@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <!-- Configure Tailwind for Nigerian Govt Theme -->
+    <!-- Configure Tailwind for Nigerian Govt Theme & Animations -->
     <script>
         tailwind.config = {
             theme: {
@@ -24,54 +24,458 @@
                         'ng-green': '#008751',     // Official Nigeria Green
                         'ng-green-dark': '#00643C',
                         'ng-green-light': '#E6F3ED',
-                        'govt-gray': '#F3F4F6',
+                        'govt-gray': '#F9FAFB',
                         'govt-text': '#111827',
                         'gold': '#D4AF37',        // For premium/official accents
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
-                        serif: ['Merriweather', 'serif'], // For official headings
+                        serif: ['Merriweather', 'serif'],
+                        script: ['Great Vibes', 'cursive'],
                     },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-in': 'slideIn 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
                 }
             }
         }
     </script>
 
-    <!-- Load Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, onSnapshot, doc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Great+Vibes&display=swap');
         
-        // --- Firebase Globals Setup ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'arcon-govt-platform';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        h1, h2, h3 { font-family: 'Merriweather', serif; }
+        .font-script { font-family: 'Great Vibes', cursive; }
         
-        let db = null;
-        let auth = null;
-        let mapInstance = null;
-        let markers = [];
-        let revenueChartInstance = null;
-        let complianceChartInstance = null;
+        /* Smooth scrolling & Custom Scrollbar */
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background-color: transparent; }
+        
+        /* Transitions */
+        .view-section { animation: fadeIn 0.4s ease-out; }
+        .nav-item { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .btn-hover:active { transform: scale(0.98); }
 
+        /* Print Styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; overflow: visible !important; height: auto !important; }
+            #certificate-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: white; padding: 0; }
+            #certificate-content { border: none !important; box-shadow: none !important; }
+            #app, aside, header { display: none; }
+        }
+    </style>
+</head>
+<body class="text-govt-text h-screen overflow-hidden flex selection:bg-ng-green selection:text-white">
+
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-ng-green text-white flex flex-col shadow-2xl z-20 no-print transition-all duration-300">
+        <!-- Brand -->
+        <div class="p-6 border-b border-white/10 flex items-center space-x-4 bg-ng-green-dark">
+            <div class="bg-white p-1.5 rounded-full shadow-lg">
+                <svg class="w-8 h-8 text-ng-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm tracking-widest uppercase">ARCON</h1>
+                <p class="text-[10px] text-green-100 uppercase font-medium tracking-wide">Federal Govt of Nigeria</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-grow py-6 space-y-1 overflow-y-auto">
+            <div class="px-6 py-2 text-[10px] font-bold text-green-200 uppercase tracking-wider mb-1">Main Menu</div>
+            <a href="#" id="nav-dashboard" onclick="window.switchTab('dashboard')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium border-l-4 border-white bg-white/10 backdrop-blur-sm">
+                <svg class="w-5 h-5 mr-3 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                Executive Dashboard
+            </a>
+            
+            <div class="px-6 py-2 text-[10px] font-bold text-green-200 uppercase tracking-wider mt-6 mb-1">Public Services</div>
+            <a href="#" id="nav-apply" onclick="window.switchTab('apply')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
+                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.586a2 2 0 012.828 0L20 7.172v.25M15 13.5v-1.5m-3 3v-1.5m-3 3v-1.5" /></svg>
+                License Application
+            </a>
+
+            <div class="px-6 py-2 text-[10px] font-bold text-green-200 uppercase tracking-wider mt-6 mb-1">Regulatory Admin</div>
+            <a href="#" id="nav-app-management" onclick="window.switchTab('app-management')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
+                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Application Mgmt
+            </a>
+            <a href="#" id="nav-verification" onclick="window.switchTab('verification')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
+                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 01-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                Verification Portal
+            </a>
+            <a href="#" id="nav-revenue" onclick="window.switchTab('revenue')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
+                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Revenue / IGR
+            </a>
+        </nav>
+
+        <!-- User Profile -->
+        <div class="p-6 border-t border-white/10 bg-ng-green-dark">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-white text-ng-green font-bold flex items-center justify-center border-2 border-green-300 shadow-sm">DG</div>
+                <div class="ml-3">
+                    <p class="text-sm font-bold text-white">Dr. O. Fadolapo</p>
+                    <p class="text-[10px] text-green-200">Director General</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow flex flex-col h-screen overflow-hidden bg-gray-50/50">
+        
+        <!-- TOP HEADER -->
+        <header class="bg-white shadow-sm border-b border-gray-100 px-8 py-4 flex justify-between items-center z-10 no-print">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 font-serif leading-tight">Advertising Regulatory Council of Nigeria</h2>
+                <p class="text-xs text-gray-500 font-medium tracking-wide uppercase mt-1">Integrated Regulatory Management System (IRMS)</p>
+            </div>
+            <div class="text-right flex items-center gap-6">
+                <div class="text-right hidden md:block">
+                    <p id="current-date" class="text-sm font-bold text-ng-green"></p>
+                    <p class="text-xs text-gray-400 mt-0.5">Abuja, Federal Capital Territory</p>
+                </div>
+                <div class="flex items-center space-x-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-100">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-xs font-semibold text-green-700">System Operational</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- SCROLLABLE CONTENT AREA -->
+        <div class="flex-grow overflow-y-auto p-8 relative scroll-smooth">
+
+            <!-- VIEW 1: EXECUTIVE DASHBOARD -->
+            <section id="dashboard-view" class="view-section space-y-8 animate-fade-in">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-ng-green to-ng-green-dark text-white p-8 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-10 transform translate-x-10 -translate-y-10">
+                        <svg class="w-64 h-64" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-3xl font-serif font-bold mb-2">Welcome, Director General</h3>
+                        <p class="text-green-100 max-w-xl text-sm leading-relaxed">Here is the executive summary of advertising compliance, revenue generation, and asset verification for the Federal Republic of Nigeria.</p>
+                        <div class="mt-6 flex gap-3">
+                            <button class="bg-white text-ng-green px-5 py-2.5 rounded-lg text-sm font-bold shadow hover:bg-gray-100 transition-colors">Download Executive Brief</button>
+                            <button class="bg-ng-green-dark/50 text-white border border-white/20 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-ng-green-dark transition-colors">View Audit Logs</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">YTD Revenue (IGR)</p>
+                                <h3 id="dash-revenue" class="text-3xl font-bold text-gray-900 mt-2">₦0.00M</h3>
+                                <p class="text-xs text-green-600 mt-1 flex items-center font-medium bg-green-50 inline-block px-2 py-0.5 rounded-full">+12.5% vs Last Year</p>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl text-ng-green shadow-sm">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">National Compliance Index</p>
+                                <h3 id="dash-compliance" class="text-3xl font-bold text-gray-900 mt-2">0%</h3>
+                                <p class="text-xs text-red-500 mt-1 font-medium">Requires Enforcement in 4 States</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 rounded-xl text-blue-600 shadow-sm">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Pending Applications</p>
+                                <h3 id="dash-pending" class="text-3xl font-bold text-gray-900 mt-2">0</h3>
+                                <p class="text-xs text-gray-500 mt-1">Average processing time: 4 Days</p>
+                            </div>
+                            <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600 shadow-sm">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h4 class="text-sm font-bold text-gray-700 mb-4 border-b pb-2 flex justify-between items-center">
+                            Revenue Collection Trends (6 Months)
+                            <button class="text-xs text-ng-green font-semibold hover:underline">View Full Report</button>
+                        </h4>
+                        <div class="h-64"><canvas id="revenueChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h4 class="text-sm font-bold text-gray-700 mb-4 border-b pb-2">Compliance Distribution</h4>
+                        <div class="h-64 flex items-center justify-center"><canvas id="complianceChart"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: NEW APPLICATION (PUBLIC) -->
+            <section id="apply-view" class="view-section hidden max-w-4xl mx-auto animate-slide-in">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-ng-green to-ng-green-dark p-8 text-white">
+                        <h3 class="text-2xl font-serif font-bold mb-2">New Advertisement License Application</h3>
+                        <p class="text-green-100 text-sm">Fill out the details below to register a new advertising asset in compliance with APCON regulations.</p>
+                    </div>
+                    <form onsubmit="window.submitApplication(event)" class="p-8 space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h4 class="text-sm font-bold text-gray-400 uppercase border-b pb-1">Applicant Details</h4>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Applicant / Company Name</label>
+                                    <input type="text" name="applicant" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+                                    <input type="email" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="text-sm font-bold text-gray-400 uppercase border-b pb-1">Asset Information</h4>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Advertisement Type</label>
+                                    <select name="type" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
+                                        <option>Digital Billboard</option>
+                                        <option>Static Billboard</option>
+                                        <option>Lamp Post</option>
+                                        <option>Gantry</option>
+                                        <option>Wall Drape</option>
+                                        <option>Signboard</option>
+                                    </select>
+                                </div>
+                                 <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Structure Size (e.g. 12m x 9m)</label>
+                                    <input type="text" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">State Jurisdiction</label>
+                                <select name="state" id="apply-state" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Local Government Area (LGA)</label>
+                                <input type="text" name="lga" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Visual Concept / Artwork</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
+                                <div class="bg-white p-3 rounded-full shadow-sm inline-block mb-3 group-hover:scale-110 transition-transform">
+                                    <svg class="w-8 h-8 text-ng-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <p class="text-sm text-gray-500 font-medium">Click to upload or drag and drop</p>
+                                <p class="text-xs text-gray-400 mt-1">SVG, PNG, JPG or PDF (max. 10MB)</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-6 border-t border-gray-100">
+                            <button type="button" onclick="window.switchTab('dashboard')" class="text-gray-500 font-bold px-6 py-3 mr-4 hover:text-gray-700">Cancel</button>
+                            <button type="submit" class="bg-ng-green text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 hover:shadow-xl transition-all transform hover:-translate-y-0.5">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- VIEW: APPLICATION MANAGEMENT (ADMIN) -->
+            <section id="app-management-view" class="view-section hidden space-y-6">
+                 <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 font-serif">Application Management</h3>
+                        <p class="text-sm text-gray-500 mt-1">Review, approve, and query incoming license applications.</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <div class="relative">
+                            <input type="text" placeholder="Search..." class="pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-green-500 outline-none w-64">
+                            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <button class="px-4 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 font-medium text-gray-700 shadow-sm">Filter</button>
+                        <button class="px-4 py-2 text-sm bg-gray-800 text-white rounded-lg hover:bg-gray-900 font-medium shadow-sm">Export</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-bold border-b border-gray-200">
+                            <tr>
+                                <th class="py-4 px-6">App ID</th>
+                                <th class="py-4 px-6">Applicant</th>
+                                <th class="py-4 px-6">Type</th>
+                                <th class="py-4 px-6">State</th>
+                                <th class="py-4 px-6">Status</th>
+                                <th class="py-4 px-6">Date</th>
+                                <th class="py-4 px-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applications-table-body" class="text-sm text-gray-700 divide-y divide-gray-100">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- VIEW: VERIFICATION PORTAL -->
+            <section id="verification-view" class="view-section hidden space-y-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-end">
+                    <div class="flex-grow">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Search Assets</label>
+                        <div class="relative mt-1">
+                            <input type="text" id="search-input" placeholder="Enter ID, Agent, or Sponsor..." class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-gray-50 focus:bg-white transition-colors">
+                            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
+                    <div class="w-48">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Jurisdiction</label>
+                        <select id="state-filter" class="w-full mt-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-green-500 outline-none cursor-pointer" onchange="window.filterAndRenderBillboards()"><option value="">All States</option></select>
+                    </div>
+                    <div class="w-48">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Display Mode</label>
+                        <div class="flex bg-gray-100 p-1 rounded-lg mt-1">
+                            <button onclick="changeView('map')" id="btn-map" class="flex-1 py-1.5 text-xs font-bold rounded-md shadow-sm bg-white text-gray-800 transition-all">Map</button>
+                            <button onclick="changeView('list')" id="btn-list" class="flex-1 py-1.5 text-xs font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">List</button>
+                            <button onclick="changeView('grid')" id="btn-grid" class="flex-1 py-1.5 text-xs font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">Grid</button>
+                        </div>
+                        <input type="hidden" id="view-toggle" value="map">
+                    </div>
+                </div>
+                
+                <div id="map-view-container" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden relative h-[650px] animate-fade-in">
+                    <div id="map" class="w-full h-full z-[1]"></div>
+                    <div class="absolute bottom-6 left-6 z-[400] bg-white/90 backdrop-blur px-4 py-3 rounded-lg shadow-lg border border-gray-200">
+                        <h5 class="text-xs font-bold text-gray-500 uppercase mb-2">Legend</h5>
+                        <div class="flex flex-col gap-2 text-xs font-medium">
+                            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-green-600 mr-2 border border-white shadow-sm"></span> Approved</div>
+                            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-orange-500 mr-2 border border-white shadow-sm"></span> Pending/Queried</div>
+                            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-red-500 mr-2 border border-white shadow-sm"></span> Expired/Illegal</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="billboard-list" class="hidden"></div>
+            </section>
+
+            <!-- VIEW: REVENUE / IGR -->
+            <section id="revenue-view" class="view-section hidden space-y-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 font-serif">Financial Transaction Logs</h3>
+                        <p class="text-sm text-gray-500 mt-1">Real-time tracking of IGR payments and invoicing.</p>
+                    </div>
+                    <button class="text-sm bg-white border border-gray-200 text-gray-700 font-bold px-4 py-2 rounded-lg hover:bg-gray-50 shadow-sm flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Export CSV
+                    </button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-bold border-b border-gray-200">
+                            <tr>
+                                <th class="py-4 px-6">Transaction ID</th>
+                                <th class="py-4 px-6">Paying Agent</th>
+                                <th class="py-4 px-6">Payment Type</th>
+                                <th class="py-4 px-6">Amount</th>
+                                <th class="py-4 px-6">Status</th>
+                                <th class="py-4 px-6">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenue-table-body" class="text-sm text-gray-700 divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal for Detailed View (Verification) -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 no-print animate-fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative transform transition-all scale-100">
+            <button onclick="document.getElementById('detail-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1 transition-colors">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div id="detail-content" class="p-8"></div>
+        </div>
+    </div>
+
+    <!-- Modal for Certificate (Printable) -->
+    <div id="certificate-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in">
+        <div class="bg-white shadow-2xl w-full max-w-3xl relative animate-slide-in rounded-sm">
+            <button onclick="document.getElementById('certificate-modal').classList.add('hidden')" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 no-print z-50 bg-white rounded-full p-2 shadow-sm border transition-all">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div id="certificate-content"></div>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
         // --- Mock Data: Billboards (Verification) ---
         const mockBillboards = [
-            { id: 'RV-LAG-001', title: 'Glo Unlimited Data', status: 'Approved', location: { state: 'Lagos', lga: 'Ikeja', lat: 6.6018, lng: 3.3515 }, expiry: '2026-11-01', type: 'LED Gantry', details: { agent: 'MediaReach OMD', sponsor: 'Globacom', fee: 1500000, paid: true } },
-            { id: 'RV-FCT-042', title: 'Dangote Cement Promo', status: 'Pending', location: { state: 'Abuja FCT', lga: 'Municipal Area Council', lat: 9.0765, lng: 7.3986 }, expiry: '2025-05-15', type: 'Unipole', details: { agent: 'Insight Publicis', sponsor: 'Dangote Group', fee: 850000, paid: false } },
-            { id: 'RV-RIV-089', title: 'Political Campaign 2027', status: 'Expired', location: { state: 'Rivers', lga: 'Port Harcourt', lat: 4.8156, lng: 7.0498 }, expiry: '2023-02-20', type: 'Billboard', details: { agent: 'Independent', sponsor: 'Party X', fee: 500000, paid: true } },
-            { id: 'RV-KAD-112', title: 'Access Bank Loan', status: 'Approved', location: { state: 'Kaduna', lga: 'Kaduna North', lat: 10.5105, lng: 7.4165 }, expiry: '2026-08-10', type: 'Lamp Post', details: { agent: 'Algorithm Media', sponsor: 'Access Bank', fee: 200000, paid: true } },
-            { id: 'RV-KNO-005', title: 'Indomie Noodles', status: 'Approved', location: { state: 'Kano', lga: 'Kano Municipal', lat: 12.0022, lng: 8.5920 }, expiry: '2026-01-30', type: 'Wall Drape', details: { agent: 'Starcom Media', sponsor: 'Dufil Prima', fee: 1200000, paid: true } },
+            { 
+                id: 'RV-RCCG-001', 
+                title: 'Church Program', 
+                status: 'Approved', 
+                location: { state: 'Abuja FCT', lga: 'Municipal Area Council', lat: 8.9754, lng: 7.3598 }, 
+                expiry: '2025-06-12', 
+                type: 'Signboard', 
+                details: { 
+                    purpose: 'Church Program', 
+                    duration: '4 Weeks', 
+                    agent: 'Samuel Adamu', 
+                    sponsor: 'RCCG Lugbe', 
+                    specificLocation: 'Lugbe Round About',
+                    size: '2ft x 4ft',
+                    tax: 'N200 Paid',
+                    fees: 'N500 Paid'
+                } 
+            },
+            { id: 'RV-LAG-001', title: 'Glo Unlimited Data', status: 'Approved', location: { state: 'Lagos', lga: 'Ikeja', lat: 6.6018, lng: 3.3515 }, expiry: '2026-11-01', type: 'LED Gantry', details: { purpose: 'Product Awareness', duration: '12 Months', agent: 'MediaReach OMD', sponsor: 'Globacom', specificLocation: 'Ikeja Underbridge', size: '20m x 4m', tax: 'N500,000 Paid', fees: 'N1.5M Paid' } },
+            { id: 'RV-FCT-042', title: 'Dangote Cement Promo', status: 'Pending', location: { state: 'Abuja FCT', lga: 'Municipal Area Council', lat: 9.0765, lng: 7.3986 }, expiry: '2025-05-15', type: 'Unipole', details: { purpose: 'Sales Promo', duration: '6 Months', agent: 'Insight Publicis', sponsor: 'Dangote Group', specificLocation: 'Berger Junction', size: '14m x 3m', tax: 'Pending', fees: 'N850,000 Pending' } },
+            { id: 'RV-RIV-089', title: 'Political Campaign 2027', status: 'Expired', location: { state: 'Rivers', lga: 'Port Harcourt', lat: 4.8156, lng: 7.0498 }, expiry: '2023-02-20', type: 'Billboard', details: { purpose: 'Campaign', duration: '3 Months', agent: 'Independent', sponsor: 'Party X', specificLocation: 'Aba Road', size: '10m x 5m', tax: 'Overdue', fees: 'Paid' } },
+            { id: 'RV-KAD-112', title: 'Access Bank Loan', status: 'Approved', location: { state: 'Kaduna', lga: 'Kaduna North', lat: 10.5105, lng: 7.4165 }, expiry: '2026-08-10', type: 'Lamp Post', details: { purpose: 'Service Ad', duration: '1 Year', agent: 'Algorithm Media', sponsor: 'Access Bank', specificLocation: 'Ahmadu Bello Way', size: '1m x 2m', tax: 'Paid', fees: 'N200,000 Paid' } },
         ];
 
-        // --- Mock Data: Applications (New) ---
+        // --- Mock Data: Applications ---
         const mockApplications = [
-            { id: 'APP-2025-001', applicant: 'Zenith Bank PLC', type: 'Digital Billboard', state: 'Lagos', date: '2025-05-10', status: 'Pending', details: { lga: 'Victoria Island', duration: '12 Months', fee: 2500000 } },
-            { id: 'APP-2025-002', applicant: 'MTN Nigeria', type: 'Street Lamp Post', state: 'Abuja FCT', date: '2025-05-11', status: 'Queried', details: { lga: 'Wuse II', duration: '6 Months', fee: 800000, queryReason: 'Incorrect dimensions provided' } },
-            { id: 'APP-2025-003', applicant: 'Guinness Nigeria', type: 'Unipole', state: 'Lagos', date: '2025-05-09', status: 'Approved', details: { lga: 'Ikeja', duration: '24 Months', fee: 4000000 } }
+            { id: 'APP-2025-001', applicant: 'Zenith Bank PLC', type: 'Digital Billboard', state: 'Lagos', date: '2025-05-10', status: 'Pending', details: { lga: 'Victoria Island', duration: '12 Months', fees: 'N2,500,000', agent: 'In-house', sponsor: 'Zenith Bank', purpose: 'Brand Awareness', specificLocation: 'Adetokunbo Ademola', size: 'Digital 12x6m', tax: 'Pending' } },
+            { id: 'APP-2025-002', applicant: 'MTN Nigeria', type: 'Street Lamp Post', state: 'Abuja FCT', date: '2025-05-11', status: 'Queried', details: { lga: 'Wuse II', duration: '6 Months', fees: 'N800,000', queryReason: 'Incorrect dimensions provided', agent: 'Yellow Media', sponsor: 'MTN', purpose: 'Data Plan', specificLocation: 'Aminu Kano Cresc', size: 'Standard', tax: 'N/A' } },
+            { id: 'APP-2025-003', applicant: 'Guinness Nigeria', type: 'Unipole', state: 'Lagos', date: '2025-05-09', status: 'Approved', details: { lga: 'Ikeja', duration: '24 Months', fees: 'N4,000,000', agent: 'MediaReach', sponsor: 'Guinness', purpose: 'Product Launch', specificLocation: 'Allen Avenue', size: '15m x 4m', tax: 'Paid' } },
+            // Add the mock application that matches the specific request just in case they look here
+             { id: 'APP-RCCG-001', applicant: 'Samuel Adamu (RCCG)', type: 'Signboard', state: 'Abuja FCT', date: '2025-05-01', status: 'Approved', details: { lga: 'Municipal Area Council', duration: '4 Weeks', fees: 'N500 Paid', agent: 'Samuel Adamu', sponsor: 'RCCG Lugbe', purpose: 'Church Program', specificLocation: 'Lugbe Round About', size: '2ft x 4ft', tax: 'N200 Paid' } }
         ];
 
-        // --- Mock Data: Revenue (Financials) ---
+        // --- Mock Data: Revenue ---
         const mockRevenue = [
             { id: 'TRX-99821', date: '2025-05-01', agent: 'MediaReach OMD', amount: 4500000, type: 'Annual Renewal', status: 'Cleared' },
             { id: 'TRX-99822', date: '2025-05-02', agent: 'Insight Publicis', amount: 850000, type: 'New Application', status: 'Pending' },
@@ -82,59 +486,64 @@
 
         const NIGERIAN_STATES = ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Abuja FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"];
 
-        
+        let mapInstance = null;
+        let markers = [];
+        let revenueChartInstance = null;
+        let complianceChartInstance = null;
+
         // --- Initialization ---
-        window.initializeFirebaseAndApp = async () => {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('error');
-
-                if (authToken) {
-                    await signInWithCustomToken(auth, authToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        window.BILLBOARD_DATA = mockBillboards;
-                        window.REVENUE_DATA = mockRevenue;
-                        window.APPLICATIONS_DATA = mockApplications;
-                        
-                        updateDashboardStats();
-                        initCharts();
-                        populateFilters();
-                        renderRevenueTable(); 
-                        renderApplicationsTable();
-                        
-                        window.switchTab('dashboard'); 
-                    }
-                });
-            } catch (error) { console.error("Init Error:", error); }
-        };
+        function initApp() {
+            window.BILLBOARD_DATA = mockBillboards;
+            window.REVENUE_DATA = mockRevenue;
+            window.APPLICATIONS_DATA = mockApplications;
+            
+            updateDashboardStats();
+            initCharts();
+            populateFilters();
+            renderRevenueTable(); 
+            renderApplicationsTable();
+            
+            window.switchTab('dashboard'); 
+        }
 
         // --- Navigation Logic ---
         window.switchTab = (tabId) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('bg-ng-green-dark', 'border-l-4', 'border-white');
-                el.classList.add('text-gray-300', 'hover:bg-ng-green-dark');
+                el.classList.remove('bg-white/10', 'border-l-4', 'border-white', 'backdrop-blur-sm');
+                el.classList.add('text-green-50', 'hover:bg-white/10', 'hover:text-white', 'border-transparent');
             });
 
             document.getElementById(`${tabId}-view`).classList.remove('hidden');
             
             const navItem = document.getElementById(`nav-${tabId}`);
             if(navItem) {
-                navItem.classList.remove('text-gray-300', 'hover:bg-ng-green-dark');
-                navItem.classList.add('bg-ng-green-dark', 'text-white', 'border-l-4', 'border-white');
+                navItem.classList.remove('text-green-50', 'hover:bg-white/10', 'hover:text-white', 'border-transparent');
+                navItem.classList.add('bg-white/10', 'text-white', 'border-l-4', 'border-white', 'backdrop-blur-sm');
             }
 
             if (tabId === 'verification') {
                 setTimeout(() => { window.filterAndRenderBillboards(); }, 100);
             }
         };
+
+        window.changeView = (mode) => {
+            document.getElementById('view-toggle').value = mode;
+            
+            // Update buttons visually
+            ['map', 'list', 'grid'].forEach(m => {
+                 const btn = document.getElementById(`btn-${m}`);
+                 if(m === mode) {
+                     btn.classList.remove('text-gray-500', 'hover:text-gray-700', 'bg-transparent');
+                     btn.classList.add('bg-white', 'text-gray-800', 'shadow-sm');
+                 } else {
+                     btn.classList.add('text-gray-500', 'hover:text-gray-700', 'bg-transparent');
+                     btn.classList.remove('bg-white', 'text-gray-800', 'shadow-sm');
+                 }
+            });
+
+            window.filterAndRenderBillboards();
+        }
 
         // --- Dashboard Stats Logic ---
         function updateDashboardStats() {
@@ -162,10 +571,19 @@
                         label: 'IGR Collected (Millions ₦)',
                         data: [12.5, 19.2, 15.8, 22.1, 28.4, 18.0],
                         backgroundColor: '#008751',
-                        borderRadius: 4
+                        borderRadius: 6,
+                        barThickness: 20
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { borderDash: [2, 4], color: '#f3f4f6' }, border: { display: false } },
+                        x: { grid: { display: false } }
+                    }
+                }
             });
 
             const ctxComp = document.getElementById('complianceChart').getContext('2d');
@@ -176,11 +594,12 @@
                     labels: ['Compliant', 'Non-Compliant', 'Pending'],
                     datasets: [{
                         data: [65, 15, 20],
-                        backgroundColor: ['#008751', '#DC2626', '#F59E0B'],
-                        borderWidth: 0
+                        backgroundColor: ['#008751', '#EF4444', '#F59E0B'],
+                        borderWidth: 0,
+                        hoverOffset: 4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } }
             });
         }
 
@@ -189,7 +608,16 @@
             const listContainer = document.getElementById('billboard-list');
             const mapContainer = document.getElementById('map-view-container');
             const viewMode = document.getElementById('view-toggle').value;
-            const filteredData = window.BILLBOARD_DATA;
+            
+            // Simple Filter Logic (State)
+            const stateFilter = document.getElementById('state-filter').value;
+            const searchFilter = document.getElementById('search-input').value.toLowerCase();
+            
+            let filteredData = window.BILLBOARD_DATA.filter(bb => {
+                const matchesState = stateFilter ? bb.location.state === stateFilter : true;
+                const matchesSearch = searchFilter ? (bb.title.toLowerCase().includes(searchFilter) || bb.id.toLowerCase().includes(searchFilter)) : true;
+                return matchesState && matchesSearch;
+            });
 
             listContainer.innerHTML = '';
 
@@ -207,10 +635,16 @@
                 markers = [];
                 filteredData.forEach(bb => {
                     if (bb.location.lat) {
-                        const color = bb.status === 'Approved' ? 'green' : (bb.status === 'Pending' ? 'orange' : 'red');
+                        const color = bb.status === 'Approved' ? '#008751' : (bb.status === 'Pending' ? '#F59E0B' : '#EF4444');
                         const marker = L.circleMarker([bb.location.lat, bb.location.lng], {
-                            radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8
-                        }).addTo(mapInstance).bindPopup(`<b>${bb.title}</b><br>ID: ${bb.id}`);
+                            radius: 10, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
+                        }).addTo(mapInstance).bindPopup(`
+                            <div class="p-2 min-w-[150px]">
+                                <h4 class="font-bold text-gray-800 mb-1">${bb.title}</h4>
+                                <p class="text-xs text-gray-500 mb-2">${bb.id}</p>
+                                <span class="px-2 py-1 text-[10px] font-bold text-white rounded-full" style="background-color: ${color}">${bb.status}</span>
+                            </div>
+                        `);
                         marker.on('click', () => window.openDetailModal(bb));
                         markers.push(marker);
                     }
@@ -218,25 +652,60 @@
             } else {
                 mapContainer.classList.add('hidden');
                 listContainer.classList.remove('hidden');
-                listContainer.className = viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'flex flex-col space-y-3';
                 
+                listContainer.className = viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5' : 'flex flex-col space-y-3';
+                
+                if (filteredData.length === 0) {
+                    listContainer.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400 bg-white rounded-xl border border-dashed"><p>No assets found matching your criteria.</p></div>`;
+                    return;
+                }
+
                 filteredData.forEach(bb => {
                     const el = document.createElement('div');
-                    const statusClass = bb.status === 'Approved' ? 'text-green-700 bg-green-50 border-green-200' : (bb.status === 'Pending' ? 'text-yellow-700 bg-yellow-50 border-yellow-200' : 'text-red-700 bg-red-50 border-red-200');
-                    el.className = `p-4 rounded-lg border ${statusClass} cursor-pointer hover:shadow-md transition bg-white`;
-                    el.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-bold text-gray-900">${bb.title}</h4>
-                                <p class="text-xs text-gray-500">${bb.id} | ${bb.location.state}</p>
+                    let statusClass, statusBg;
+                    if (bb.status === 'Approved') { statusClass = 'text-green-700 border-green-200'; statusBg = 'bg-green-50'; }
+                    else if (bb.status === 'Pending') { statusClass = 'text-yellow-700 border-yellow-200'; statusBg = 'bg-yellow-50'; }
+                    else { statusClass = 'text-red-700 border-red-200'; statusBg = 'bg-red-50'; }
+
+                    const cardClass = viewMode === 'grid' 
+                        ? `bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group relative overflow-hidden`
+                        : `bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group`;
+
+                    if (viewMode === 'grid') {
+                        el.className = cardClass;
+                        el.innerHTML = `
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-${bb.status === 'Approved' ? 'green' : (bb.status === 'Pending' ? 'yellow' : 'red')}-500 opacity-5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150"></div>
+                            <div class="flex justify-between items-start mb-3 relative z-10">
+                                <span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full ${statusBg} ${statusClass}">${bb.status}</span>
+                                <span class="text-[10px] text-gray-400 font-mono">${bb.id}</span>
                             </div>
-                            <span class="px-2 py-1 text-xs font-bold uppercase rounded border ${statusClass}">${bb.status}</span>
-                        </div>
-                        <div class="mt-3 text-sm text-gray-600 grid grid-cols-2 gap-2">
-                            <div><span class="text-xs text-gray-400 block">Agent</span>${bb.details.agent}</div>
-                            <div><span class="text-xs text-gray-400 block">Type</span>${bb.type}</div>
-                        </div>
-                    `;
+                            <h4 class="font-bold text-gray-800 text-lg mb-1 group-hover:text-ng-green transition-colors truncate">${bb.title}</h4>
+                            <p class="text-xs text-gray-500 mb-4 flex items-center"><svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>${bb.location.lga}, ${bb.location.state}</p>
+                            
+                            <div class="grid grid-cols-2 gap-2 pt-3 border-t border-gray-50 text-xs">
+                                <div><span class="text-gray-400 block text-[10px] uppercase">Agent</span><span class="font-medium text-gray-700 truncate block">${bb.details.agent}</span></div>
+                                <div><span class="text-gray-400 block text-[10px] uppercase">Type</span><span class="font-medium text-gray-700 truncate block">${bb.type}</span></div>
+                            </div>
+                        `;
+                    } else {
+                        el.className = cardClass;
+                        el.innerHTML = `
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-full ${statusBg} flex items-center justify-center font-bold text-xs ${statusClass.split(' ')[0]}">${bb.type.substring(0,2)}</div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 group-hover:text-ng-green transition-colors">${bb.title}</h4>
+                                    <p class="text-xs text-gray-500">${bb.id} • ${bb.location.lga}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-6 text-right">
+                                <div class="hidden md:block">
+                                    <p class="text-xs text-gray-400 uppercase">Agent</p>
+                                    <p class="text-sm font-medium text-gray-700">${bb.details.agent}</p>
+                                </div>
+                                <span class="px-3 py-1 text-xs font-bold uppercase rounded-full ${statusBg} ${statusClass}">${bb.status}</span>
+                            </div>
+                        `;
+                    }
                     el.onclick = () => window.openDetailModal(bb);
                     listContainer.appendChild(el);
                 });
@@ -244,27 +713,18 @@
         };
 
         function populateFilters() {
-            const select = document.getElementById('state-filter');
-            // Check if select exists (it might be on a hidden tab)
-            if(select) {
-                select.innerHTML = '<option value="">All States</option>';
-                NIGERIAN_STATES.sort().forEach(state => {
-                    const opt = document.createElement('option');
-                    opt.value = state;
-                    opt.innerText = state;
-                    select.appendChild(opt);
-                });
-            }
-            // Populate Application Form State Select as well
-             const applySelect = document.getElementById('apply-state');
-             if(applySelect) {
-                 NIGERIAN_STATES.sort().forEach(state => {
-                    const opt = document.createElement('option');
-                    opt.value = state;
-                    opt.innerText = state;
-                    applySelect.appendChild(opt);
-                });
-             }
+            const selects = [document.getElementById('state-filter'), document.getElementById('apply-state')];
+            selects.forEach(select => {
+                if(select) {
+                    select.innerHTML = select.id === 'state-filter' ? '<option value="">All States</option>' : '';
+                    NIGERIAN_STATES.sort().forEach(state => {
+                        const opt = document.createElement('option');
+                        opt.value = state;
+                        opt.innerText = state;
+                        select.appendChild(opt);
+                    });
+                }
+            });
         }
         
         function renderRevenueTable() {
@@ -272,21 +732,16 @@
             if (!revTable) return;
             revTable.innerHTML = ''; 
 
-            if (!window.REVENUE_DATA || window.REVENUE_DATA.length === 0) {
-                revTable.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">No transactions found.</td></tr>';
-                return;
-            }
-
             window.REVENUE_DATA.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b hover:bg-gray-50';
+                tr.className = 'hover:bg-gray-50 transition-colors';
                 tr.innerHTML = `
-                    <td class="py-3 px-4 font-mono text-xs text-gray-500">${row.id}</td>
-                    <td class="py-3 px-4">${row.agent}</td>
-                    <td class="py-3 px-4">${row.type}</td>
-                    <td class="py-3 px-4 font-semibold">₦${row.amount.toLocaleString()}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${row.status === 'Cleared' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${row.status}</span></td>
-                    <td class="py-3 px-4 text-xs text-gray-500">${row.date}</td>
+                    <td class="py-4 px-6 font-mono text-xs text-gray-500 font-medium">${row.id}</td>
+                    <td class="py-4 px-6 font-medium text-gray-800">${row.agent}</td>
+                    <td class="py-4 px-6 text-gray-600">${row.type}</td>
+                    <td class="py-4 px-6 font-bold text-gray-800">₦${row.amount.toLocaleString()}</td>
+                    <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${row.status === 'Cleared' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${row.status}</span></td>
+                    <td class="py-4 px-6 text-xs text-gray-500">${row.date}</td>
                 `;
                 revTable.appendChild(tr);
             });
@@ -300,33 +755,35 @@
 
             window.APPLICATIONS_DATA.forEach(app => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b hover:bg-gray-50';
+                tr.className = 'hover:bg-gray-50 transition-colors group';
                 
-                let statusColor = 'bg-yellow-100 text-yellow-800';
-                if(app.status === 'Approved') statusColor = 'bg-green-100 text-green-800';
-                if(app.status === 'Rejected') statusColor = 'bg-red-100 text-red-800';
-                if(app.status === 'Queried') statusColor = 'bg-orange-100 text-orange-800';
+                let statusColor = 'bg-yellow-100 text-yellow-700';
+                if(app.status === 'Approved') statusColor = 'bg-green-100 text-green-700';
+                if(app.status === 'Rejected') statusColor = 'bg-red-100 text-red-700';
+                if(app.status === 'Queried') statusColor = 'bg-orange-100 text-orange-700';
 
                 // Action Buttons
                 let actions = `
-                    <button onclick="manageApplication('${app.id}', 'view')" class="text-blue-600 hover:text-blue-800 mr-2 text-xs font-bold">VIEW</button>
-                    ${app.status === 'Pending' ? `
-                    <button onclick="manageApplication('${app.id}', 'approve')" class="text-green-600 hover:text-green-800 mr-2 text-xs font-bold">APPROVE</button>
-                    <button onclick="manageApplication('${app.id}', 'query')" class="text-orange-600 hover:text-orange-800 mr-2 text-xs font-bold">QUERY</button>
-                    ` : ''}
-                    ${app.status === 'Approved' ? `
-                    <button onclick="generateCertificate('${app.id}')" class="text-purple-600 hover:text-purple-800 text-xs font-bold flex items-center"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>CERT</button>
-                    ` : ''}
+                    <div class="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="manageApplication('${app.id}', 'view')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="View"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+                        ${app.status === 'Pending' ? `
+                        <button onclick="manageApplication('${app.id}', 'approve')" class="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Approve"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button>
+                        <button onclick="manageApplication('${app.id}', 'query')" class="p-1.5 text-orange-600 hover:bg-orange-50 rounded" title="Query"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                        ` : ''}
+                        ${app.status === 'Approved' ? `
+                        <button onclick="generateCertificate('${app.id}')" class="p-1.5 text-purple-600 hover:bg-purple-50 rounded font-bold text-xs flex items-center border border-purple-200" title="Generate Certificate">CERT</button>
+                        ` : ''}
+                    </div>
                 `;
 
                 tr.innerHTML = `
-                    <td class="py-3 px-4 font-mono text-xs text-gray-500">${app.id}</td>
-                    <td class="py-3 px-4 font-semibold text-gray-800">${app.applicant}</td>
-                    <td class="py-3 px-4">${app.type}</td>
-                    <td class="py-3 px-4">${app.state}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${statusColor}">${app.status}</span></td>
-                    <td class="py-3 px-4 text-xs text-gray-500">${app.date}</td>
-                    <td class="py-3 px-4 flex items-center">${actions}</td>
+                    <td class="py-4 px-6 font-mono text-xs text-gray-500 font-medium">${app.id}</td>
+                    <td class="py-4 px-6 font-bold text-gray-800">${app.applicant}</td>
+                    <td class="py-4 px-6 text-gray-600">${app.type}</td>
+                    <td class="py-4 px-6 text-gray-600">${app.state}</td>
+                    <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${statusColor}">${app.status}</span></td>
+                    <td class="py-4 px-6 text-xs text-gray-500">${app.date}</td>
+                    <td class="py-4 px-6 text-right">${actions}</td>
                 `;
                 appTable.appendChild(tr);
             });
@@ -337,10 +794,9 @@
                 const app = window.APPLICATIONS_DATA.find(a => a.id === id);
                 if(app) {
                     app.status = 'Approved';
-                    // Conceptually move to billboards DB here
                     renderApplicationsTable();
                     alert(`Application ${id} Approved! You can now generate the certificate.`);
-                    updateDashboardStats(); // Refresh pending count
+                    updateDashboardStats(); 
                 }
             } else if (action === 'query') {
                 const reason = prompt("Enter query reason:");
@@ -354,7 +810,7 @@
                 }
             } else if (action === 'view') {
                 const app = window.APPLICATIONS_DATA.find(a => a.id === id);
-                alert(`Details for ${app.applicant}:\nType: ${app.type}\nLocation: ${app.details.lga}, ${app.state}\nFee: ₦${app.details.fee.toLocaleString()}`);
+                alert(`Details for ${app.applicant}:\nType: ${app.type}\nLocation: ${app.details.lga}, ${app.state}\nFee: ₦${app.details.fees || '0'}`);
             }
         };
 
@@ -371,27 +827,58 @@
                 details: {
                     lga: form.lga.value,
                     duration: '12 Months',
-                    fee: 0 // To be assessed
+                    fees: 'Pending Assessment',
+                    agent: form.applicant.value,
+                    sponsor: form.applicant.value,
+                    purpose: 'General Advertisement',
+                    size: 'Standard',
+                    specificLocation: form.lga.value,
+                    tax: 'Pending'
                 }
             };
             
             window.APPLICATIONS_DATA.unshift(newApp); // Add to top
             alert(`Application Submitted Successfully! Reference ID: ${newApp.id}`);
             form.reset();
-            renderApplicationsTable(); // Update admin view
+            renderApplicationsTable(); 
             updateDashboardStats();
-            window.switchTab('app-management'); // Switch to admin view to see it
+            window.switchTab('app-management'); 
         };
 
         // --- Certificate Generation ---
-        window.generateCertificate = (appId) => {
-            const app = window.APPLICATIONS_DATA.find(a => a.id === appId);
-            if(!app) return;
+        window.generateCertificate = (itemId) => {
+            // Check both lists (Applications and Billboards)
+            let item = window.APPLICATIONS_DATA.find(a => a.id === itemId);
+            if (!item) {
+                // If not in applications, check billboards (for existing approved assets)
+                const bb = window.BILLBOARD_DATA.find(b => b.id === itemId);
+                if(bb) {
+                    item = {
+                        id: bb.id,
+                        applicant: bb.details.agent, // Use Agent as primary name
+                        type: bb.type,
+                        state: bb.location.state,
+                        details: {
+                            lga: bb.location.lga,
+                            duration: bb.details.duration,
+                            agent: bb.details.agent,
+                            sponsor: bb.details.sponsor,
+                            purpose: bb.details.purpose,
+                            specificLocation: bb.details.specificLocation,
+                            size: bb.details.size,
+                            tax: bb.details.tax,
+                            fees: bb.details.fees
+                        }
+                    };
+                }
+            }
+
+            if(!item) return;
 
             const certModal = document.getElementById('certificate-modal');
             const certContent = document.getElementById('certificate-content');
             
-            // Generate simple QR placeholder with ID
+            // Generate QR Code
             const qrSvg = `
                 <svg class="w-full h-full text-black" fill="currentColor" viewBox="0 0 24 24">
                      <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 11h6v6H3v-6zm2 2v2h2v-2H5zm13-2h3v3h-3v-3zm0 3h-3v3h3v-3zm3 3h-3v3h3v-3zm-6-3h3v3h-3v-3zm3 3h3v3h-3v-3zm-3-6h3v3h-3v-3z"/>
@@ -400,58 +887,109 @@
             `;
 
             certContent.innerHTML = `
-                <div class="border-8 border-double border-ng-green p-8 bg-white relative">
-                    <!-- Watermark -->
-                    <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-                        <svg class="w-96 h-96 text-ng-green" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <div class="border-8 border-double border-ng-green p-10 bg-white relative shadow-2xl overflow-hidden">
+                    <!-- Background Watermark -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none scale-150">
+                        <svg class="w-full h-full text-ng-green" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                     </div>
+                    
+                    <!-- Corner Ornaments -->
+                    <div class="absolute top-0 left-0 w-24 h-24 border-t-4 border-l-4 border-gold m-2"></div>
+                    <div class="absolute top-0 right-0 w-24 h-24 border-t-4 border-r-4 border-gold m-2"></div>
+                    <div class="absolute bottom-0 left-0 w-24 h-24 border-b-4 border-l-4 border-gold m-2"></div>
+                    <div class="absolute bottom-0 right-0 w-24 h-24 border-b-4 border-r-4 border-gold m-2"></div>
 
-                    <div class="text-center mb-8">
-                        <div class="inline-block p-2 rounded-full mb-4">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" class="h-24 w-auto mx-auto" alt="Coat of Arms">
+                    <div class="text-center mb-8 relative z-10">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" class="h-28 w-auto mx-auto mb-4 drop-shadow-sm" alt="Coat of Arms">
+                        <h1 class="text-3xl font-serif font-bold text-ng-green mb-1 tracking-wider">FEDERAL REPUBLIC OF NIGERIA</h1>
+                        <h2 class="text-xl font-serif font-bold text-gray-800 uppercase tracking-widest text-sm">Advertising Regulatory Council of Nigeria</h2>
+                        
+                        <div class="flex items-center justify-center gap-4 my-6">
+                            <div class="h-px bg-gold w-24"></div>
+                            <div class="w-4 h-4 transform rotate-45 bg-gold"></div>
+                            <div class="h-px bg-gold w-24"></div>
                         </div>
-                        <h1 class="text-3xl font-serif font-bold text-ng-green mb-1">FEDERAL REPUBLIC OF NIGERIA</h1>
-                        <h2 class="text-xl font-serif font-bold text-gray-800">ADVERTISING REGULATORY COUNCIL</h2>
-                        <div class="h-1 w-32 bg-gold mx-auto my-4"></div>
-                        <h3 class="text-4xl font-serif font-black text-ng-green-dark tracking-widest mt-6">CERTIFICATE OF LICENSE</h3>
-                        <p class="text-sm font-mono text-gray-500 mt-2">LICENSE NO: ${app.id}</p>
+
+                        <h3 class="text-5xl font-serif font-black text-ng-green-dark tracking-tight mb-2">CERTIFICATE OF APPROVAL</h3>
+                        <p class="text-sm font-mono text-gray-500 bg-gray-100 inline-block px-3 py-1 rounded">LICENSE NO: ${item.id}</p>
                     </div>
 
-                    <div class="text-center space-y-6 text-gray-800 font-serif text-lg leading-relaxed px-12">
-                        <p>This is to certify that the advertising application submitted by:</p>
-                        <p class="text-3xl font-bold border-b-2 border-gray-300 inline-block px-8 pb-1">${app.applicant}</p>
-                        <p>has been duly vetted and approved for the following assets:</p>
-                        <p class="font-bold text-xl">${app.type} in ${app.details.lga}, ${app.state}</p>
-                        <p>in accordance with the Advertising Regulatory Council of Nigeria Act.</p>
+                    <div class="relative z-10 px-8">
+                        <div class="bg-green-50/50 border border-green-100 rounded-xl p-6 mb-8">
+                             <div class="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                                <div class="col-span-2 text-center mb-2">
+                                    <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Advert Purpose</p>
+                                    <p class="font-serif font-bold text-xl text-gray-900">${item.details.purpose || 'N/A'}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Advert Sponsor</p>
+                                    <p class="font-semibold text-gray-800 text-lg">${item.details.sponsor || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Approving Agent</p>
+                                    <p class="font-semibold text-gray-800 text-lg">${item.details.agent || 'N/A'}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Board Location</p>
+                                    <p class="font-semibold text-gray-800">${item.details.specificLocation || item.details.lga}</p>
+                                    <p class="text-xs text-gray-500">${item.state}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Board Type & Size</p>
+                                    <p class="font-semibold text-gray-800">${item.type}</p>
+                                    <p class="text-xs text-gray-500">${item.details.size || 'Standard'}</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Advert Duration</p>
+                                    <p class="font-semibold text-gray-800">${item.details.duration || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Board State Tax</p>
+                                    <p class="font-semibold text-gray-800">${item.details.tax || 'Unpaid'}</p>
+                                </div>
+                                 <div class="col-span-2 border-t border-green-200 pt-3 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-bold">ARCON Fees</p>
+                                        <p class="font-bold text-green-700 text-lg">${item.details.fees || 'Paid'}</p>
+                                    </div>
+                                    <div class="bg-ng-green text-white px-4 py-2 rounded font-bold uppercase tracking-widest text-sm shadow-md">
+                                        This ADVERT IS APPROVED
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mt-16 flex justify-between items-end">
+                    <div class="mt-12 flex justify-between items-end px-12 relative z-10">
                         <div class="text-center">
-                            <div class="w-32 h-32 bg-white border border-gray-300 p-2 mx-auto mb-2">
+                            <div class="w-28 h-28 bg-white border-2 border-gray-800 p-1 mx-auto mb-2">
                                 ${qrSvg}
                             </div>
-                            <p class="text-xs font-mono text-gray-500">Scan to Verify</p>
+                            <p class="text-[10px] font-mono text-gray-500 uppercase">Scan to Authenticate</p>
                         </div>
                         <div class="text-center">
-                            <div class="w-48 border-b-2 border-gray-800 mb-2">
-                                <span class="font-script text-2xl text-ng-green-dark">Dr. Olalekan Fadolapo</span>
+                            <div class="w-56 border-b-2 border-gray-800 mb-2 pb-2">
+                                <span class="font-script text-4xl text-ng-green-dark">Dr. O. Fadolapo</span>
                             </div>
-                            <p class="font-bold text-sm uppercase">Director General, ARCON</p>
-                            <p class="text-xs text-gray-500">${new Date().toLocaleDateString()}</p>
+                            <p class="font-bold text-xs uppercase tracking-widest text-gray-800">Director General, ARCON</p>
+                            <p class="text-[10px] text-gray-500 uppercase mt-1">Date Issued: ${new Date().toLocaleDateString()}</p>
                         </div>
                     </div>
                     
-                    <div class="mt-8 text-center text-xs text-gray-400 font-mono">
-                        This certificate is electronically generated and is valid without a physical seal.
+                    <div class="mt-8 text-center text-[10px] text-gray-400 font-mono">
+                        System Generated ID: ${item.id} | Valid without physical seal | Verify at arcon.gov.ng/verify
                     </div>
                 </div>
                 
                 <div class="mt-6 text-center no-print">
-                    <button onclick="window.print()" class="bg-ng-green text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 flex items-center mx-auto">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        Download / Print Certificate
+                    <button onclick="window.print()" class="bg-ng-green text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 hover:shadow-xl transition-all flex items-center mx-auto gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Print Official Certificate
                     </button>
-                    <p class="text-sm text-gray-500 mt-2">Use browser print dialog to Save as PDF</p>
+                    <p class="text-xs text-gray-500 mt-2">Recommended: Save as PDF for your records</p>
                 </div>
             `;
             
@@ -462,358 +1000,62 @@
         window.openDetailModal = (bb) => {
             const modal = document.getElementById('detail-modal');
             const content = document.getElementById('detail-content');
-            // ... (Existing modal logic reuse) ...
-            // Re-implementing briefly for completeness since code was replaced
-             const feeFormatted = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(bb.details.fee);
+            
+            const isApproved = bb.status === 'Approved';
+            let statusColor = isApproved ? 'text-green-600 bg-green-50 border-green-200' : 'text-red-600 bg-red-50 border-red-200';
+            if(bb.status === 'Pending') statusColor = 'text-yellow-600 bg-yellow-50 border-yellow-200';
 
             content.innerHTML = `
-                <div class="flex justify-between items-center border-b pb-4 mb-4">
-                    <div class="flex items-center space-x-3">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" class="h-12 w-auto" alt="Coat of Arms">
-                        <div>
-                            <h3 class="text-lg font-bold text-ng-green uppercase">Verification Certificate</h3>
-                            <p class="text-xs text-gray-500">Federal Republic of Nigeria</p>
-                        </div>
+                <div class="text-center mb-6">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" class="h-16 w-auto mx-auto mb-2" alt="Coat of Arms">
+                    <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">Asset Verification</h3>
+                    <p class="text-xs text-gray-400">Official Database Record</p>
+                </div>
+
+                <div class="border rounded-lg p-4 mb-6 ${statusColor} flex justify-between items-center">
+                    <div>
+                        <p class="text-xs uppercase font-bold opacity-70">Current Status</p>
+                        <p class="text-xl font-bold uppercase tracking-wide">${bb.status}</p>
                     </div>
                     <div class="text-right">
-                         <span class="block text-sm font-mono text-gray-400">ID: ${bb.id}</span>
-                         <span class="inline-block px-3 py-1 rounded text-xs font-bold text-white ${bb.status === 'Approved' ? 'bg-ng-green' : 'bg-red-500'}">${bb.status.toUpperCase()}</span>
+                         <p class="text-xs uppercase font-bold opacity-70">ID Reference</p>
+                         <p class="font-mono font-bold">${bb.id}</p>
                     </div>
                 </div>
-                <!-- Details -->
-                 <div class="grid grid-cols-2 gap-6 text-sm">
-                    <div><p class="text-xs text-gray-400 uppercase">Board Title</p><p class="font-semibold text-gray-800">${bb.title}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase">Location</p><p class="font-semibold text-gray-800">${bb.location.lga}, ${bb.location.state}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase">Agent</p><p class="font-semibold text-gray-800">${bb.details.agent}</p></div>
-                    <div><p class="text-xs text-gray-400 uppercase">Fee</p><p class="font-semibold text-gray-800">${feeFormatted}</p></div>
+                
+                 <div class="space-y-4 text-sm">
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Board Title</span>
+                        <span class="font-semibold text-gray-900 text-right">${bb.title}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Location</span>
+                        <span class="font-semibold text-gray-900 text-right">${bb.details.specificLocation || bb.location.lga}, ${bb.location.state}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Registered Agent</span>
+                        <span class="font-semibold text-gray-900 text-right">${bb.details.agent}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Sponsor</span>
+                        <span class="font-semibold text-gray-900 text-right">${bb.details.sponsor}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Regulatory Fees</span>
+                        <span class="font-semibold text-gray-900 text-right">${bb.details.fees || 'Paid'}</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button onclick="generateCertificate('${bb.id}')" class="flex-1 bg-ng-green text-white py-2.5 rounded-lg font-bold shadow hover:bg-green-700 transition-colors">View Certificate</button>
+                    <button class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-bold hover:bg-gray-50 transition-colors">Download Report</button>
                 </div>
             `;
             modal.classList.remove('hidden');
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            window.initializeFirebaseAndApp();
-        });
-
+        // Initialize
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Great+Vibes&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
-        h1, h2, h3 { font-family: 'Merriweather', serif; }
-        .font-script { font-family: 'Great Vibes', cursive; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 3px; }
-        ::-webkit-scrollbar-track { background-color: transparent; }
-        
-        .nav-item { transition: all 0.2s ease-in-out; }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { background-color: white; }
-            #certificate-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: white; }
-            #app, aside, header { display: none; }
-        }
-    </style>
-</head>
-<body class="text-govt-text h-screen overflow-hidden flex">
-
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-ng-green text-white flex flex-col shadow-2xl z-20 no-print">
-        <!-- Brand -->
-        <div class="p-6 border-b border-green-600 flex items-center space-x-3 bg-ng-green-dark">
-            <div class="bg-white p-1 rounded-full">
-                <svg class="w-8 h-8 text-ng-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div>
-                <h1 class="font-bold text-sm tracking-widest uppercase">ARCON</h1>
-                <p class="text-[10px] text-green-200 uppercase">Federal Govt of Nigeria</p>
-            </div>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-grow py-6 space-y-1">
-            <a href="#" id="nav-dashboard" onclick="window.switchTab('dashboard')" class="nav-item flex items-center px-6 py-3 text-sm font-medium border-l-4 border-white bg-ng-green-dark">
-                <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                Executive Dashboard
-            </a>
-            
-            <div class="px-6 py-2 text-xs font-bold text-green-200 uppercase mt-4">Public Services</div>
-            <a href="#" id="nav-apply" onclick="window.switchTab('apply')" class="nav-item flex items-center px-6 py-3 text-sm font-medium text-green-100 hover:bg-ng-green-dark border-l-4 border-transparent">
-                <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.586a2 2 0 012.828 0L20 7.172v.25M15 13.5v-1.5m-3 3v-1.5m-3 3v-1.5" /></svg>
-                License Application
-            </a>
-
-            <div class="px-6 py-2 text-xs font-bold text-green-200 uppercase mt-4">Regulatory Admin</div>
-            <a href="#" id="nav-app-management" onclick="window.switchTab('app-management')" class="nav-item flex items-center px-6 py-3 text-sm font-medium text-green-100 hover:bg-ng-green-dark border-l-4 border-transparent">
-                <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                Application Mgmt
-            </a>
-            <a href="#" id="nav-verification" onclick="window.switchTab('verification')" class="nav-item flex items-center px-6 py-3 text-sm font-medium text-green-100 hover:bg-ng-green-dark border-l-4 border-transparent">
-                <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 01-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
-                Verification Portal
-            </a>
-            <a href="#" id="nav-revenue" onclick="window.switchTab('revenue')" class="nav-item flex items-center px-6 py-3 text-sm font-medium text-green-100 hover:bg-ng-green-dark border-l-4 border-transparent">
-                <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Revenue / IGR
-            </a>
-        </nav>
-
-        <!-- User Profile -->
-        <div class="p-6 border-t border-green-600 bg-ng-green-dark">
-            <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-white text-ng-green font-bold flex items-center justify-center">DG</div>
-                <div class="ml-3">
-                    <p class="text-xs font-semibold">Director General</p>
-                    <p class="text-[10px] text-green-300">Admin Access</p>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-
-    <!-- MAIN CONTENT -->
-    <main class="flex-grow flex flex-col h-screen overflow-hidden bg-gray-50">
-        
-        <!-- TOP HEADER -->
-        <header class="bg-white shadow-sm border-b px-8 py-4 flex justify-between items-center z-10 no-print">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 font-serif">Advertising Regulatory Council of Nigeria</h2>
-                <p class="text-sm text-gray-500">Integrated Regulatory Management System (IRMS)</p>
-            </div>
-            <div class="text-right">
-                <p id="current-date" class="text-sm font-semibold text-ng-green"></p>
-                <div class="flex items-center space-x-2 justify-end mt-1">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="text-xs text-gray-400">System Operational</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- SCROLLABLE CONTENT AREA -->
-        <div class="flex-grow overflow-y-auto p-8 relative">
-
-            <!-- VIEW 1: EXECUTIVE DASHBOARD -->
-            <section id="dashboard-view" class="view-section space-y-8">
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Revenue KPI -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">YTD Revenue (IGR)</p>
-                                <h3 id="dash-revenue" class="text-3xl font-bold text-gray-900 mt-2">₦0.00M</h3>
-                                <p class="text-xs text-green-600 mt-1 flex items-center">+12.5% vs Last Year</p>
-                            </div>
-                            <div class="p-3 bg-green-50 rounded-full text-ng-green">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        </div>
-                    </div>
-                     <!-- Compliance KPI -->
-                     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">National Compliance Index</p>
-                                <h3 id="dash-compliance" class="text-3xl font-bold text-gray-900 mt-2">0%</h3>
-                                <p class="text-xs text-red-500 mt-1">Requires Enforcement in 4 States</p>
-                            </div>
-                            <div class="p-3 bg-blue-50 rounded-full text-blue-600">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Pending KPI -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Pending Applications</p>
-                                <h3 id="dash-pending" class="text-3xl font-bold text-gray-900 mt-2">0</h3>
-                                <p class="text-xs text-gray-500 mt-1">Average processing time: 4 Days</p>
-                            </div>
-                            <div class="p-3 bg-yellow-50 rounded-full text-yellow-600">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                        <h4 class="text-sm font-bold text-gray-700 mb-4 border-b pb-2">Revenue Collection Trends (6 Months)</h4>
-                        <div class="h-64"><canvas id="revenueChart"></canvas></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                        <h4 class="text-sm font-bold text-gray-700 mb-4 border-b pb-2">Compliance Distribution</h4>
-                        <div class="h-64 flex items-center justify-center"><canvas id="complianceChart"></canvas></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIEW: NEW APPLICATION (PUBLIC) -->
-            <section id="apply-view" class="view-section hidden max-w-4xl mx-auto">
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                    <div class="bg-ng-green p-6 text-white">
-                        <h3 class="text-xl font-serif font-bold">New Advertisement License Application</h3>
-                        <p class="text-green-100 text-sm">Fill out the details below to register a new advertising asset.</p>
-                    </div>
-                    <form onsubmit="window.submitApplication(event)" class="p-8 space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Applicant / Company Name</label>
-                                <input type="text" name="applicant" required class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <input type="email" required class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Advertisement Type</label>
-                                <select name="type" class="w-full p-2 border border-gray-300 rounded bg-white">
-                                    <option>Digital Billboard</option>
-                                    <option>Static Billboard</option>
-                                    <option>Lamp Post</option>
-                                    <option>Gantry</option>
-                                    <option>Wall Drape</option>
-                                </select>
-                            </div>
-                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Structure Size (e.g. 12m x 9m)</label>
-                                <input type="text" required class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
-                                <select name="state" id="apply-state" class="w-full p-2 border border-gray-300 rounded bg-white">
-                                    <!-- Populated by JS -->
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Local Government Area (LGA)</label>
-                                <input type="text" name="lga" required class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none">
-                            </div>
-                        </div>
-                        
-                        <div class="border-t pt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Upload Visual Concept / Artwork</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-                                <svg class="w-10 h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                                <p class="text-sm text-gray-500">Drag and drop file here, or <span class="text-blue-600 cursor-pointer hover:underline">browse</span></p>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end pt-4">
-                            <button type="submit" class="bg-ng-green text-white px-8 py-3 rounded font-bold shadow hover:bg-green-700 transition">Submit Application</button>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            <!-- VIEW: APPLICATION MANAGEMENT (ADMIN) -->
-            <section id="app-management-view" class="view-section hidden space-y-6">
-                 <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-gray-800 font-serif">Application Management</h3>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-sm border rounded bg-white hover:bg-gray-50">Filter: All</button>
-                        <button class="px-3 py-1 text-sm border rounded bg-white hover:bg-gray-50">Export List</button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-100 text-xs uppercase text-gray-500 font-semibold border-b">
-                            <tr>
-                                <th class="py-3 px-4">App ID</th>
-                                <th class="py-3 px-4">Applicant</th>
-                                <th class="py-3 px-4">Type</th>
-                                <th class="py-3 px-4">State</th>
-                                <th class="py-3 px-4">Status</th>
-                                <th class="py-3 px-4">Date</th>
-                                <th class="py-3 px-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="applications-table-body" class="text-sm text-gray-700">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- VIEW: VERIFICATION PORTAL -->
-            <section id="verification-view" class="view-section hidden space-y-6">
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-wrap gap-4 items-end">
-                    <div class="flex-grow">
-                        <label class="text-xs font-semibold text-gray-500">Search Assets</label>
-                        <input type="text" id="search-input" placeholder="Enter ID, Agent, or Sponsor..." class="w-full mt-1 p-2 border rounded text-sm focus:ring-2 focus:ring-green-500 outline-none">
-                    </div>
-                    <div class="w-48">
-                        <label class="text-xs font-semibold text-gray-500">Jurisdiction (State)</label>
-                        <select id="state-filter" class="w-full mt-1 p-2 border rounded text-sm bg-white" onchange="window.filterAndRenderBillboards()"><option value="">All States</option></select>
-                    </div>
-                    <div class="w-48">
-                        <label class="text-xs font-semibold text-gray-500">Display Mode</label>
-                        <select id="view-toggle" class="w-full mt-1 p-2 border rounded text-sm bg-white" onchange="window.filterAndRenderBillboards()">
-                            <option value="map">Geospatial Map</option>
-                            <option value="list">Asset List</option>
-                            <option value="grid">Grid View</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="map-view-container" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative h-[600px]">
-                    <div id="map" class="w-full h-full z-[1]"></div>
-                </div>
-                <div id="billboard-list" class="hidden"></div>
-            </section>
-
-            <!-- VIEW: REVENUE / IGR -->
-            <section id="revenue-view" class="view-section hidden space-y-6">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-gray-800 font-serif">Financial Transaction Logs</h3>
-                    <button class="text-sm text-ng-green font-medium hover:underline">Export to CSV</button>
-                </div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-100 text-xs uppercase text-gray-500 font-semibold border-b">
-                            <tr>
-                                <th class="py-3 px-4">Transaction ID</th>
-                                <th class="py-3 px-4">Paying Agent</th>
-                                <th class="py-3 px-4">Payment Type</th>
-                                <th class="py-3 px-4">Amount</th>
-                                <th class="py-3 px-4">Status</th>
-                                <th class="py-3 px-4">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="revenue-table-body" class="text-sm text-gray-700"></tbody>
-                    </table>
-                </div>
-            </section>
-
-        </div>
-    </main>
-
-    <!-- Modal for Detailed View (Verification) -->
-    <div id="detail-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50 p-4 no-print">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg overflow-hidden relative">
-            <button onclick="document.getElementById('detail-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            <div id="detail-content" class="p-8"></div>
-        </div>
-    </div>
-
-    <!-- Modal for Certificate (Printable) -->
-    <div id="certificate-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-75 p-4 overflow-y-auto">
-        <div class="bg-white shadow-2xl w-full max-w-3xl relative animate-[fadeIn_0.3s_ease-out]">
-            <button onclick="document.getElementById('certificate-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 no-print z-50">
-                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            <div id="certificate-content"></div>
-        </div>
-    </div>
-
 </body>
 </html>
