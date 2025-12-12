@@ -5,21 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Federal Government of Nigeria - ARCON/DOAS Integrated Platform</title>
 
-  <!-- Tailwind -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
  
-<!-- ✅ QR Code Library (REAL QR generation) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
-
+  <!-- ✅ CORRECT QR Code Library (node-qrcode via CDNJS) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script> 
 
   <script>
     tailwind.config = {
@@ -105,7 +102,7 @@
     </div>
   </div>
 
-  <!-- ✅ PROMPT MODAL (replaces browser prompt for Query reason) -->
+  <!-- PROMPT MODAL -->
   <div id="prompt-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in no-print">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
       <div class="p-4 bg-gray-900 text-white flex justify-between items-center">
@@ -166,7 +163,7 @@
         Revenue / IGR
       </a>
 
-      <!-- ✅ NEW: QR Studio -->
+      <!-- NEW: QR Studio -->
       <a href="#" id="nav-qr" onclick="window.switchTab('qr')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
         <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h2v2h-2v-2zm4 0h2v6h-6v-2h4v-4z"/>
@@ -587,7 +584,7 @@
         </div>
       </section>
 
-      <!-- ✅ QR STUDIO -->
+      <!-- QR STUDIO -->
       <section id="qr-view" class="view-section hidden space-y-6 max-w-4xl mx-auto">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <h3 class="text-2xl font-bold text-gray-800 font-serif">QR Code Studio</h3>
@@ -1376,22 +1373,22 @@
     }
 
     async function generateQrAssets(text){
-  const QR = window.QRCode; // be explicit
+      const QR = window.QRCode; 
 
-  if(!QR || typeof QR.toDataURL !== 'function'){
-    throw new Error("QR library not loaded. Check the <script src=...> for qrcode.");
-  }
+      if(!QR || typeof QR.toDataURL !== 'function'){
+        throw new Error("QR library not loaded. Check the <script src=...> for qrcode.");
+      }
 
-  const optsSmall = { margin: 1, width: 140, color: { dark: '#111111', light: '#ffffff' } };
-  const optsBig   = { margin: 1, width: 1024, color: { dark: '#111111', light: '#ffffff' } };
+      const optsSmall = { margin: 1, width: 140, color: { dark: '#111111', light: '#ffffff' } };
+      const optsBig   = { margin: 1, width: 1024, color: { dark: '#111111', light: '#ffffff' } };
 
-  const smallDataUrl = await QR.toDataURL(text, optsSmall);
-  const bigDataUrl   = await QR.toDataURL(text, optsBig);
-  const svgString    = await QR.toString(text, { type:'svg', margin:1, color:{dark:'#111111', light:'#ffffff'} });
+      const smallDataUrl = await QR.toDataURL(text, optsSmall);
+      const bigDataUrl   = await QR.toDataURL(text, optsBig);
+      const svgString    = await QR.toString(text, { type:'svg', margin:1, color:{dark:'#111111', light:'#ffffff'} });
 
-  window.__lastQr = { text, pngDataUrl: bigDataUrl, svgString };
-  return { smallDataUrl, bigDataUrl, svgString };
-}
+      window.__lastQr = { text, pngDataUrl: bigDataUrl, svgString };
+      return { smallDataUrl, bigDataUrl, svgString };
+    }
 
 
     function downloadBlob(filename, blob){
@@ -1749,7 +1746,8 @@ Top Notes:
     // -----------------------
     // INITIALIZE
     // -----------------------
-    document.addEventListener('DOMContentLoaded', initApp);
+    // Changed to window.load for robustness
+    window.addEventListener('load', initApp);
   </script>
 </body>
 </html>
