@@ -242,7 +242,7 @@
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                     <div class="bg-gradient-to-r from-ng-green to-ng-green-dark p-8 text-white">
                         <h3 class="text-2xl font-serif font-bold mb-2">New Advertisement License Application</h3>
-                        <p class="text-green-100 text-sm">Fill out the details below to register a new advertising asset in compliance with APCON regulations.</p>
+                        <p class="text-green-100 text-sm">Fill out the details below to register a new advertising asset. Fees are calculated automatically based on size, location, and industry.</p>
                     </div>
                     <form onsubmit="window.submitApplication(event)" class="p-8 space-y-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -255,6 +255,17 @@
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
                                     <input type="email" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Industry / Category</label>
+                                    <select name="industry" id="apply-industry" onchange="calculateFee()" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
+                                        <option value="">Select Industry</option>
+                                        <option value="Election Campaign">Election Campaign (1.5x Multiplier)</option>
+                                        <option value="New Product Launch">New Product Launch (1.2x Multiplier)</option>
+                                        <option value="Corporate/Company">Corporate/Company (Standard)</option>
+                                        <option value="SME/Small Business">SME/Small Business (0.8x Discount)</option>
+                                        <option value="Religious/NGO">Religious/NGO (0.5x Discount)</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="space-y-4">
@@ -271,8 +282,24 @@
                                     </select>
                                 </div>
                                  <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Structure Size (e.g. 12m x 9m)</label>
-                                    <input type="text" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Structure Size</label>
+                                    <select name="size" id="apply-size" onchange="toggleCustomSize()" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
+                                        <option value="">Select Size</option>
+                                        <option value="A4 (0.06 sqm)">A4 Paper Size</option>
+                                        <option value="4-Sheet (1.5 sqm)">4-Sheet (1m x 1.5m)</option>
+                                        <option value="6-Sheet (2.16 sqm)">6-Sheet (1.2m x 1.8m)</option>
+                                        <option value="12-Sheet (4.5 sqm)">12-Sheet (3m x 1.5m)</option>
+                                        <option value="32-Sheet (12 sqm)">32-Sheet (4m x 3m)</option>
+                                        <option value="48-Sheet (18 sqm)">48-Sheet (Standard Billboard 6m x 3m)</option>
+                                        <option value="96-Sheet (36 sqm)">96-Sheet (Superwide 12m x 3m)</option>
+                                        <option value="Unipole (108 sqm)">Unipole (18m x 6m)</option>
+                                        <option value="Gantry (80 sqm)">Gantry (20m x 4m)</option>
+                                        <option value="Custom Size">Custom Size (Enter Dimensions)</option>
+                                    </select>
+                                </div>
+                                <div id="custom-size-container" class="hidden grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <input id="custom-width" placeholder="Width (m)" type="number" step="0.1" class="w-full p-2 border rounded" oninput="calculateFee()">
+                                    <input id="custom-height" placeholder="Height (m)" type="number" step="0.1" class="w-full p-2 border rounded" oninput="calculateFee()">
                                 </div>
                             </div>
                         </div>
@@ -280,14 +307,23 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">State Jurisdiction</label>
-                                <select name="state" id="apply-state" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
+                                <select name="state" id="apply-state" onchange="calculateFee()" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
                                     <!-- Populated by JS -->
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Local Government Area (LGA)</label>
-                                <input type="text" name="lga" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                                <input type="text" name="lga" placeholder="e.g. Ikeja, AMAC, Port Harcourt" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
                             </div>
+                        </div>
+
+                        <!-- Fee Display -->
+                        <div class="bg-green-50 border border-green-200 p-6 rounded-xl flex flex-col md:flex-row justify-between items-center shadow-sm">
+                            <div>
+                                <span class="block text-sm font-bold text-gray-600 uppercase tracking-wider">Estimated Regulatory Fee</span>
+                                <span class="text-xs text-gray-500 mt-1">Based on location rate x area x industry factor</span>
+                            </div>
+                            <span id="estimated-fee" class="text-3xl font-black text-ng-green mt-2 md:mt-0">₦0.00</span>
                         </div>
 
                         <div class="pt-4">
@@ -440,6 +476,35 @@
 
     <!-- JS Logic -->
     <script>
+        // --- Constants for Calculation ---
+        const STATE_RATES = {
+            'Abuja FCT': 500,
+            'Lagos': 650,
+            'default': 400
+        };
+
+        const INDUSTRY_MULTIPLIERS = {
+            'Election Campaign': 1.5,
+            'New Product Launch': 1.2,
+            'Corporate/Company': 1.0,
+            'SME/Small Business': 0.8,
+            'Religious/NGO': 0.5,
+            'default': 1.0
+        };
+
+        const STANDARD_SIZES = {
+            'A4 (0.06 sqm)': { area: 0.06237 }, // 0.21 x 0.297
+            '4-Sheet (1.5 sqm)': { area: 1.5 },
+            '6-Sheet (2.16 sqm)': { area: 2.16 },
+            '12-Sheet (4.5 sqm)': { area: 4.5 },
+            '32-Sheet (12 sqm)': { area: 12 },
+            '48-Sheet (18 sqm)': { area: 18 },
+            '96-Sheet (36 sqm)': { area: 36 },
+            'Unipole (108 sqm)': { area: 108 },
+            'Gantry (80 sqm)': { area: 80 },
+            'Custom Size': null
+        };
+
         // --- Mock Data: Billboards (Verification) ---
         const mockBillboards = [
             { 
@@ -471,7 +536,6 @@
             { id: 'APP-2025-001', applicant: 'Zenith Bank PLC', type: 'Digital Billboard', state: 'Lagos', date: '2025-05-10', status: 'Pending', details: { lga: 'Victoria Island', duration: '12 Months', fees: 'N2,500,000', agent: 'In-house', sponsor: 'Zenith Bank', purpose: 'Brand Awareness', specificLocation: 'Adetokunbo Ademola', size: 'Digital 12x6m', tax: 'Pending' } },
             { id: 'APP-2025-002', applicant: 'MTN Nigeria', type: 'Street Lamp Post', state: 'Abuja FCT', date: '2025-05-11', status: 'Queried', details: { lga: 'Wuse II', duration: '6 Months', fees: 'N800,000', queryReason: 'Incorrect dimensions provided', agent: 'Yellow Media', sponsor: 'MTN', purpose: 'Data Plan', specificLocation: 'Aminu Kano Cresc', size: 'Standard', tax: 'N/A' } },
             { id: 'APP-2025-003', applicant: 'Guinness Nigeria', type: 'Unipole', state: 'Lagos', date: '2025-05-09', status: 'Approved', details: { lga: 'Ikeja', duration: '24 Months', fees: 'N4,000,000', agent: 'MediaReach', sponsor: 'Guinness', purpose: 'Product Launch', specificLocation: 'Allen Avenue', size: '15m x 4m', tax: 'Paid' } },
-            // Add the mock application that matches the specific request just in case they look here
              { id: 'APP-RCCG-001', applicant: 'Samuel Adamu (RCCG)', type: 'Signboard', state: 'Abuja FCT', date: '2025-05-01', status: 'Approved', details: { lga: 'Municipal Area Council', duration: '4 Weeks', fees: 'N500 Paid', agent: 'Samuel Adamu', sponsor: 'RCCG Lugbe', purpose: 'Church Program', specificLocation: 'Lugbe Round About', size: '2ft x 4ft', tax: 'N200 Paid' } }
         ];
 
@@ -810,13 +874,69 @@
                 }
             } else if (action === 'view') {
                 const app = window.APPLICATIONS_DATA.find(a => a.id === id);
-                alert(`Details for ${app.applicant}:\nType: ${app.type}\nLocation: ${app.details.lga}, ${app.state}\nFee: ₦${app.details.fees || '0'}`);
+                alert(`Details for ${app.applicant}:\nType: ${app.type}\nLocation: ${app.details.lga}, ${app.state}\nFee: ${app.details.fees || '0'}`);
             }
+        };
+
+        // --- Fee Calculation Logic ---
+        window.toggleCustomSize = () => {
+            const sizeSelect = document.getElementById('apply-size');
+            const customContainer = document.getElementById('custom-size-container');
+            if (sizeSelect.value === 'Custom Size') {
+                customContainer.classList.remove('hidden');
+                customContainer.classList.add('grid');
+            } else {
+                customContainer.classList.add('hidden');
+                customContainer.classList.remove('grid');
+            }
+            calculateFee();
+        };
+
+        window.calculateFee = () => {
+            const state = document.getElementById('apply-state').value;
+            const industry = document.getElementById('apply-industry').value;
+            const sizeVal = document.getElementById('apply-size').value;
+            const feeDisplay = document.getElementById('estimated-fee');
+
+            if (!state || !industry || !sizeVal) {
+                feeDisplay.innerText = "₦0.00";
+                return 0;
+            }
+
+            // 1. Determine State Rate
+            let rate = STATE_RATES['default'];
+            if (state === 'Abuja FCT') rate = STATE_RATES['Abuja FCT'];
+            else if (state === 'Lagos') rate = STATE_RATES['Lagos'];
+
+            // 2. Determine Industry Multiplier
+            const multiplier = INDUSTRY_MULTIPLIERS[industry] || 1.0;
+
+            // 3. Determine Area
+            let area = 0;
+            if (sizeVal === 'Custom Size') {
+                const w = parseFloat(document.getElementById('custom-width').value) || 0;
+                const h = parseFloat(document.getElementById('custom-height').value) || 0;
+                area = w * h;
+            } else {
+                area = STANDARD_SIZES[sizeVal]?.area || 0;
+            }
+
+            // 4. Calculate Total
+            const total = Math.round(rate * area * multiplier);
+            
+            // Format for display
+            feeDisplay.innerText = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(total);
+            return total;
         };
 
         window.submitApplication = (e) => {
             e.preventDefault();
             const form = e.target;
+            const calculatedFee = window.calculateFee();
+            
+            // Formatted Fee String
+            const feeString = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(calculatedFee);
+
             const newApp = {
                 id: `APP-2025-${Math.floor(Math.random() * 900) + 100}`,
                 applicant: form.applicant.value,
@@ -827,19 +947,24 @@
                 details: {
                     lga: form.lga.value,
                     duration: '12 Months',
-                    fees: 'Pending Assessment',
+                    fees: feeString,
                     agent: form.applicant.value,
                     sponsor: form.applicant.value,
-                    purpose: 'General Advertisement',
-                    size: 'Standard',
+                    purpose: form.industry.value, // Using Industry as Purpose
+                    size: form.size.value === 'Custom Size' 
+                          ? `${form.querySelector('#custom-width').value}m x ${form.querySelector('#custom-height').value}m`
+                          : form.size.value,
                     specificLocation: form.lga.value,
                     tax: 'Pending'
                 }
             };
             
             window.APPLICATIONS_DATA.unshift(newApp); // Add to top
-            alert(`Application Submitted Successfully! Reference ID: ${newApp.id}`);
+            alert(`Application Submitted Successfully! Reference ID: ${newApp.id}\nEstimated Fee: ${feeString}`);
             form.reset();
+            document.getElementById('estimated-fee').innerText = "₦0.00";
+            document.getElementById('custom-size-container').classList.add('hidden');
+            
             renderApplicationsTable(); 
             updateDashboardStats();
             window.switchTab('app-management'); 
