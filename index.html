@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Federal Government of Nigeria - ARCON/DOAS Platform</title>
+    <title>Federal Government of Nigeria - ARCON/DOAS Integrated Platform</title>
     
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,9 +24,10 @@
                         'ng-green': '#008751',     // Official Nigeria Green
                         'ng-green-dark': '#00643C',
                         'ng-green-light': '#E6F3ED',
-                        'govt-gray': '#F9FAFB',
-                        'govt-text': '#111827',
+                        'govt-gray': '#F3F4F6',
+                        'govt-text': '#1F2937',
                         'gold': '#D4AF37',        // For premium/official accents
+                        'arcon-blue': '#1e3a8a'
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -36,7 +37,9 @@
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-out',
                         'slide-in': 'slideIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-in': 'bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                     },
                     keyframes: {
                         fadeIn: {
@@ -44,8 +47,16 @@
                             '100%': { opacity: '1' },
                         },
                         slideIn: {
+                            '0%': { transform: 'translateX(20px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                         slideUp: {
                             '0%': { transform: 'translateY(20px)', opacity: '0' },
                             '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
                         }
                     }
                 }
@@ -56,52 +67,116 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Great+Vibes&display=swap');
         
-        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
         h1, h2, h3 { font-family: 'Merriweather', serif; }
         .font-script { font-family: 'Great Vibes', cursive; }
         
         /* Smooth scrolling & Custom Scrollbar */
         html { scroll-behavior: smooth; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 4px; }
-        ::-webkit-scrollbar-track { background-color: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #008751; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background-color: #E5E7EB; }
         
         /* Transitions */
-        .view-section { animation: fadeIn 0.4s ease-out; }
+        .view-section { animation: slideUp 0.4s ease-out; }
         .nav-item { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-hover { transition: transform 0.2s, box-shadow 0.2s; }
-        .btn-hover:active { transform: scale(0.98); }
+        .form-input { transition: border-color 0.2s, box-shadow 0.2s; }
+        .form-input:focus { border-color: #008751; box-shadow: 0 0 0 3px rgba(0, 135, 81, 0.1); }
+
+        /* Social Proof Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 50;
+            pointer-events: none;
+        }
+        .toast {
+            background: white;
+            border-left: 4px solid #008751;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+            transform: translateX(-100%);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 350px;
+        }
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
 
         /* Print Styles */
         @media print {
             .no-print { display: none !important; }
             body { background-color: white; overflow: visible !important; height: auto !important; }
-            #certificate-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: white; padding: 0; }
-            #certificate-content { border: none !important; box-shadow: none !important; }
+            #certificate-modal { 
+                position: fixed; 
+                top: 0; 
+                left: 0; 
+                width: 100vw; 
+                height: 100vh; 
+                z-index: 9999; 
+                background: white; 
+                padding: 0; 
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+            #certificate-content { 
+                border: none !important; 
+                box-shadow: none !important; 
+                transform: scale(0.9);
+                width: 100%;
+            }
             #app, aside, header { display: none; }
         }
     </style>
 </head>
 <body class="text-govt-text h-screen overflow-hidden flex selection:bg-ng-green selection:text-white">
 
+    <!-- SOCIAL PROOF CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- CUSTOM MESSAGE MODAL (Replacement for Alerts) -->
+    <div id="msg-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-100 animate-bounce-in">
+            <div id="msg-header" class="p-4 bg-ng-green text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg" id="msg-title">Notification</h3>
+                <button onclick="closeMsgModal()" class="text-white hover:bg-white/20 rounded-full p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 text-center">
+                <div id="msg-icon" class="mb-4 flex justify-center"></div>
+                <p id="msg-body" class="text-gray-700 mb-6 leading-relaxed">Operation successful.</p>
+                <button onclick="closeMsgModal()" class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-bold hover:bg-gray-800 transition">Okay, Understood</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SIDEBAR -->
     <aside class="w-72 bg-ng-green text-white flex flex-col shadow-2xl z-20 no-print transition-all duration-300">
         <!-- Brand -->
-        <div class="p-6 border-b border-white/10 flex items-center space-x-4 bg-ng-green-dark">
-            <div class="bg-white p-1.5 rounded-full shadow-lg">
-                <svg class="w-8 h-8 text-ng-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <div class="p-6 border-b border-white/10 flex items-center space-x-3 bg-ng-green-dark">
+            <div class="bg-white p-1 rounded-full shadow-lg h-12 w-12 flex items-center justify-center overflow-hidden">
+                <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" alt="ARCON Logo" class="w-full h-full object-cover">
             </div>
             <div>
-                <h1 class="font-bold text-sm tracking-widest uppercase">ARCON</h1>
-                <p class="text-[10px] text-green-100 uppercase font-medium tracking-wide">Federal Govt of Nigeria</p>
+                <h1 class="font-bold text-lg tracking-wider font-serif">ARCON</h1>
+                <p class="text-[10px] text-green-100 uppercase font-medium tracking-wide opacity-80">Federal Govt of Nigeria</p>
             </div>
         </div>
 
         <!-- Navigation -->
         <nav class="flex-grow py-6 space-y-1 overflow-y-auto">
-            <div class="px-6 py-2 text-[10px] font-bold text-green-200 uppercase tracking-wider mb-1">Main Menu</div>
+            <div class="px-6 py-2 text-[10px] font-bold text-green-200 uppercase tracking-wider mb-1">Overview</div>
             <a href="#" id="nav-dashboard" onclick="window.switchTab('dashboard')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium border-l-4 border-white bg-white/10 backdrop-blur-sm">
                 <svg class="w-5 h-5 mr-3 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                 Executive Dashboard
@@ -109,14 +184,14 @@
             
             <div class="px-6 py-2 text-[10px] font-bold text-green-200 uppercase tracking-wider mt-6 mb-1">Public Services</div>
             <a href="#" id="nav-apply" onclick="window.switchTab('apply')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
-                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.586a2 2 0 012.828 0L20 7.172v.25M15 13.5v-1.5m-3 3v-1.5m-3 3v-1.5" /></svg>
-                License Application
+                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                New License Application
             </a>
 
             <div class="px-6 py-2 text-[10px] font-bold text-green-200 uppercase tracking-wider mt-6 mb-1">Regulatory Admin</div>
             <a href="#" id="nav-app-management" onclick="window.switchTab('app-management')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
-                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                Application Mgmt
+                <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                Application Review
             </a>
             <a href="#" id="nav-verification" onclick="window.switchTab('verification')" class="nav-item flex items-center px-6 py-3.5 text-sm font-medium text-green-50 hover:bg-white/10 hover:text-white border-l-4 border-transparent">
                 <svg class="w-5 h-5 mr-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 01-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
@@ -131,7 +206,7 @@
         <!-- User Profile -->
         <div class="p-6 border-t border-white/10 bg-ng-green-dark">
             <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-white text-ng-green font-bold flex items-center justify-center border-2 border-green-300 shadow-sm">DG</div>
+                <div class="w-10 h-10 rounded-full bg-white text-ng-green font-bold flex items-center justify-center border-2 border-green-300 shadow-sm text-sm">DG</div>
                 <div class="ml-3">
                     <p class="text-sm font-bold text-white">Dr. O. Fadolapo</p>
                     <p class="text-[10px] text-green-200">Director General</p>
@@ -139,7 +214,6 @@
             </div>
         </div>
     </aside>
-
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow flex flex-col h-screen overflow-hidden bg-gray-50/50">
@@ -163,10 +237,10 @@
         </header>
 
         <!-- SCROLLABLE CONTENT AREA -->
-        <div class="flex-grow overflow-y-auto p-8 relative scroll-smooth">
+        <div class="flex-grow overflow-y-auto p-8 relative scroll-smooth bg-[#F9FAFB]">
 
             <!-- VIEW 1: EXECUTIVE DASHBOARD -->
-            <section id="dashboard-view" class="view-section space-y-8 animate-fade-in">
+            <section id="dashboard-view" class="view-section space-y-8">
                 <!-- Welcome Banner -->
                 <div class="bg-gradient-to-r from-ng-green to-ng-green-dark text-white p-8 rounded-2xl shadow-lg relative overflow-hidden">
                     <div class="absolute right-0 top-0 opacity-10 transform translate-x-10 -translate-y-10">
@@ -176,8 +250,8 @@
                         <h3 class="text-3xl font-serif font-bold mb-2">Welcome, Director General</h3>
                         <p class="text-green-100 max-w-xl text-sm leading-relaxed">Here is the executive summary of advertising compliance, revenue generation, and asset verification for the Federal Republic of Nigeria.</p>
                         <div class="mt-6 flex gap-3">
-                            <button class="bg-white text-ng-green px-5 py-2.5 rounded-lg text-sm font-bold shadow hover:bg-gray-100 transition-colors">Download Executive Brief</button>
-                            <button class="bg-ng-green-dark/50 text-white border border-white/20 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-ng-green-dark transition-colors">View Audit Logs</button>
+                            <button onclick="showToast('Downloading Executive Brief...', 'info')" class="bg-white text-ng-green px-5 py-2.5 rounded-lg text-sm font-bold shadow hover:bg-gray-100 transition-colors">Download Executive Brief</button>
+                            <button onclick="window.switchTab('revenue')" class="bg-ng-green-dark/50 text-white border border-white/20 px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-ng-green-dark transition-colors">View Audit Logs</button>
                         </div>
                     </div>
                 </div>
@@ -238,54 +312,101 @@
             </section>
 
             <!-- VIEW: NEW APPLICATION (PUBLIC) -->
-            <section id="apply-view" class="view-section hidden max-w-4xl mx-auto animate-slide-in">
+            <section id="apply-view" class="view-section hidden max-w-5xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div class="bg-gradient-to-r from-ng-green to-ng-green-dark p-8 text-white">
-                        <h3 class="text-2xl font-serif font-bold mb-2">New Advertisement License Application</h3>
-                        <p class="text-green-100 text-sm">Fill out the details below to register a new advertising asset. Fees are calculated automatically based on size, location, and industry.</p>
+                    <div class="bg-gradient-to-r from-ng-green to-ng-green-dark p-8 text-white flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-serif font-bold mb-2">New Advertisement License Application</h3>
+                            <p class="text-green-100 text-sm">Fill out the details below to register a new advertising asset. Fees are calculated automatically based on size, location, and industry regulations.</p>
+                        </div>
+                        <div class="hidden md:block bg-white/10 p-2 rounded-lg backdrop-blur-sm">
+                            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-16 w-16 rounded object-cover border border-white/20">
+                        </div>
                     </div>
+                    
                     <form onsubmit="window.submitApplication(event)" class="p-8 space-y-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="space-y-4">
-                                <h4 class="text-sm font-bold text-gray-400 uppercase border-b pb-1">Applicant Details</h4>
+                        
+                        <!-- SECTION 1: APPLICANT -->
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                            <h4 class="text-sm font-bold text-gray-500 uppercase border-b border-gray-200 pb-2 mb-4 flex items-center">
+                                <span class="bg-ng-green text-white w-5 h-5 rounded-full flex items-center justify-center text-xs mr-2">1</span> Applicant Details
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Applicant / Company Name</label>
-                                    <input type="text" name="applicant" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none">
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Applicant / Company Name</label>
+                                    <input type="text" name="applicant" placeholder="Enter full legal name" required class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                                    <input type="email" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Phone Number</label>
+                                    <input type="tel" name="phone" placeholder="+234..." required class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Industry / Category</label>
-                                    <select name="industry" id="apply-industry" onchange="calculateFee()" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
-                                        <option value="">Select Industry</option>
-                                        <option value="Election Campaign">Election Campaign (1.5x Multiplier)</option>
-                                        <option value="New Product Launch">New Product Launch (1.2x Multiplier)</option>
-                                        <option value="Corporate/Company">Corporate/Company (Standard)</option>
-                                        <option value="SME/Small Business">SME/Small Business (0.8x Discount)</option>
-                                        <option value="Religious/NGO">Religious/NGO (0.5x Discount)</option>
-                                    </select>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Email Address</label>
+                                    <input type="email" name="email" placeholder="official@company.com" required class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Board Owner</label>
+                                    <div class="flex">
+                                        <select id="owner-select" name="owner" onchange="toggleOwnerInput()" class="form-input w-full p-3 border border-gray-300 rounded-l-lg bg-white outline-none">
+                                            <option value="Self">Self / In-house</option>
+                                            <option value="New">Register New Owner...</option>
+                                            <option value="MediaReach OMD">MediaReach OMD</option>
+                                            <option value="Insight Publicis">Insight Publicis</option>
+                                            <option value="Algorithm Media">Algorithm Media</option>
+                                            <option value="Starcom Media">Starcom Media</option>
+                                        </select>
+                                        <input type="text" id="new-owner-input" name="new_owner" placeholder="Enter Name" class="hidden form-input w-full p-3 border border-gray-300 border-l-0 rounded-r-lg bg-white outline-none">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="space-y-4">
-                                <h4 class="text-sm font-bold text-gray-400 uppercase border-b pb-1">Asset Information</h4>
+                        </div>
+
+                        <!-- SECTION 2: ADVERT DETAILS -->
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                             <h4 class="text-sm font-bold text-gray-500 uppercase border-b border-gray-200 pb-2 mb-4 flex items-center">
+                                <span class="bg-ng-green text-white w-5 h-5 rounded-full flex items-center justify-center text-xs mr-2">2</span> Advert Content
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Advertisement Type</label>
-                                    <select name="type" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
-                                        <option>Digital Billboard</option>
-                                        <option>Static Billboard</option>
-                                        <option>Lamp Post</option>
-                                        <option>Gantry</option>
-                                        <option>Wall Drape</option>
-                                        <option>Signboard</option>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Advert Purpose / Category</label>
+                                    <select name="industry" id="apply-industry" onchange="calculateFee()" class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                        <option value="">Select Category</option>
+                                        <option value="Election Campaign">Election Campaign / Political</option>
+                                        <option value="New Product Launch">New Product Launch</option>
+                                        <option value="Corporate/Company">Corporate Branding</option>
+                                        <option value="Religious">Religious Program / Crusade</option>
+                                        <option value="Wedding/Social">Wedding / Birthday / Social</option>
+                                        <option value="Obituary">Obituary / Memorial</option>
+                                        <option value="SME/Small Business">SME / Small Business</option>
+                                        <option value="NGO/Public Service">NGO / Public Service</option>
                                     </select>
                                 </div>
-                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Structure Size</label>
-                                    <select name="size" id="apply-size" onchange="toggleCustomSize()" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
-                                        <option value="">Select Size</option>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Sponsor Name</label>
+                                    <input type="text" name="sponsor" placeholder="Who is paying for this ad?" required class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Advertisement Type</label>
+                                    <select name="type" class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                        <option value="Digital Billboard">Digital LED Billboard</option>
+                                        <option value="Static Billboard">Static Billboard</option>
+                                        <option value="Unipole">Unipole</option>
+                                        <option value="Gantry">Gantry</option>
+                                        <option value="Lamp Post">Street Lamp Post</option>
+                                        <option value="Wall Drape">Wall Drape / Mural</option>
+                                        <option value="Bridge Panel">Bridge Panel</option>
+                                        <option value="Bus Shelter">Bus Shelter</option>
+                                        <option value="Mobile Ad">Mobile Truck / Bus Branding</option>
+                                        <option value="Flyer/Poster">Flyer / Poster</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Asset Size</label>
+                                    <select name="size" id="apply-size" onchange="toggleCustomSize()" class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                        <option value="">Select Standard Size</option>
+                                        <option value="A5 (0.03 sqm)">A5 Paper Size</option>
                                         <option value="A4 (0.06 sqm)">A4 Paper Size</option>
+                                        <option value="A3 (0.12 sqm)">A3 Paper Size</option>
                                         <option value="4-Sheet (1.5 sqm)">4-Sheet (1m x 1.5m)</option>
                                         <option value="6-Sheet (2.16 sqm)">6-Sheet (1.2m x 1.8m)</option>
                                         <option value="12-Sheet (4.5 sqm)">12-Sheet (3m x 1.5m)</option>
@@ -296,50 +417,95 @@
                                         <option value="Gantry (80 sqm)">Gantry (20m x 4m)</option>
                                         <option value="Custom Size">Custom Size (Enter Dimensions)</option>
                                     </select>
+                                    
+                                    <!-- Custom Size Inputs -->
+                                    <div id="custom-size-container" class="hidden mt-3 grid grid-cols-2 gap-2 bg-white p-2 rounded border border-gray-200">
+                                        <div>
+                                            <span class="text-[10px] uppercase font-bold text-gray-400">Width (m)</span>
+                                            <input id="custom-width" type="number" step="0.1" class="w-full border-b border-gray-300 focus:border-ng-green outline-none" oninput="calculateFee()">
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] uppercase font-bold text-gray-400">Height (m)</span>
+                                            <input id="custom-height" type="number" step="0.1" class="w-full border-b border-gray-300 focus:border-ng-green outline-none" oninput="calculateFee()">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div id="custom-size-container" class="hidden grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                    <input id="custom-width" placeholder="Width (m)" type="number" step="0.1" class="w-full p-2 border rounded" oninput="calculateFee()">
-                                    <input id="custom-height" placeholder="Height (m)" type="number" step="0.1" class="w-full p-2 border rounded" oninput="calculateFee()">
+
+                                <div id="duration-container">
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Duration</label>
+                                    <div class="flex gap-2">
+                                        <input type="number" name="duration_val" min="1" value="1" class="form-input w-24 p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                        <select name="duration_unit" class="form-input flex-grow p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                            <option value="Months">Months</option>
+                                            <option value="Weeks">Weeks</option>
+                                            <option value="Days">Days</option>
+                                            <option value="Years">Years</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">State Jurisdiction</label>
-                                <select name="state" id="apply-state" onchange="calculateFee()" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none">
-                                    <!-- Populated by JS -->
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Local Government Area (LGA)</label>
-                                <input type="text" name="lga" placeholder="e.g. Ikeja, AMAC, Port Harcourt" required class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition-all">
                             </div>
                         </div>
 
-                        <!-- Fee Display -->
-                        <div class="bg-green-50 border border-green-200 p-6 rounded-xl flex flex-col md:flex-row justify-between items-center shadow-sm">
-                            <div>
-                                <span class="block text-sm font-bold text-gray-600 uppercase tracking-wider">Estimated Regulatory Fee</span>
-                                <span class="text-xs text-gray-500 mt-1">Based on location rate x area x industry factor</span>
-                            </div>
-                            <span id="estimated-fee" class="text-3xl font-black text-ng-green mt-2 md:mt-0">₦0.00</span>
-                        </div>
-
-                        <div class="pt-4">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Visual Concept / Artwork</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
-                                <div class="bg-white p-3 rounded-full shadow-sm inline-block mb-3 group-hover:scale-110 transition-transform">
-                                    <svg class="w-8 h-8 text-ng-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        <!-- SECTION 3: LOCATION & UPLOAD -->
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                            <h4 class="text-sm font-bold text-gray-500 uppercase border-b border-gray-200 pb-2 mb-4 flex items-center">
+                                <span class="bg-ng-green text-white w-5 h-5 rounded-full flex items-center justify-center text-xs mr-2">3</span> Location & Artwork
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">State Jurisdiction</label>
+                                    <select name="state" id="apply-state" onchange="handleStateChange()" class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                        <!-- Populated by JS -->
+                                    </select>
                                 </div>
-                                <p class="text-sm text-gray-500 font-medium">Click to upload or drag and drop</p>
-                                <p class="text-xs text-gray-400 mt-1">SVG, PNG, JPG or PDF (max. 10MB)</p>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Local Government Area (LGA)</label>
+                                    <select name="lga" id="apply-lga" class="form-input w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                                        <option value="">Select State First</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Upload Visual Concept / Artwork</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-white hover:bg-gray-50 transition-colors cursor-pointer group relative">
+                                        <input type="file" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                        <div class="bg-gray-100 p-3 rounded-full shadow-sm inline-block mb-3 group-hover:scale-110 transition-transform">
+                                            <svg class="w-8 h-8 text-ng-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                        </div>
+                                        <p class="text-sm text-gray-500 font-medium">Click to upload multiple files or drag and drop</p>
+                                        <p class="text-xs text-gray-400 mt-1">Supports JPG, PNG, PDF, AI (Max 25MB)</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex justify-end pt-6 border-t border-gray-100">
-                            <button type="button" onclick="window.switchTab('dashboard')" class="text-gray-500 font-bold px-6 py-3 mr-4 hover:text-gray-700">Cancel</button>
-                            <button type="submit" class="bg-ng-green text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 hover:shadow-xl transition-all transform hover:-translate-y-0.5">Submit Application</button>
+                        <!-- FEE CALCULATOR DISPLAY -->
+                        <div class="bg-white border-2 border-green-100 p-6 rounded-xl shadow-lg relative overflow-hidden">
+                             <div class="absolute right-0 top-0 opacity-5 w-48 h-48 transform translate-x-10 -translate-y-10">
+                                <svg fill="currentColor" viewBox="0 0 24 24" class="text-ng-green w-full h-full"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.47.33 2.62 1.26 2.94 3.03h-1.97c-.21-.84-.98-1.31-2.02-1.31-1.11 0-1.77.53-1.77 1.38 0 .73.39 1.41 2.34 1.87 2.93.7 4.54 1.76 4.54 3.98 0 1.95-1.53 3.11-3.29 3.49z"/></svg>
+                            </div>
+                            <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">Cost Breakdown (Estimated)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase">ARCON Vetting Fee</p>
+                                    <p id="fee-arcon" class="text-lg font-bold text-gray-700">₦0.00</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase">State Advertisement Tax</p>
+                                    <p id="fee-tax" class="text-lg font-bold text-gray-700">₦0.00</p>
+                                </div>
+                                <div class="border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
+                                    <p class="text-xs text-ng-green font-bold uppercase">Total Payable</p>
+                                    <p id="fee-total" class="text-3xl font-black text-ng-green">₦0.00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-6 border-t border-gray-200 gap-4">
+                            <button type="button" onclick="window.switchTab('dashboard')" class="text-gray-500 font-bold px-6 py-3 hover:text-gray-800 transition">Cancel</button>
+                            <button type="submit" class="bg-ng-green text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Submit Application
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -354,7 +520,7 @@
                     </div>
                     <div class="flex space-x-3">
                         <div class="relative">
-                            <input type="text" placeholder="Search..." class="pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-green-500 outline-none w-64">
+                            <input type="text" placeholder="Search..." class="pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-green-500 outline-none w-64 shadow-sm">
                             <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </div>
                         <button class="px-4 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 font-medium text-gray-700 shadow-sm">Filter</button>
@@ -464,11 +630,14 @@
         </div>
     </div>
 
-    <!-- Modal for Certificate (Printable) -->
-    <div id="certificate-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in">
-        <div class="bg-white shadow-2xl w-full max-w-3xl relative animate-slide-in rounded-sm">
-            <button onclick="document.getElementById('certificate-modal').classList.add('hidden')" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 no-print z-50 bg-white rounded-full p-2 shadow-sm border transition-all">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <!-- Modal for Certificate (Printable) - FIXED CLOSE ISSUE -->
+    <div id="certificate-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white shadow-2xl w-full max-w-3xl relative animate-slide-in rounded-sm my-8">
+            <!-- Close Button with higher z-index and explicit positioning -->
+            <button onclick="closeCertificate()" class="absolute top-4 right-4 text-gray-500 hover:text-red-600 bg-white rounded-full p-2 shadow-lg border border-gray-200 transition-all z-[70] group cursor-pointer">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
             <div id="certificate-content"></div>
         </div>
@@ -476,24 +645,26 @@
 
     <!-- JS Logic -->
     <script>
-        // --- Constants for Calculation ---
-        const STATE_RATES = {
-            'Abuja FCT': 500,
-            'Lagos': 650,
-            'default': 400
-        };
-
+        // --- Constants & Data ---
+        const STATE_RATES = { 'Abuja FCT': 500, 'Lagos': 650, 'Rivers': 550, 'Kano': 450, 'default': 350 };
+        const STATE_TAXES = { 'Abuja FCT': 50000, 'Lagos': 100000, 'Rivers': 75000, 'default': 30000 };
+        
         const INDUSTRY_MULTIPLIERS = {
             'Election Campaign': 1.5,
             'New Product Launch': 1.2,
             'Corporate/Company': 1.0,
             'SME/Small Business': 0.8,
-            'Religious/NGO': 0.5,
+            'Religious': 0.5,
+            'Wedding/Social': 0.4,
+            'Obituary': 0.3,
+            'NGO/Public Service': 0.2,
             'default': 1.0
         };
 
         const STANDARD_SIZES = {
-            'A4 (0.06 sqm)': { area: 0.06237 }, // 0.21 x 0.297
+            'A5 (0.03 sqm)': { area: 0.031 },
+            'A4 (0.06 sqm)': { area: 0.062 },
+            'A3 (0.12 sqm)': { area: 0.125 },
             '4-Sheet (1.5 sqm)': { area: 1.5 },
             '6-Sheet (2.16 sqm)': { area: 2.16 },
             '12-Sheet (4.5 sqm)': { area: 4.5 },
@@ -505,50 +676,34 @@
             'Custom Size': null
         };
 
-        // --- Mock Data: Billboards (Verification) ---
+        const MOCK_LGAS = {
+            'Lagos': ['Ikeja', 'Eti-Osa', 'Lagos Island', 'Surulere', 'Ikorodu'],
+            'Abuja FCT': ['AMAC', 'Bwari', 'Gwagwalada', 'Kuje', 'Kwali', 'Abaji'],
+            'Rivers': ['Port Harcourt', 'Obio-Akpor', 'Eleme', 'Ikwerre'],
+            'Kano': ['Kano Municipal', 'Fagge', 'Dala', 'Gwale', 'Tarauni'],
+            'default': ['Central', 'North', 'South', 'East', 'West']
+        };
+
+        const NIGERIAN_STATES = ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Abuja FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"];
+
+        // --- Mock Databases ---
         const mockBillboards = [
-            { 
-                id: 'RV-RCCG-001', 
-                title: 'Church Program', 
-                status: 'Approved', 
-                location: { state: 'Abuja FCT', lga: 'Municipal Area Council', lat: 8.9754, lng: 7.3598 }, 
-                expiry: '2025-06-12', 
-                type: 'Signboard', 
-                details: { 
-                    purpose: 'Church Program', 
-                    duration: '4 Weeks', 
-                    agent: 'Samuel Adamu', 
-                    sponsor: 'RCCG Lugbe', 
-                    specificLocation: 'Lugbe Round About',
-                    size: '2ft x 4ft',
-                    tax: 'N200 Paid',
-                    fees: 'N500 Paid'
-                } 
-            },
-            { id: 'RV-LAG-001', title: 'Glo Unlimited Data', status: 'Approved', location: { state: 'Lagos', lga: 'Ikeja', lat: 6.6018, lng: 3.3515 }, expiry: '2026-11-01', type: 'LED Gantry', details: { purpose: 'Product Awareness', duration: '12 Months', agent: 'MediaReach OMD', sponsor: 'Globacom', specificLocation: 'Ikeja Underbridge', size: '20m x 4m', tax: 'N500,000 Paid', fees: 'N1.5M Paid' } },
-            { id: 'RV-FCT-042', title: 'Dangote Cement Promo', status: 'Pending', location: { state: 'Abuja FCT', lga: 'Municipal Area Council', lat: 9.0765, lng: 7.3986 }, expiry: '2025-05-15', type: 'Unipole', details: { purpose: 'Sales Promo', duration: '6 Months', agent: 'Insight Publicis', sponsor: 'Dangote Group', specificLocation: 'Berger Junction', size: '14m x 3m', tax: 'Pending', fees: 'N850,000 Pending' } },
-            { id: 'RV-RIV-089', title: 'Political Campaign 2027', status: 'Expired', location: { state: 'Rivers', lga: 'Port Harcourt', lat: 4.8156, lng: 7.0498 }, expiry: '2023-02-20', type: 'Billboard', details: { purpose: 'Campaign', duration: '3 Months', agent: 'Independent', sponsor: 'Party X', specificLocation: 'Aba Road', size: '10m x 5m', tax: 'Overdue', fees: 'Paid' } },
-            { id: 'RV-KAD-112', title: 'Access Bank Loan', status: 'Approved', location: { state: 'Kaduna', lga: 'Kaduna North', lat: 10.5105, lng: 7.4165 }, expiry: '2026-08-10', type: 'Lamp Post', details: { purpose: 'Service Ad', duration: '1 Year', agent: 'Algorithm Media', sponsor: 'Access Bank', specificLocation: 'Ahmadu Bello Way', size: '1m x 2m', tax: 'Paid', fees: 'N200,000 Paid' } },
+            { id: 'RV-RCCG-001', title: 'Church Program', status: 'Approved', location: { state: 'Abuja FCT', lga: 'AMAC', lat: 8.9754, lng: 7.3598 }, expiry: '2025-06-12', type: 'Signboard', details: { purpose: 'Religious', duration: '4 Weeks', agent: 'Samuel Adamu', sponsor: 'RCCG Lugbe', specificLocation: 'Lugbe Round About', size: '2ft x 4ft', tax: 'Paid', fees: 'Paid' } },
+            { id: 'RV-LAG-001', title: 'Glo Unlimited Data', status: 'Approved', location: { state: 'Lagos', lga: 'Ikeja', lat: 6.6018, lng: 3.3515 }, expiry: '2026-11-01', type: 'LED Gantry', details: { purpose: 'Product Awareness', duration: '12 Months', agent: 'MediaReach OMD', sponsor: 'Globacom', specificLocation: 'Ikeja Underbridge', size: '20m x 4m', tax: 'Paid', fees: 'Paid' } },
+            { id: 'RV-FCT-042', title: 'Dangote Cement Promo', status: 'Pending', location: { state: 'Abuja FCT', lga: 'AMAC', lat: 9.0765, lng: 7.3986 }, expiry: '2025-05-15', type: 'Unipole', details: { purpose: 'Sales Promo', duration: '6 Months', agent: 'Insight Publicis', sponsor: 'Dangote Group', specificLocation: 'Berger Junction', size: '14m x 3m', tax: 'Pending', fees: 'Pending' } },
         ];
 
-        // --- Mock Data: Applications ---
         const mockApplications = [
-            { id: 'APP-2025-001', applicant: 'Zenith Bank PLC', type: 'Digital Billboard', state: 'Lagos', date: '2025-05-10', status: 'Pending', details: { lga: 'Victoria Island', duration: '12 Months', fees: 'N2,500,000', agent: 'In-house', sponsor: 'Zenith Bank', purpose: 'Brand Awareness', specificLocation: 'Adetokunbo Ademola', size: 'Digital 12x6m', tax: 'Pending' } },
-            { id: 'APP-2025-002', applicant: 'MTN Nigeria', type: 'Street Lamp Post', state: 'Abuja FCT', date: '2025-05-11', status: 'Queried', details: { lga: 'Wuse II', duration: '6 Months', fees: 'N800,000', queryReason: 'Incorrect dimensions provided', agent: 'Yellow Media', sponsor: 'MTN', purpose: 'Data Plan', specificLocation: 'Aminu Kano Cresc', size: 'Standard', tax: 'N/A' } },
-            { id: 'APP-2025-003', applicant: 'Guinness Nigeria', type: 'Unipole', state: 'Lagos', date: '2025-05-09', status: 'Approved', details: { lga: 'Ikeja', duration: '24 Months', fees: 'N4,000,000', agent: 'MediaReach', sponsor: 'Guinness', purpose: 'Product Launch', specificLocation: 'Allen Avenue', size: '15m x 4m', tax: 'Paid' } },
-             { id: 'APP-RCCG-001', applicant: 'Samuel Adamu (RCCG)', type: 'Signboard', state: 'Abuja FCT', date: '2025-05-01', status: 'Approved', details: { lga: 'Municipal Area Council', duration: '4 Weeks', fees: 'N500 Paid', agent: 'Samuel Adamu', sponsor: 'RCCG Lugbe', purpose: 'Church Program', specificLocation: 'Lugbe Round About', size: '2ft x 4ft', tax: 'N200 Paid' } }
+            { id: 'APP-2025-001', applicant: 'Zenith Bank PLC', type: 'Digital Billboard', state: 'Lagos', date: '2025-05-10', status: 'Pending', details: { lga: 'Victoria Island', duration: '12 Months', fees: 'N2,500,000', agent: 'In-house', sponsor: 'Zenith Bank', purpose: 'Corporate', specificLocation: 'Adetokunbo Ademola', size: 'Digital 12x6m', tax: 'Pending' } },
+            { id: 'APP-2025-002', applicant: 'MTN Nigeria', type: 'Street Lamp Post', state: 'Abuja FCT', date: '2025-05-11', status: 'Queried', details: { lga: 'Wuse II', duration: '6 Months', fees: 'N800,000', queryReason: 'Incorrect dimensions provided', agent: 'Yellow Media', sponsor: 'MTN', purpose: 'New Product', specificLocation: 'Aminu Kano Cresc', size: 'Standard', tax: 'N/A' } },
+             { id: 'APP-RCCG-001', applicant: 'Samuel Adamu (RCCG)', type: 'Signboard', state: 'Abuja FCT', date: '2025-05-01', status: 'Approved', details: { lga: 'AMAC', duration: '4 Weeks', fees: 'N500 Paid', agent: 'Samuel Adamu', sponsor: 'RCCG Lugbe', purpose: 'Religious', specificLocation: 'Lugbe Round About', size: '2ft x 4ft', tax: 'Paid' } }
         ];
 
-        // --- Mock Data: Revenue ---
         const mockRevenue = [
             { id: 'TRX-99821', date: '2025-05-01', agent: 'MediaReach OMD', amount: 4500000, type: 'Annual Renewal', status: 'Cleared' },
             { id: 'TRX-99822', date: '2025-05-02', agent: 'Insight Publicis', amount: 850000, type: 'New Application', status: 'Pending' },
             { id: 'TRX-99823', date: '2025-05-03', agent: 'Starcom Media', amount: 1200000, type: 'Penalty Fee', status: 'Cleared' },
-            { id: 'TRX-99824', date: '2025-05-04', agent: 'Algorithm Media', amount: 200000, type: 'Verification Fee', status: 'Cleared' },
-            { id: 'TRX-99825', date: '2025-05-04', agent: 'X3M Ideas', amount: 3500000, type: 'Digital License', status: 'Failed' },
         ];
-
-        const NIGERIAN_STATES = ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Abuja FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"];
 
         let mapInstance = null;
         let markers = [];
@@ -563,14 +718,16 @@
             
             updateDashboardStats();
             initCharts();
-            populateFilters();
+            populateStates();
             renderRevenueTable(); 
             renderApplicationsTable();
+            startSocialProof();
             
+            // Initial view
             window.switchTab('dashboard'); 
         }
 
-        // --- Navigation Logic ---
+        // --- Logic: Navigation & UI ---
         window.switchTab = (tabId) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(el => {
@@ -578,7 +735,11 @@
                 el.classList.add('text-green-50', 'hover:bg-white/10', 'hover:text-white', 'border-transparent');
             });
 
-            document.getElementById(`${tabId}-view`).classList.remove('hidden');
+            const activeSection = document.getElementById(`${tabId}-view`);
+            if(activeSection) {
+                activeSection.classList.remove('hidden');
+                activeSection.classList.add('animate-slide-up'); // Re-trigger animation
+            }
             
             const navItem = document.getElementById(`nav-${tabId}`);
             if(navItem) {
@@ -586,30 +747,253 @@
                 navItem.classList.add('bg-white/10', 'text-white', 'border-l-4', 'border-white', 'backdrop-blur-sm');
             }
 
-            if (tabId === 'verification') {
-                setTimeout(() => { window.filterAndRenderBillboards(); }, 100);
-            }
+            if (tabId === 'verification') setTimeout(() => window.filterAndRenderBillboards(), 100);
         };
 
         window.changeView = (mode) => {
             document.getElementById('view-toggle').value = mode;
-            
-            // Update buttons visually
             ['map', 'list', 'grid'].forEach(m => {
                  const btn = document.getElementById(`btn-${m}`);
                  if(m === mode) {
-                     btn.classList.remove('text-gray-500', 'hover:text-gray-700', 'bg-transparent');
+                     btn.classList.remove('text-gray-500', 'bg-transparent');
                      btn.classList.add('bg-white', 'text-gray-800', 'shadow-sm');
                  } else {
-                     btn.classList.add('text-gray-500', 'hover:text-gray-700', 'bg-transparent');
+                     btn.classList.add('text-gray-500', 'bg-transparent');
                      btn.classList.remove('bg-white', 'text-gray-800', 'shadow-sm');
                  }
             });
-
             window.filterAndRenderBillboards();
         }
 
-        // --- Dashboard Stats Logic ---
+        // --- Logic: Social Proof Toast ---
+        const socialEvents = [
+            "Dangote Group just renewed a license in Lagos",
+            "RCCG applied for a crusade banner in Abuja",
+            "MTN Nigeria paid ₦2.5M for verification",
+            "Airtel just registered a new Unipole in Kano",
+            "Guinness Nigeria approved for digital board",
+            "New Political Campaign registered in Rivers",
+            "First Bank PLC renewed 120 assets",
+            "Globacom just paid Lagos State Tax"
+        ];
+
+        function startSocialProof() {
+            setInterval(() => {
+                const text = socialEvents[Math.floor(Math.random() * socialEvents.length)];
+                showToast(text, 'success');
+            }, 8000); // Every 8 seconds
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div class="bg-green-100 rounded-full p-1">
+                    <svg class="w-5 h-5 text-ng-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase">Just Now</p>
+                    <p class="text-sm font-medium text-gray-800">${message}</p>
+                </div>
+            `;
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Remove
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+        }
+
+        // --- Logic: Custom Modal ---
+        function showMsgModal(title, message, isSuccess = true) {
+            const modal = document.getElementById('msg-modal');
+            document.getElementById('msg-title').innerText = title;
+            document.getElementById('msg-body').innerText = message;
+            
+            const header = document.getElementById('msg-header');
+            const iconContainer = document.getElementById('msg-icon');
+            
+            if(isSuccess) {
+                header.className = 'p-4 bg-ng-green text-white flex justify-between items-center';
+                iconContainer.innerHTML = '<div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-ng-green"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>';
+            } else {
+                header.className = 'p-4 bg-red-600 text-white flex justify-between items-center';
+                iconContainer.innerHTML = '<div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        window.closeMsgModal = () => document.getElementById('msg-modal').classList.add('hidden');
+
+        // --- Logic: Application Form ---
+        function populateStates() {
+            const selects = [document.getElementById('state-filter'), document.getElementById('apply-state')];
+            selects.forEach(select => {
+                if(select) {
+                    select.innerHTML = select.id === 'state-filter' ? '<option value="">All States</option>' : '<option value="">Select State</option>';
+                    NIGERIAN_STATES.sort().forEach(state => {
+                        const opt = document.createElement('option');
+                        opt.value = state;
+                        opt.innerText = state;
+                        select.appendChild(opt);
+                    });
+                }
+            });
+        }
+
+        window.handleStateChange = () => {
+            const state = document.getElementById('apply-state').value;
+            const lgaSelect = document.getElementById('apply-lga');
+            
+            lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+            
+            if(state) {
+                const lgas = MOCK_LGAS[state] || MOCK_LGAS['default'];
+                lgas.forEach(lga => {
+                    const opt = document.createElement('option');
+                    opt.value = lga;
+                    opt.innerText = lga;
+                    lgaSelect.appendChild(opt);
+                });
+            }
+            calculateFee();
+        };
+
+        window.toggleOwnerInput = () => {
+            const select = document.getElementById('owner-select');
+            const input = document.getElementById('new-owner-input');
+            if(select.value === 'New') {
+                input.classList.remove('hidden');
+                input.required = true;
+                select.classList.add('rounded-l-lg'); // Restore style
+            } else {
+                input.classList.add('hidden');
+                input.required = false;
+            }
+        };
+
+        window.toggleCustomSize = () => {
+            const sizeSelect = document.getElementById('apply-size');
+            const customContainer = document.getElementById('custom-size-container');
+            const durationContainer = document.getElementById('duration-container');
+            
+            // Hide duration for small flyers/posters logic could go here, but for now let's keep it simple
+            if (sizeSelect.value.includes('A5') || sizeSelect.value.includes('A4')) {
+               // Logic to simplify form for small items if needed
+            }
+
+            if (sizeSelect.value === 'Custom Size') {
+                customContainer.classList.remove('hidden');
+                customContainer.classList.add('grid');
+            } else {
+                customContainer.classList.add('hidden');
+                customContainer.classList.remove('grid');
+            }
+            calculateFee();
+        };
+
+        window.calculateFee = () => {
+            const state = document.getElementById('apply-state').value;
+            const industry = document.getElementById('apply-industry').value;
+            const sizeVal = document.getElementById('apply-size').value;
+            
+            // Elements
+            const arconDisplay = document.getElementById('fee-arcon');
+            const taxDisplay = document.getElementById('fee-tax');
+            const totalDisplay = document.getElementById('fee-total');
+
+            if (!state || !industry || !sizeVal) {
+                arconDisplay.innerText = "₦0.00";
+                taxDisplay.innerText = "₦0.00";
+                totalDisplay.innerText = "₦0.00";
+                return 0;
+            }
+
+            // Rates
+            let rate = STATE_RATES[state] || STATE_RATES['default'];
+            let tax = STATE_TAXES[state] || STATE_TAXES['default'];
+            let multiplier = INDUSTRY_MULTIPLIERS[industry] || 1.0;
+
+            // Area Calculation
+            let area = 0;
+            if (sizeVal === 'Custom Size') {
+                const w = parseFloat(document.getElementById('custom-width').value) || 0;
+                const h = parseFloat(document.getElementById('custom-height').value) || 0;
+                area = w * h;
+            } else {
+                area = STANDARD_SIZES[sizeVal]?.area || 0;
+            }
+
+            // Calculation
+            const arconFee = rate * area * 1000 * multiplier; // Mock formula: Rate * Area * 1000 multiplier base
+            const finalTax = tax; // Flat tax per asset
+            const total = Math.round(arconFee + finalTax);
+
+            // Update UI
+            const fmt = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' });
+            arconDisplay.innerText = fmt.format(arconFee);
+            taxDisplay.innerText = fmt.format(finalTax);
+            totalDisplay.innerText = fmt.format(total);
+            
+            return total;
+        };
+
+        window.submitApplication = (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const totalFee = calculateFee(); // Recalculate to be safe
+            
+            if(totalFee <= 0) {
+                showMsgModal("Incomplete Data", "Please fill all fields to calculate the fee.", false);
+                return;
+            }
+
+            const owner = form.owner.value === 'New' ? form.new_owner.value : form.owner.value;
+            const feeString = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(totalFee);
+
+            const newApp = {
+                id: `APP-2025-${Math.floor(Math.random() * 9000) + 1000}`,
+                applicant: form.applicant.value,
+                type: form.type.value,
+                state: form.state.value,
+                date: new Date().toISOString().split('T')[0],
+                status: 'Pending',
+                details: {
+                    lga: form.lga.value,
+                    duration: `${form.duration_val.value} ${form.duration_unit.value}`,
+                    fees: feeString,
+                    agent: owner,
+                    sponsor: form.sponsor.value,
+                    purpose: form.industry.value,
+                    size: form.size.value === 'Custom Size' 
+                          ? `${form.querySelector('#custom-width').value}m x ${form.querySelector('#custom-height').value}m`
+                          : form.size.value,
+                    specificLocation: form.lga.value, // Simplified
+                    tax: 'Pending'
+                }
+            };
+            
+            window.APPLICATIONS_DATA.unshift(newApp);
+            showMsgModal("Application Submitted!", `Your application ID is ${newApp.id}. Please proceed to payment of ${feeString}.`, true);
+            form.reset();
+            
+            // Reset complex fields
+            document.getElementById('fee-total').innerText = "₦0.00";
+            document.getElementById('custom-size-container').classList.add('hidden');
+            document.getElementById('new-owner-input').classList.add('hidden');
+            
+            renderApplicationsTable(); 
+            updateDashboardStats();
+            window.switchTab('app-management'); 
+        };
+
+        // --- Dashboard & Charts ---
         function updateDashboardStats() {
             const totalRevenue = window.REVENUE_DATA.reduce((sum, item) => item.status === 'Cleared' ? sum + item.amount : sum, 0);
             const complianceRate = Math.round((window.BILLBOARD_DATA.filter(b => b.status === 'Approved').length / window.BILLBOARD_DATA.length) * 100);
@@ -623,7 +1007,6 @@
             document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-GB', dateOptions);
         }
 
-        // --- Charts Initialization ---
         function initCharts() {
             const ctxRev = document.getElementById('revenueChart').getContext('2d');
             if (revenueChartInstance) revenueChartInstance.destroy();
@@ -667,13 +1050,11 @@
             });
         }
 
-        // --- Verification/Map Logic ---
+        // --- Verification Map ---
         window.filterAndRenderBillboards = () => {
             const listContainer = document.getElementById('billboard-list');
             const mapContainer = document.getElementById('map-view-container');
             const viewMode = document.getElementById('view-toggle').value;
-            
-            // Simple Filter Logic (State)
             const stateFilter = document.getElementById('state-filter').value;
             const searchFilter = document.getElementById('search-input').value.toLowerCase();
             
@@ -720,7 +1101,7 @@
                 listContainer.className = viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5' : 'flex flex-col space-y-3';
                 
                 if (filteredData.length === 0) {
-                    listContainer.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400 bg-white rounded-xl border border-dashed"><p>No assets found matching your criteria.</p></div>`;
+                    listContainer.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400 bg-white rounded-xl border border-dashed"><p>No assets found.</p></div>`;
                     return;
                 }
 
@@ -731,12 +1112,8 @@
                     else if (bb.status === 'Pending') { statusClass = 'text-yellow-700 border-yellow-200'; statusBg = 'bg-yellow-50'; }
                     else { statusClass = 'text-red-700 border-red-200'; statusBg = 'bg-red-50'; }
 
-                    const cardClass = viewMode === 'grid' 
-                        ? `bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group relative overflow-hidden`
-                        : `bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group`;
-
                     if (viewMode === 'grid') {
-                        el.className = cardClass;
+                        el.className = `bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group relative overflow-hidden`;
                         el.innerHTML = `
                             <div class="absolute top-0 right-0 w-16 h-16 bg-${bb.status === 'Approved' ? 'green' : (bb.status === 'Pending' ? 'yellow' : 'red')}-500 opacity-5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150"></div>
                             <div class="flex justify-between items-start mb-3 relative z-10">
@@ -744,15 +1121,14 @@
                                 <span class="text-[10px] text-gray-400 font-mono">${bb.id}</span>
                             </div>
                             <h4 class="font-bold text-gray-800 text-lg mb-1 group-hover:text-ng-green transition-colors truncate">${bb.title}</h4>
-                            <p class="text-xs text-gray-500 mb-4 flex items-center"><svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>${bb.location.lga}, ${bb.location.state}</p>
-                            
+                            <p class="text-xs text-gray-500 mb-4 flex items-center">${bb.location.lga}, ${bb.location.state}</p>
                             <div class="grid grid-cols-2 gap-2 pt-3 border-t border-gray-50 text-xs">
                                 <div><span class="text-gray-400 block text-[10px] uppercase">Agent</span><span class="font-medium text-gray-700 truncate block">${bb.details.agent}</span></div>
                                 <div><span class="text-gray-400 block text-[10px] uppercase">Type</span><span class="font-medium text-gray-700 truncate block">${bb.type}</span></div>
                             </div>
                         `;
                     } else {
-                        el.className = cardClass;
+                        el.className = `bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex justify-between items-center group`;
                         el.innerHTML = `
                             <div class="flex items-center space-x-4">
                                 <div class="w-10 h-10 rounded-full ${statusBg} flex items-center justify-center font-bold text-xs ${statusClass.split(' ')[0]}">${bb.type.substring(0,2)}</div>
@@ -761,13 +1137,7 @@
                                     <p class="text-xs text-gray-500">${bb.id} • ${bb.location.lga}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-6 text-right">
-                                <div class="hidden md:block">
-                                    <p class="text-xs text-gray-400 uppercase">Agent</p>
-                                    <p class="text-sm font-medium text-gray-700">${bb.details.agent}</p>
-                                </div>
-                                <span class="px-3 py-1 text-xs font-bold uppercase rounded-full ${statusBg} ${statusClass}">${bb.status}</span>
-                            </div>
+                            <span class="px-3 py-1 text-xs font-bold uppercase rounded-full ${statusBg} ${statusClass}">${bb.status}</span>
                         `;
                     }
                     el.onclick = () => window.openDetailModal(bb);
@@ -776,26 +1146,11 @@
             }
         };
 
-        function populateFilters() {
-            const selects = [document.getElementById('state-filter'), document.getElementById('apply-state')];
-            selects.forEach(select => {
-                if(select) {
-                    select.innerHTML = select.id === 'state-filter' ? '<option value="">All States</option>' : '';
-                    NIGERIAN_STATES.sort().forEach(state => {
-                        const opt = document.createElement('option');
-                        opt.value = state;
-                        opt.innerText = state;
-                        select.appendChild(opt);
-                    });
-                }
-            });
-        }
-        
+        // --- Render Tables ---
         function renderRevenueTable() {
             const revTable = document.getElementById('revenue-table-body');
             if (!revTable) return;
             revTable.innerHTML = ''; 
-
             window.REVENUE_DATA.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors';
@@ -811,7 +1166,6 @@
             });
         }
 
-        // --- Application Management Logic ---
         function renderApplicationsTable() {
             const appTable = document.getElementById('applications-table-body');
             if (!appTable) return;
@@ -854,146 +1208,42 @@
         }
 
         window.manageApplication = (id, action) => {
+            const app = window.APPLICATIONS_DATA.find(a => a.id === id);
+            if(!app) return;
+
             if(action === 'approve') {
-                const app = window.APPLICATIONS_DATA.find(a => a.id === id);
-                if(app) {
-                    app.status = 'Approved';
-                    renderApplicationsTable();
-                    alert(`Application ${id} Approved! You can now generate the certificate.`);
-                    updateDashboardStats(); 
-                }
+                app.status = 'Approved';
+                renderApplicationsTable();
+                showMsgModal("Approved", `Application ${id} has been approved successfully. Certificate generated.`, true);
+                updateDashboardStats(); 
             } else if (action === 'query') {
                 const reason = prompt("Enter query reason:");
                 if(reason) {
-                    const app = window.APPLICATIONS_DATA.find(a => a.id === id);
-                    if(app) {
-                        app.status = 'Queried';
-                        app.details.queryReason = reason;
-                        renderApplicationsTable();
-                    }
+                    app.status = 'Queried';
+                    app.details.queryReason = reason;
+                    renderApplicationsTable();
                 }
             } else if (action === 'view') {
-                const app = window.APPLICATIONS_DATA.find(a => a.id === id);
                 alert(`Details for ${app.applicant}:\nType: ${app.type}\nLocation: ${app.details.lga}, ${app.state}\nFee: ${app.details.fees || '0'}`);
             }
         };
 
-        // --- Fee Calculation Logic ---
-        window.toggleCustomSize = () => {
-            const sizeSelect = document.getElementById('apply-size');
-            const customContainer = document.getElementById('custom-size-container');
-            if (sizeSelect.value === 'Custom Size') {
-                customContainer.classList.remove('hidden');
-                customContainer.classList.add('grid');
-            } else {
-                customContainer.classList.add('hidden');
-                customContainer.classList.remove('grid');
-            }
-            calculateFee();
+        // --- Certificate ---
+        window.closeCertificate = () => {
+             document.getElementById('certificate-modal').classList.add('hidden');
         };
 
-        window.calculateFee = () => {
-            const state = document.getElementById('apply-state').value;
-            const industry = document.getElementById('apply-industry').value;
-            const sizeVal = document.getElementById('apply-size').value;
-            const feeDisplay = document.getElementById('estimated-fee');
-
-            if (!state || !industry || !sizeVal) {
-                feeDisplay.innerText = "₦0.00";
-                return 0;
-            }
-
-            // 1. Determine State Rate
-            let rate = STATE_RATES['default'];
-            if (state === 'Abuja FCT') rate = STATE_RATES['Abuja FCT'];
-            else if (state === 'Lagos') rate = STATE_RATES['Lagos'];
-
-            // 2. Determine Industry Multiplier
-            const multiplier = INDUSTRY_MULTIPLIERS[industry] || 1.0;
-
-            // 3. Determine Area
-            let area = 0;
-            if (sizeVal === 'Custom Size') {
-                const w = parseFloat(document.getElementById('custom-width').value) || 0;
-                const h = parseFloat(document.getElementById('custom-height').value) || 0;
-                area = w * h;
-            } else {
-                area = STANDARD_SIZES[sizeVal]?.area || 0;
-            }
-
-            // 4. Calculate Total
-            const total = Math.round(rate * area * multiplier);
-            
-            // Format for display
-            feeDisplay.innerText = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(total);
-            return total;
-        };
-
-        window.submitApplication = (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const calculatedFee = window.calculateFee();
-            
-            // Formatted Fee String
-            const feeString = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(calculatedFee);
-
-            const newApp = {
-                id: `APP-2025-${Math.floor(Math.random() * 900) + 100}`,
-                applicant: form.applicant.value,
-                type: form.type.value,
-                state: form.state.value,
-                date: new Date().toISOString().split('T')[0],
-                status: 'Pending',
-                details: {
-                    lga: form.lga.value,
-                    duration: '12 Months',
-                    fees: feeString,
-                    agent: form.applicant.value,
-                    sponsor: form.applicant.value,
-                    purpose: form.industry.value, // Using Industry as Purpose
-                    size: form.size.value === 'Custom Size' 
-                          ? `${form.querySelector('#custom-width').value}m x ${form.querySelector('#custom-height').value}m`
-                          : form.size.value,
-                    specificLocation: form.lga.value,
-                    tax: 'Pending'
-                }
-            };
-            
-            window.APPLICATIONS_DATA.unshift(newApp); // Add to top
-            alert(`Application Submitted Successfully! Reference ID: ${newApp.id}\nEstimated Fee: ${feeString}`);
-            form.reset();
-            document.getElementById('estimated-fee').innerText = "₦0.00";
-            document.getElementById('custom-size-container').classList.add('hidden');
-            
-            renderApplicationsTable(); 
-            updateDashboardStats();
-            window.switchTab('app-management'); 
-        };
-
-        // --- Certificate Generation ---
         window.generateCertificate = (itemId) => {
-            // Check both lists (Applications and Billboards)
             let item = window.APPLICATIONS_DATA.find(a => a.id === itemId);
             if (!item) {
-                // If not in applications, check billboards (for existing approved assets)
                 const bb = window.BILLBOARD_DATA.find(b => b.id === itemId);
                 if(bb) {
                     item = {
                         id: bb.id,
-                        applicant: bb.details.agent, // Use Agent as primary name
+                        applicant: bb.details.agent,
                         type: bb.type,
                         state: bb.location.state,
-                        details: {
-                            lga: bb.location.lga,
-                            duration: bb.details.duration,
-                            agent: bb.details.agent,
-                            sponsor: bb.details.sponsor,
-                            purpose: bb.details.purpose,
-                            specificLocation: bb.details.specificLocation,
-                            size: bb.details.size,
-                            tax: bb.details.tax,
-                            fees: bb.details.fees
-                        }
+                        details: bb.details
                     };
                 }
             }
@@ -1003,7 +1253,6 @@
             const certModal = document.getElementById('certificate-modal');
             const certContent = document.getElementById('certificate-content');
             
-            // Generate QR Code
             const qrSvg = `
                 <svg class="w-full h-full text-black" fill="currentColor" viewBox="0 0 24 24">
                      <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 11h6v6H3v-6zm2 2v2h2v-2H5zm13-2h3v3h-3v-3zm0 3h-3v3h3v-3zm3 3h-3v3h3v-3zm-6-3h3v3h-3v-3zm3 3h3v3h-3v-3zm-3-6h3v3h-3v-3z"/>
@@ -1013,19 +1262,17 @@
 
             certContent.innerHTML = `
                 <div class="border-8 border-double border-ng-green p-10 bg-white relative shadow-2xl overflow-hidden">
-                    <!-- Background Watermark -->
                     <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none scale-150">
                         <svg class="w-full h-full text-ng-green" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                     </div>
                     
-                    <!-- Corner Ornaments -->
                     <div class="absolute top-0 left-0 w-24 h-24 border-t-4 border-l-4 border-gold m-2"></div>
                     <div class="absolute top-0 right-0 w-24 h-24 border-t-4 border-r-4 border-gold m-2"></div>
                     <div class="absolute bottom-0 left-0 w-24 h-24 border-b-4 border-l-4 border-gold m-2"></div>
                     <div class="absolute bottom-0 right-0 w-24 h-24 border-b-4 border-r-4 border-gold m-2"></div>
 
                     <div class="text-center mb-8 relative z-10">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" class="h-28 w-auto mx-auto mb-4 drop-shadow-sm" alt="Coat of Arms">
+                        <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-28 w-auto mx-auto mb-4 drop-shadow-sm rounded" alt="ARCON Logo">
                         <h1 class="text-3xl font-serif font-bold text-ng-green mb-1 tracking-wider">FEDERAL REPUBLIC OF NIGERIA</h1>
                         <h2 class="text-xl font-serif font-bold text-gray-800 uppercase tracking-widest text-sm">Advertising Regulatory Council of Nigeria</h2>
                         
@@ -1052,7 +1299,7 @@
                                     <p class="font-semibold text-gray-800 text-lg">${item.details.sponsor || 'N/A'}</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs text-gray-500 uppercase font-bold">Approving Agent</p>
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Approving Agent / Owner</p>
                                     <p class="font-semibold text-gray-800 text-lg">${item.details.agent || 'N/A'}</p>
                                 </div>
                                 
@@ -1103,13 +1350,9 @@
                             <p class="text-[10px] text-gray-500 uppercase mt-1">Date Issued: ${new Date().toLocaleDateString()}</p>
                         </div>
                     </div>
-                    
-                    <div class="mt-8 text-center text-[10px] text-gray-400 font-mono">
-                        System Generated ID: ${item.id} | Valid without physical seal | Verify at arcon.gov.ng/verify
-                    </div>
                 </div>
                 
-                <div class="mt-6 text-center no-print">
+                <div class="mt-6 text-center no-print pb-10">
                     <button onclick="window.print()" class="bg-ng-green text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 hover:shadow-xl transition-all flex items-center mx-auto gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Print Official Certificate
@@ -1121,7 +1364,6 @@
             certModal.classList.remove('hidden');
         };
 
-        // --- Common Modal Logic ---
         window.openDetailModal = (bb) => {
             const modal = document.getElementById('detail-modal');
             const content = document.getElementById('detail-content');
@@ -1132,7 +1374,7 @@
 
             content.innerHTML = `
                 <div class="text-center mb-6">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Coat_of_arms_of_Nigeria.svg" class="h-16 w-auto mx-auto mb-2" alt="Coat of Arms">
+                    <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-16 w-auto mx-auto mb-2 rounded" alt="ARCON Logo">
                     <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">Asset Verification</h3>
                     <p class="text-xs text-gray-400">Official Database Record</p>
                 </div>
@@ -1165,6 +1407,10 @@
                         <span class="text-gray-500">Sponsor</span>
                         <span class="font-semibold text-gray-900 text-right">${bb.details.sponsor}</span>
                     </div>
+                     <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Category</span>
+                        <span class="font-semibold text-gray-900 text-right">${bb.details.purpose}</span>
+                    </div>
                     <div class="flex justify-between border-b border-gray-100 pb-2">
                         <span class="text-gray-500">Regulatory Fees</span>
                         <span class="font-semibold text-gray-900 text-right">${bb.details.fees || 'Paid'}</span>
@@ -1173,7 +1419,7 @@
 
                 <div class="mt-6 flex gap-3">
                     <button onclick="generateCertificate('${bb.id}')" class="flex-1 bg-ng-green text-white py-2.5 rounded-lg font-bold shadow hover:bg-green-700 transition-colors">View Certificate</button>
-                    <button class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-bold hover:bg-gray-50 transition-colors">Download Report</button>
+                    <button onclick="document.getElementById('detail-modal').classList.add('hidden')" class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-bold hover:bg-gray-50 transition-colors">Close</button>
                 </div>
             `;
             modal.classList.remove('hidden');
