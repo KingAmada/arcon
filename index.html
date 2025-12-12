@@ -16,9 +16,10 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+ 
+<!-- ✅ QR Code Library (REAL QR generation) -->
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
 
-  <!-- ✅ QR Code Library (REAL QR generation) -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -1375,23 +1376,23 @@
     }
 
     async function generateQrAssets(text){
-      const optsSmall = { margin: 1, width: 140, color: { dark: '#111111', light: '#ffffff' } };
-      const optsBig   = { margin: 1, width: 1024, color: { dark: '#111111', light: '#ffffff' } };
+  const QR = window.QRCode; // be explicit
 
-      // Small (for certificate display)
-      const smallDataUrl = await QRCode.toDataURL(text, optsSmall);
+  if(!QR || typeof QR.toDataURL !== 'function'){
+    throw new Error("QR library not loaded. Check the <script src=...> for qrcode.");
+  }
 
-      // Big PNG (for printing)
-      const bigDataUrl = await QRCode.toDataURL(text, optsBig);
+  const optsSmall = { margin: 1, width: 140, color: { dark: '#111111', light: '#ffffff' } };
+  const optsBig   = { margin: 1, width: 1024, color: { dark: '#111111', light: '#ffffff' } };
 
-      // SVG
-      const svgString = await QRCode.toString(text, { type:'svg', margin:1, color:{dark:'#111111', light:'#ffffff'} });
+  const smallDataUrl = await QR.toDataURL(text, optsSmall);
+  const bigDataUrl   = await QR.toDataURL(text, optsBig);
+  const svgString    = await QR.toString(text, { type:'svg', margin:1, color:{dark:'#111111', light:'#ffffff'} });
 
-      // Store "last QR" as print-quality PNG + SVG
-      window.__lastQr = { text, pngDataUrl: bigDataUrl, svgString };
+  window.__lastQr = { text, pngDataUrl: bigDataUrl, svgString };
+  return { smallDataUrl, bigDataUrl, svgString };
+}
 
-      return { smallDataUrl, bigDataUrl, svgString };
-    }
 
     function downloadBlob(filename, blob){
       const url = URL.createObjectURL(blob);
@@ -1431,6 +1432,7 @@
     }
 
     window.generateCertificate = async (itemId) => {
+        try {
       let item = window.APPLICATIONS_DATA.find(a => a.id === itemId);
       if(!item){
         const bb = window.BILLBOARD_DATA.find(b => b.id === itemId);
@@ -1556,7 +1558,12 @@
         </div>
       `;
 
-      certModal.classList.remove('hidden');
+      certModal.classList.remove('hidden'); 
+
+       } catch (err) {
+    console.error(err);
+    showMsgModal("QR Error", "QR generator failed to load. Check your QRCode script tag (CDN).", false);
+  }
     };
 
     // Quick QR download from Approved Applications table
