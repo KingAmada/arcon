@@ -3,95 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
-  <title>IRMS — ARCON Integrated Regulatory Management System</title>
+  <title>IRMS — DG Portal</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- ✅ QR library that supports QRCode.toDataURL / toString -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
-  <!-- ✅ For invoice/receipt/certificate PNG export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <!-- Optional (DG dashboard chart) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
     html, body { font-family: Outfit, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .no-print { display: block; }
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white !important; }
-    }
-    .animate-fade-in { animation: fadeIn .15s ease-out; }
-    @keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
+    .no-print{display:block;}
+    @media print{ .no-print{display:none!important;} body{background:#fff!important;} }
   </style>
 
   <script>
-    // Tailwind theme helpers
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            "ng-green": "#0ea75a",
-            "ng-green-dark": "#0b7f45"
-          }
-        }
-      }
-    }
+    tailwind.config = { theme: { extend: { colors: { "ng-green":"#0ea75a", "ng-green-dark":"#0b7f45" } } } }
   </script>
 </head>
 
 <body class="bg-gray-50 text-gray-900">
-  <!-- Top bar -->
   <header class="no-print sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-2xl bg-gray-900 text-white grid place-items-center font-black">IR</div>
         <div>
           <div class="font-black tracking-tight">IRMS</div>
-          <div class="text-xs text-gray-500 -mt-0.5">ARCON Integrated Regulatory Management System</div>
+          <div class="text-xs text-gray-500 -mt-0.5">DG Portal</div>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <span id="portal-pill" class="px-3 py-1 rounded-full text-xs font-black border border-gray-200 bg-white">Portal: —</span>
-
-        <!-- quick portal switch (optional) -->
-        <div class="hidden md:flex items-center gap-2">
-          <button class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-300 hover:bg-gray-50" onclick="setPortalAndReload('advertiser')">Advertiser</button>
-          <button class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-300 hover:bg-gray-50" onclick="setPortalAndReload('staff')">Staff</button>
-          <button class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-300 hover:bg-gray-50" onclick="setPortalAndReload('dg')">DG</button>
-        </div>
-      </div>
+      <span class="px-3 py-1 rounded-full text-xs font-black border border-gray-200 bg-white">Portal: DG</span>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <!-- Sidebar -->
     <aside class="no-print lg:col-span-3">
       <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div class="p-4 border-b border-gray-200">
           <div class="font-black text-lg">Navigation</div>
-          <div class="text-xs text-gray-500">Menu changes per portal</div>
+          <div class="text-xs text-gray-500">DG access only</div>
         </div>
 
         <nav class="p-2 space-y-1">
-          <!-- DG -->
-          <a id="nav-dashboard" href="#" onclick="switchTab('dashboard')" class="nav-item block px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50">DG Overview Dashboard</a>
+          <a id="nav-dashboard" href="#" onclick="switchTab('dashboard')" class="nav-item block px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50">Overview Dashboard</a>
           <a id="nav-revenue" href="#" onclick="switchTab('revenue')" class="nav-item block px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50">Revenue & Projections</a>
-
-          <!-- Staff -->
-          <a id="nav-app-management" href="#" onclick="switchTab('app-management')" class="nav-item block px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50">Application Review</a>
-
-          <!-- Shared -->
           <a id="nav-verification" href="#" onclick="switchTab('verification')" class="nav-item block px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50">Verification Portal</a>
-
-          <!-- Advertiser -->
-          <a id="nav-apply" href="#" onclick="switchTab('apply')" class="nav-item block px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50">New License Application</a>
-          <a id="nav-status" href="#" onclick="switchTab('status')" class="nav-item block px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50">Application Status</a>
         </nav>
 
         <div class="p-4 border-t border-gray-200">
@@ -105,9 +61,8 @@
       </div>
     </aside>
 
-    <!-- Content -->
     <section class="lg:col-span-9 space-y-6">
-      <!-- DG DASHBOARD -->
+      <!-- DASHBOARD -->
       <section id="dashboard-view" class="view-section hidden space-y-6">
         <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
           <div class="flex flex-wrap items-end justify-between gap-4">
@@ -135,7 +90,7 @@
               <div id="stat-underreview" class="text-3xl font-black mt-1">0</div>
             </div>
             <div class="p-4 rounded-2xl border border-gray-200 bg-gray-50">
-              <div class="text-xs text-gray-500 font-bold">Approved (Verifiable)</div>
+              <div class="text-xs text-gray-500 font-bold">Approved</div>
               <div id="stat-approved" class="text-3xl font-black mt-1">0</div>
             </div>
           </div>
@@ -144,7 +99,7 @@
             <div class="border border-gray-200 rounded-2xl p-4">
               <div class="flex items-center justify-between">
                 <div class="font-black">Revenue Trend (Cleared)</div>
-                <div class="text-xs text-gray-500">Demo chart (updates from payments)</div>
+                <div class="text-xs text-gray-500">Updates from staff payment confirmations</div>
               </div>
               <canvas id="revenueChart" class="mt-3"></canvas>
             </div>
@@ -156,28 +111,13 @@
             </div>
           </div>
         </div>
-
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <div class="flex items-center justify-between gap-4">
-            <div>
-              <div class="font-black text-lg">Quick Verification</div>
-              <div class="text-sm text-gray-500">Jump straight into the verification portal.</div>
-            </div>
-            <button onclick="switchTab('verification')" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black">Open Verification</button>
-          </div>
-        </div>
       </section>
 
       <!-- REVENUE -->
       <section id="revenue-view" class="view-section hidden space-y-6">
         <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 class="text-2xl font-black">Revenue & Projections</h2>
-              <p class="text-sm text-gray-500 mt-1">Numbers to help leadership understand the scale (cleared vs pending).</p>
-            </div>
-            <button onclick="seedDemoPayments()" class="no-print px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50">Seed Demo Payments</button>
-          </div>
+          <h2 class="text-2xl font-black">Revenue & Projections</h2>
+          <p class="text-sm text-gray-500 mt-1">High-level numbers for leadership (cleared vs pending).</p>
 
           <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
             <div class="p-4 rounded-2xl border border-gray-200 bg-gray-50">
@@ -197,216 +137,14 @@
               <div id="rev-proj" class="text-2xl font-black mt-1">₦0</div>
             </div>
           </div>
-
-          <div class="mt-6 border border-gray-200 rounded-2xl overflow-hidden">
-            <div class="p-4 bg-gray-900 text-white flex items-center justify-between">
-              <div class="font-black">Revenue Ledger</div>
-              <div class="text-xs text-white/70">Generated on Staff payment confirmation</div>
-            </div>
-            <div class="p-4 overflow-auto">
-              <table class="min-w-full text-sm">
-                <thead class="text-xs text-gray-500">
-                  <tr class="border-b">
-                    <th class="py-2 text-left">Date</th>
-                    <th class="py-2 text-left">Type</th>
-                    <th class="py-2 text-left">Application</th>
-                    <th class="py-2 text-left">Amount</th>
-                    <th class="py-2 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="revenue-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- APPLY (Advertiser) -->
-      <section id="apply-view" class="view-section hidden space-y-6">
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <div class="flex items-end justify-between flex-wrap gap-4">
-            <div>
-              <h2 class="text-2xl font-black">New License Application</h2>
-              <p class="text-sm text-gray-500 mt-1">Submit → invoice is generated → pay to ARCON account → staff confirms → review begins.</p>
-            </div>
-            <div class="text-right">
-              <div class="text-xs text-gray-500">Auto Fee Engine</div>
-              <div id="fee-total" class="text-2xl font-black text-ng-green">₦0.00</div>
-              <div id="fee-meta" class="text-xs text-gray-500">Fill State + Category + Size + Duration</div>
-            </div>
-          </div>
-
-          <form id="applyForm" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs font-bold text-gray-500">Applicant / Company Name</label>
-              <input name="applicant" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" placeholder="e.g. Micro Press LTD" />
-            </div>
-            <div>
-              <label class="text-xs font-bold text-gray-500">Type</label>
-              <select name="type" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none">
-                <option value="">Select type</option>
-                <option>Outdoor Billboard</option>
-                <option>LED Screen</option>
-                <option>Transit / Vehicle Branding</option>
-                <option>Radio / TV</option>
-                <option>Digital / Social</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">Email</label>
-              <input name="email" type="email" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" placeholder="name@company.com" />
-            </div>
-            <div>
-              <label class="text-xs font-bold text-gray-500">Phone</label>
-              <input name="phone" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" placeholder="+234..." />
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">State</label>
-              <select name="state" id="state" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none">
-                <option value="">Select state</option>
-                <option>Abuja (FCT)</option>
-                <option>Lagos</option>
-                <option>Kano</option>
-                <option>Rivers</option>
-                <option>Kaduna</option>
-                <option>Borno</option>
-                <option>Oyo</option>
-                <option>Enugu</option>
-                <option>Others</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">LGA / Area</label>
-              <input name="lga" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" placeholder="e.g. Garki Area 1" />
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">Category</label>
-              <select name="category" id="category" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none">
-                <option value="">Select category</option>
-                <option value="standard">Standard</option>
-                <option value="premium">Premium</option>
-                <option value="highway">Highway / Express</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">Size</label>
-              <select name="size" id="size" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none">
-                <option value="">Select size</option>
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">Duration</label>
-              <div class="mt-1 flex gap-2">
-                <input id="duration_val" name="duration_val" type="number" min="1" value="1" required class="w-1/2 p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" />
-                <select id="duration_unit" name="duration_unit" required class="w-1/2 p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none">
-                  <option value="weeks">Weeks</option>
-                  <option value="months" selected>Months</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">Industry / Purpose</label>
-              <input name="industry" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" placeholder="e.g. Political, FMCG, Telecom, Real Estate" />
-            </div>
-
-            <div>
-              <label class="text-xs font-bold text-gray-500">Sponsor</label>
-              <input name="sponsor" required class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" placeholder="Brand sponsor / agency" />
-            </div>
-
-            <div class="md:col-span-2">
-              <label class="text-xs font-bold text-gray-500">Agent / Owner</label>
-              <select name="owner" id="owner" class="mt-1 w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none">
-                <option value="Micro Press LTD">Micro Press LTD</option>
-                <option value="New">New (enter)</option>
-              </select>
-              <input id="new_owner" name="new_owner" class="mt-2 hidden w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-ng-green outline-none" placeholder="Enter new agent / owner" />
-            </div>
-
-            <div class="md:col-span-2 flex flex-wrap items-center justify-end gap-2 pt-2">
-              <button type="button" class="px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50" onclick="previewFee()">Preview Fee</button>
-              <button type="submit" class="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-black hover:bg-black">Submit Application</button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <!-- STATUS (Advertiser) -->
-      <section id="status-view" class="view-section hidden space-y-6">
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <h2 class="text-2xl font-black">Application Status</h2>
-          <p class="text-sm text-gray-500 mt-1">Search by Application ID + Email/Phone used. View invoice/receipt once available.</p>
-
-          <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input id="status-app-id" class="p-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-ng-green" placeholder="Application ID (e.g. APP-2025-1234)">
-            <input id="status-contact" class="p-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-ng-green" placeholder="Email or Phone used">
-            <button onclick="lookupApplicationStatus()" class="bg-ng-green text-white rounded-xl font-black hover:bg-ng-green-dark">Search</button>
-          </div>
-        </div>
-
-        <div id="status-result" class="hidden bg-white border border-gray-200 rounded-2xl shadow-sm p-6"></div>
-      </section>
-
-      <!-- STAFF: APPLICATION REVIEW -->
-      <section id="app-management-view" class="view-section hidden space-y-6">
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 class="text-2xl font-black">Application Review (Staff)</h2>
-              <p class="text-sm text-gray-500 mt-1">Confirm payments, query applicants, approve licenses, generate certificates.</p>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <input id="staff-search" class="p-3 rounded-xl border border-gray-300 outline-none focus:ring-2 focus:ring-ng-green text-sm" placeholder="Search App ID / name / state" oninput="renderApplicationsTable()" />
-              <button class="px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50" onclick="resetDemoData()">Reset Demo</button>
-            </div>
-          </div>
-
-          <div class="mt-6 overflow-auto border border-gray-200 rounded-2xl">
-            <table class="min-w-full text-sm">
-              <thead class="text-xs text-gray-500 bg-gray-50">
-                <tr class="border-b">
-                  <th class="py-3 px-3 text-left">Application</th>
-                  <th class="py-3 px-3 text-left">Applicant</th>
-                  <th class="py-3 px-3 text-left">State</th>
-                  <th class="py-3 px-3 text-left">Fee</th>
-                  <th class="py-3 px-3 text-left">Status</th>
-                  <th class="py-3 px-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="apps-tbody"></tbody>
-            </table>
-          </div>
         </div>
       </section>
 
       <!-- VERIFICATION -->
       <section id="verification-view" class="view-section hidden space-y-6">
         <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 class="text-2xl font-black">Verification Portal</h2>
-              <p class="text-sm text-gray-500 mt-1">
-                Verify a certificate number (or QR content). DG/Staff can view as Map/List/Grid.
-              </p>
-            </div>
-
-            <div id="veri-view-toggle" class="no-print hidden gap-2">
-              <button class="px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50" onclick="setVeriMode('grid')">Grid</button>
-              <button class="px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50" onclick="setVeriMode('list')">List</button>
-              <button class="px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50" onclick="setVeriMode('map')">Map</button>
-            </div>
-          </div>
+          <h2 class="text-2xl font-black">Verification Portal</h2>
+          <p class="text-sm text-gray-500 mt-1">Verify a certificate number (or QR content).</p>
 
           <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
             <input id="verify-input" class="p-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-ng-green" placeholder="Enter Certificate No or QR text">
@@ -416,1198 +154,143 @@
 
           <div id="verify-result" class="mt-5 hidden border border-gray-200 rounded-2xl p-5 bg-gray-50"></div>
         </div>
-
-        <!-- DG/Staff view -->
-        <div id="veri-browser" class="hidden bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <div class="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <div class="font-black text-lg">Verified Certificates Browser</div>
-              <div class="text-sm text-gray-500">Only approved applications produce verifiable certificates.</div>
-            </div>
-            <div class="text-xs text-gray-500">Mode: <span id="veri-mode-label" class="font-black text-gray-900">grid</span></div>
-          </div>
-
-          <div id="veri-grid" class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-          <div id="veri-list" class="mt-5 hidden overflow-auto border border-gray-200 rounded-2xl">
-            <table class="min-w-full text-sm">
-              <thead class="text-xs text-gray-500 bg-gray-50">
-                <tr class="border-b">
-                  <th class="py-3 px-3 text-left">Certificate</th>
-                  <th class="py-3 px-3 text-left">Application</th>
-                  <th class="py-3 px-3 text-left">Applicant</th>
-                  <th class="py-3 px-3 text-left">State</th>
-                  <th class="py-3 px-3 text-left">Issued</th>
-                  <th class="py-3 px-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="veri-list-tbody"></tbody>
-            </table>
-          </div>
-
-          <div id="veri-map" class="mt-5 hidden">
-            <div class="border border-gray-200 rounded-2xl p-5 bg-gray-50">
-              <div class="font-black">Map View (Placeholder)</div>
-              <div class="text-sm text-gray-500 mt-1">
-                Integrate with a real map provider later. For now, this summarizes certificates per state.
-              </div>
-              <div id="veri-map-summary" class="mt-4 space-y-2"></div>
-            </div>
-          </div>
-        </div>
       </section>
-
     </section>
   </main>
 
-  <!-- ✅ INVOICE / PAYMENT MODAL -->
-  <div id="invoice-modal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 no-print animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden">
-      <div class="p-4 bg-gray-900 text-white flex justify-between items-center">
-        <h3 class="font-black text-lg">Invoice / Payment</h3>
-        <button onclick="closeInvoiceModal()" class="text-white/80 hover:text-white">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="p-6">
-        <div id="invoice-content" class="border border-gray-200 rounded-xl p-6 bg-white"></div>
-
-        <div class="mt-6 flex flex-wrap gap-2 justify-end">
-          <button onclick="downloadInvoicePDF()" class="px-4 py-2 rounded-xl bg-ng-green text-white font-black hover:bg-ng-green-dark">Download Invoice (PDF)</button>
-          <button onclick="downloadInvoicePNG()" class="px-4 py-2 rounded-xl border border-gray-300 font-black text-gray-700 hover:bg-gray-50">Download Invoice (PNG)</button>
-          <button onclick="openIHavePaidFlow()" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black">I Have Paid</button>
-          <button onclick="closeInvoiceModal()" class="px-4 py-2 rounded-xl border border-gray-300 font-black text-gray-700 hover:bg-gray-50">Close</button>
-        </div>
-
-        <p class="mt-3 text-xs text-gray-500">
-          Processing begins after payment is confirmed by ARCON staff.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ✅ CERTIFICATE MODAL -->
-  <div id="cert-modal" class="fixed inset-0 z-[130] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 no-print animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden">
-      <div class="p-4 bg-gray-900 text-white flex justify-between items-center">
-        <h3 class="font-black text-lg">Certificate</h3>
-        <button onclick="closeCertModal()" class="text-white/80 hover:text-white">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="p-6">
-        <div id="cert-content" class="border border-gray-200 rounded-2xl p-6 bg-white"></div>
-
-        <div class="mt-6 flex flex-wrap gap-2 justify-end">
-          <button onclick="downloadCertificatePNG()" class="px-4 py-2 rounded-xl bg-ng-green text-white font-black hover:bg-ng-green-dark">Download (PNG)</button>
-          <button onclick="printCertificatePDF()" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black">Print (PDF)</button>
-          <button onclick="closeCertModal()" class="px-4 py-2 rounded-xl border border-gray-300 font-black text-gray-700 hover:bg-gray-50">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ✅ PROMPT MODAL -->
-  <div id="prompt-modal" class="fixed inset-0 z-[140] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 no-print animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-      <div class="p-4 bg-gray-900 text-white flex justify-between items-center">
-        <h3 id="prompt-title" class="font-black text-lg">Prompt</h3>
-        <button onclick="closePromptModal()" class="text-white/80 hover:text-white">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="p-6">
-        <p id="prompt-desc" class="text-sm text-gray-600"></p>
-        <textarea id="prompt-input" class="mt-4 w-full p-3 rounded-xl border border-gray-300 outline-none focus:ring-2 focus:ring-ng-green" rows="4" placeholder="Type here..."></textarea>
-
-        <div class="mt-5 flex gap-2 justify-end">
-          <button onclick="closePromptModal()" class="px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50">Cancel</button>
-          <button onclick="confirmPromptModal()" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black">Continue</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ✅ MESSAGE MODAL -->
-  <div id="msg-modal" class="fixed inset-0 z-[150] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 no-print animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-      <div class="p-4 bg-gray-900 text-white flex justify-between items-center">
-        <h3 id="msg-title" class="font-black text-lg">Message</h3>
-        <button onclick="closeMsgModal()" class="text-white/80 hover:text-white">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="p-6">
-        <p id="msg-body" class="text-sm text-gray-700"></p>
-        <div class="mt-5 flex justify-end">
-          <button onclick="closeMsgModal()" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black">OK</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] hidden no-print">
-    <div class="px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-black shadow-lg">Copied</div>
-  </div>
-
   <script>
-    // -----------------------
-    // ✅ CONFIG + CONSTANTS
-    // -----------------------
-    const STORAGE_KEYS = {
-      APPS: "IRMS_APPS_V1",
-      REV: "IRMS_REV_V1",
-      VERI_MODE: "IRMS_VERI_MODE",
-      PORTAL: "IRMS_PORTAL"
-    };
-
-    const ARCON_PAY_ACCOUNT = {
-      name: "ARCON ADs VETTING",
-      bank: "Stanbic IBTC Bank",
-      number: "5770242424"
-    };
-
+    // ===== SHARED CORE (DG) =====
+    const PORTAL="dg";
+    const STORAGE_KEYS = { APPS:"IRMS_APPS_V1", REV:"IRMS_REV_V1" };
     const APP_STATUS = {
-      AWAITING_PAYMENT: "AWAITING_PAYMENT",
-      PAYMENT_UNDER_REVIEW: "PAYMENT_UNDER_REVIEW",
-      UNDER_REVIEW: "UNDER_REVIEW",
-      QUERIED: "QUERIED",
-      APPROVED: "APPROVED",
-      REJECTED: "REJECTED"
+      AWAITING_PAYMENT:"AWAITING_PAYMENT",
+      PAYMENT_UNDER_REVIEW:"PAYMENT_UNDER_REVIEW",
+      UNDER_REVIEW:"UNDER_REVIEW",
+      QUERIED:"QUERIED",
+      APPROVED:"APPROVED",
+      REJECTED:"REJECTED"
     };
 
-    // Fee engine (simple demo)
-    const BASE_BY_CATEGORY = { standard: 250000, premium: 450000, highway: 650000 };
-    const MULT_BY_SIZE = { small: 1.0, medium: 1.7, large: 2.6 };
-    const MULT_BY_STATE = {
-      "Lagos": 1.35,
-      "Abuja (FCT)": 1.25,
-      "Rivers": 1.15,
-      "Kano": 1.10,
-      "Kaduna": 1.05,
-      "Borno": 0.95,
-      "Oyo": 1.00,
-      "Enugu": 0.98,
-      "Others": 0.90
-    };
+    let APPLICATIONS_DATA=[];
+    let REVENUE_DATA=[];
+    let __revChart=null;
 
-    function durationToMonths(val, unit) {
-      const v = Math.max(1, Number(val || 1));
-      return unit === "weeks" ? (v / 4) : v;
+    function formatNGN(n){
+      const v=Number(n||0);
+      return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(v);
     }
-    function feeDurationMultiplier(months) {
-      if (months <= 1) return 1.0;
-      if (months <= 3) return 1.8;
-      if (months <= 6) return 3.0;
-      if (months <= 12) return 5.5;
-      return 7.5;
-    }
-
-    function makeId(prefix="APP") {
-      return `${prefix}-2025-${Math.floor(Math.random() * 9000) + 1000}`;
-    }
-    function makePaymentRef(appId) {
-      return `ARCON-${appId}-${Math.floor(100000 + Math.random()*900000)}`;
-    }
-    function makeReceiptNo() {
-      return `RCPT-${Math.floor(100000 + Math.random()*900000)}`;
-    }
-    function makeCertNo(appId) {
-      return `CERT-${appId}-${Math.floor(1000 + Math.random()*9000)}`;
-    }
-
-    function formatNGN(n) {
-      const v = Number(n || 0);
-      return new Intl.NumberFormat('en-NG', { style:'currency', currency:'NGN', maximumFractionDigits: 0 }).format(v);
-    }
-
-    function escapeHtml(s){
-      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    }
-    function escapeJs(s){
-      return String(s ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
-    }
-
-    function showToast(text="Done") {
-      const t = document.getElementById("toast");
-      t.querySelector("div").textContent = text;
-      t.classList.remove("hidden");
-      setTimeout(()=>t.classList.add("hidden"), 1100);
-    }
-    function copyText(t){
-      navigator.clipboard?.writeText(t).then(()=>showToast("Copied")).catch(()=>showToast("Copy failed"));
-    }
-
-    // -----------------------
-    // ✅ PORTAL ROUTING
-    // -----------------------
-    const PORTALS = ["advertiser","staff","dg"];
-    function getPortal(){
-      const url = new URL(location.href);
-      const p = (url.searchParams.get("portal") || "").toLowerCase();
-      if (PORTALS.includes(p)) return p;
-      return localStorage.getItem(STORAGE_KEYS.PORTAL) || "advertiser";
-    }
-    function setPortal(p){
-      localStorage.setItem(STORAGE_KEYS.PORTAL, p);
-    }
-    function setPortalAndReload(p){
-      setPortal(p);
-      const url = new URL(location.href);
-      url.searchParams.set("portal", p);
-      location.href = url.toString();
-    }
-
-    function applyPortalVisibility(){
-      const portal = getPortal();
-      document.getElementById("portal-pill").textContent = `Portal: ${portal.toUpperCase()}`;
-
-      const show = (id, yes=true) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.style.display = yes ? "" : "none";
-      };
-
-      // Defaults (hide all then enable)
-      show("nav-dashboard", false);
-      show("nav-revenue", false);
-      show("nav-app-management", false);
-      show("nav-apply", false);
-      show("nav-status", false);
-      show("nav-verification", true); // shared
-
-      if (portal === "advertiser") {
-        show("nav-apply", true);
-        show("nav-status", true);
-        switchTab("apply");
-      }
-      if (portal === "staff") {
-        show("nav-app-management", true);
-        switchTab("app-management");
-      }
-      if (portal === "dg") {
-        show("nav-dashboard", true);
-        show("nav-revenue", true);
-        switchTab("dashboard");
-      }
-
-      // DG/Staff get certificate browser + view toggles
-      const isDGorStaff = (portal === "dg" || portal === "staff");
-      document.getElementById("veri-browser").classList.toggle("hidden", !isDGorStaff);
-      document.getElementById("veri-view-toggle").classList.toggle("hidden", !isDGorStaff);
-      if (isDGorStaff) {
-        const mode = localStorage.getItem(STORAGE_KEYS.VERI_MODE) || "grid";
-        setVeriMode(mode);
-      }
-    }
-
-    // -----------------------
-    // ✅ DATA STORE
-    // -----------------------
-    let APPLICATIONS_DATA = [];
-    let REVENUE_DATA = [];
+    function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
     function loadData(){
-      const apps = localStorage.getItem(STORAGE_KEYS.APPS);
-      const rev  = localStorage.getItem(STORAGE_KEYS.REV);
-      APPLICATIONS_DATA = apps ? JSON.parse(apps) : seedDemoApps();
-      REVENUE_DATA      = rev ? JSON.parse(rev)  : [];
-      persist();
-    }
-    function persist(){
-      localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(APPLICATIONS_DATA));
-      localStorage.setItem(STORAGE_KEYS.REV, JSON.stringify(REVENUE_DATA));
+      const apps=localStorage.getItem(STORAGE_KEYS.APPS);
+      const rev=localStorage.getItem(STORAGE_KEYS.REV);
+      APPLICATIONS_DATA = apps ? JSON.parse(apps) : [];
+      REVENUE_DATA = rev ? JSON.parse(rev) : [];
     }
 
-    function seedDemoApps(){
-      const a1 = {
-        id: "APP-2025-2381",
-        applicant: "Micro Press LTD",
-        phone: "+2348000000000",
-        email: "info@micropress.ng",
-        type: "Outdoor Billboard",
-        state: "Abuja (FCT)",
-        date: "2025-12-01",
-        status: APP_STATUS.UNDER_REVIEW,
-        payment: {
-          amount: 850000,
-          amountFormatted: formatNGN(850000),
-          reference: "ARCON-APP-2025-2381-224901",
-          account: {...ARCON_PAY_ACCOUNT},
-          payerNarration: "Transfer from Micro Press",
-          confirmedAt: "2025-12-02T12:10:00Z",
-          receiptNo: "RCPT-772911"
-        },
-        details: { lga:"Garki Area 1", duration:"3 months", fees: formatNGN(850000), agent:"Micro Press LTD", sponsor:"Micro Press LTD", purpose:"Real Estate", size:"Medium", specificLocation:"Garki Area 1", tax:"Pending" },
-        certificate: null
-      };
-
-      const a2 = {
-        id: "APP-2025-7442",
-        applicant: "Lagos Brand House",
-        phone: "+2348111111111",
-        email: "ops@lagosbrand.ng",
-        type: "LED Screen",
-        state: "Lagos",
-        date: "2025-11-22",
-        status: APP_STATUS.APPROVED,
-        payment: {
-          amount: 1750000,
-          amountFormatted: formatNGN(1750000),
-          reference: "ARCON-APP-2025-7442-912004",
-          account: {...ARCON_PAY_ACCOUNT},
-          payerNarration: "Payment for vetting",
-          confirmedAt: "2025-11-23T08:35:00Z",
-          receiptNo: "RCPT-114982"
-        },
-        details: { lga:"Ikeja", duration:"6 months", fees: formatNGN(1750000), agent:"Lagos Brand House", sponsor:"Telecom Partner", purpose:"Telecom", size:"Large", specificLocation:"Ikeja", tax:"Pending" },
-        certificate: {
-          certNo: "CERT-APP-2025-7442-9037",
-          issuedAt: "2025-11-24T09:12:00Z",
-          qrText: "" // filled later
-        }
-      };
-
-      const a3 = {
-        id: "APP-2025-5019",
-        applicant: "Riverline Media",
-        phone: "+2348222222222",
-        email: "hello@riverline.ng",
-        type: "Digital / Social",
-        state: "Rivers",
-        date: "2025-12-05",
-        status: APP_STATUS.AWAITING_PAYMENT,
-        payment: {
-          amount: 420000,
-          amountFormatted: formatNGN(420000),
-          reference: "ARCON-APP-2025-5019-332190",
-          account: {...ARCON_PAY_ACCOUNT},
-          payerNarration: null,
-          confirmedAt: null,
-          receiptNo: null
-        },
-        details: { lga:"Port Harcourt", duration:"1 months", fees: formatNGN(420000), agent:"Riverline Media", sponsor:"FMCG", purpose:"FMCG", size:"Small", specificLocation:"Port Harcourt", tax:"Pending" },
-        certificate: null
-      };
-
-      // Ensure approved has QR payload
-      a2.certificate.qrText = buildVerifyURL(a2.certificate.certNo);
-
-      return [a3, a1, a2];
-    }
-
-    function resetDemoData(){
-      localStorage.removeItem(STORAGE_KEYS.APPS);
-      localStorage.removeItem(STORAGE_KEYS.REV);
-      loadData();
-      renderAll();
-      showMsgModal("Reset Complete", "Demo data was reset.", true);
-    }
-
-    // -----------------------
-    // ✅ UI: TABS
-    // -----------------------
-    const VIEWS = ["dashboard","revenue","apply","status","app-management","verification"];
+    const VIEWS=["dashboard","revenue","verification"];
     function switchTab(key){
-      VIEWS.forEach(v=>{
-        const sec = document.getElementById(`${v}-view`);
-        if (sec) sec.classList.toggle("hidden", v !== key);
-      });
-
-      // update active nav styling
+      VIEWS.forEach(v=>document.getElementById(`${v}-view`)?.classList.toggle("hidden", v!==key));
       document.querySelectorAll(".nav-item").forEach(a=>a.classList.remove("bg-gray-900","text-white"));
-      const map = {
-        "dashboard": "nav-dashboard",
-        "revenue": "nav-revenue",
-        "apply": "nav-apply",
-        "status": "nav-status",
-        "app-management": "nav-app-management",
-        "verification": "nav-verification"
-      };
-      const id = map[key];
-      if (id) {
-        const nav = document.getElementById(id);
-        if (nav && nav.style.display !== "none") nav.classList.add("bg-gray-900","text-white");
-      }
+      const map={dashboard:"nav-dashboard", revenue:"nav-revenue", verification:"nav-verification"};
+      document.getElementById(map[key])?.classList.add("bg-gray-900","text-white");
 
-      // refresh some views
-      if (key === "dashboard") drawDGChart();
-      if (key === "revenue") renderRevenueTable();
-      if (key === "app-management") renderApplicationsTable();
-      if (key === "verification") renderVerificationBrowser();
+      if(key==="dashboard") { updateDashboardStats(); drawDGChart(); }
+      if(key==="revenue") renderRevenue();
     }
 
-    // -----------------------
-    // ✅ MODALS
-    // -----------------------
-    function showMsgModal(title, body){
-      document.getElementById("msg-title").textContent = title;
-      document.getElementById("msg-body").textContent = body;
-      const m = document.getElementById("msg-modal");
-      m.classList.remove("hidden");
-      m.classList.add("flex");
-    }
-    function closeMsgModal(){
-      const m = document.getElementById("msg-modal");
-      m.classList.add("hidden");
-      m.classList.remove("flex");
-    }
+    function updateDashboardStats(){
+      const apps=APPLICATIONS_DATA.length;
+      const awaiting=APPLICATIONS_DATA.filter(a=>a.status===APP_STATUS.AWAITING_PAYMENT || a.status===APP_STATUS.PAYMENT_UNDER_REVIEW).length;
+      const under=APPLICATIONS_DATA.filter(a=>a.status===APP_STATUS.UNDER_REVIEW).length;
+      const approved=APPLICATIONS_DATA.filter(a=>a.status===APP_STATUS.APPROVED).length;
 
-    let __promptResolver = null;
-    function openPromptModal(title, desc, onConfirm){
-      document.getElementById("prompt-title").textContent = title;
-      document.getElementById("prompt-desc").textContent = desc;
-      document.getElementById("prompt-input").value = "";
-      __promptResolver = onConfirm;
-      const m = document.getElementById("prompt-modal");
-      m.classList.remove("hidden");
-      m.classList.add("flex");
-    }
-    function closePromptModal(){
-      const m = document.getElementById("prompt-modal");
-      m.classList.add("hidden");
-      m.classList.remove("flex");
-      __promptResolver = null;
-    }
-    function confirmPromptModal(){
-      const val = document.getElementById("prompt-input").value;
-      const fn = __promptResolver;
-      closePromptModal();
-      if (typeof fn === "function") fn(val);
-    }
+      document.getElementById("stat-apps").textContent=apps;
+      document.getElementById("stat-awaiting").textContent=awaiting;
+      document.getElementById("stat-underreview").textContent=under;
+      document.getElementById("stat-approved").textContent=approved;
 
-    // -----------------------
-    // ✅ FEE ENGINE
-    // -----------------------
-    function calculateFee(){
-      const state = document.getElementById("state").value || "";
-      const category = document.getElementById("category").value || "";
-      const size = document.getElementById("size").value || "";
-      const dVal = document.getElementById("duration_val").value || 1;
-      const dUnit = document.getElementById("duration_unit").value || "months";
-
-      if(!state || !category || !size) return 0;
-
-      const base = BASE_BY_CATEGORY[category] || 0;
-      const mState = MULT_BY_STATE[state] || 1.0;
-      const mSize = MULT_BY_SIZE[size] || 1.0;
-      const months = durationToMonths(dVal, dUnit);
-      const mDur = feeDurationMultiplier(months);
-
-      const total = Math.round(base * mState * mSize * mDur);
-      return total;
-    }
-
-    function previewFee(){
-      const total = calculateFee();
-      if(!total){
-        document.getElementById("fee-total").textContent = "₦0.00";
-        document.getElementById("fee-meta").textContent = "Fill State + Category + Size + Duration";
-        showMsgModal("Fee Preview", "Please fill State, Category, Size and Duration to calculate a fee.");
-        return;
-      }
-      document.getElementById("fee-total").textContent = formatNGN(total);
-      document.getElementById("fee-meta").textContent = "Auto-calculated (demo fee engine)";
-      showMsgModal("Fee Preview", `Estimated fee: ${formatNGN(total)}.`);
-    }
-
-    function syncFeeUI(){
-      const total = calculateFee();
-      document.getElementById("fee-total").textContent = total ? formatNGN(total) : "₦0.00";
-      document.getElementById("fee-meta").textContent = total ? "Auto-calculated (demo fee engine)" : "Fill State + Category + Size + Duration";
-    }
-
-    // -----------------------
-    // ✅ INVOICE FLOW
-    // -----------------------
-    let __invoiceAppId = null;
-
-    function openInvoiceModal(app){
-      __invoiceAppId = app.id;
-      document.getElementById("invoice-content").innerHTML = buildInvoiceHTML(app);
-      const m = document.getElementById("invoice-modal");
-      m.classList.remove("hidden");
-      m.classList.add("flex");
-    }
-    function closeInvoiceModal(){
-      const m = document.getElementById("invoice-modal");
-      m.classList.add("hidden");
-      m.classList.remove("flex");
-      __invoiceAppId = null;
-    }
-    function getAppById(id){
-      return APPLICATIONS_DATA.find(a => a.id === id);
-    }
-
-    function buildInvoiceHTML(app){
-      const pay = app.payment;
-      const issued = new Date().toLocaleString();
-      const due = new Date(Date.now() + 7*24*60*60*1000).toLocaleDateString();
-
-      return `
-        <div id="invoice-paper" class="p-2">
-          <div class="flex justify-between items-start gap-4">
-            <div>
-              <div class="text-xs font-black text-gray-500">ARCON</div>
-              <h2 class="text-xl font-black text-gray-900">Advertisement Vetting Invoice</h2>
-              <p class="text-xs text-gray-500 mt-1">Integrated Regulatory Management System (IRMS)</p>
-            </div>
-            <div class="text-right">
-              <p class="text-xs text-gray-500">Issued</p>
-              <p class="font-black text-gray-800">${issued}</p>
-              <p class="text-xs text-gray-500 mt-2">Due</p>
-              <p class="font-black text-gray-800">${due}</p>
-            </div>
-          </div>
-
-          <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="border border-gray-200 rounded-2xl p-4">
-              <p class="text-xs font-black text-gray-500 uppercase">Applicant</p>
-              <p class="font-black text-gray-900 mt-1">${escapeHtml(app.applicant)}</p>
-              <p class="text-sm text-gray-600">${escapeHtml(app.email)} • ${escapeHtml(app.phone)}</p>
-            </div>
-
-            <div class="border border-gray-200 rounded-2xl p-4">
-              <p class="text-xs font-black text-gray-500 uppercase">Application</p>
-              <p class="font-mono font-black text-gray-900 mt-1">${app.id}</p>
-              <p class="text-sm text-gray-600">${escapeHtml(app.type)} • ${escapeHtml(app.state)}</p>
-            </div>
-          </div>
-
-          <div class="mt-4 border border-gray-200 rounded-2xl p-4 bg-gray-50">
-            <div class="flex justify-between items-center">
-              <div>
-                <p class="text-xs font-black text-gray-500 uppercase">Total Payable</p>
-                <p class="text-2xl font-black text-ng-green mt-1">${pay.amountFormatted}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-xs font-black text-gray-500 uppercase">Status</p>
-                <p class="font-black text-gray-900">${app.status}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-4 border border-gray-200 rounded-2xl p-4">
-            <p class="text-xs font-black text-gray-500 uppercase mb-2">Pay To (Official ARCON Account)</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-              <div class="bg-white border border-gray-200 rounded-xl p-3">
-                <p class="text-[10px] uppercase text-gray-400 font-black">Account Name</p>
-                <p class="font-black text-gray-900">${escapeHtml(pay.account.name)}</p>
-              </div>
-              <div class="bg-white border border-gray-200 rounded-xl p-3">
-                <p class="text-[10px] uppercase text-gray-400 font-black">Bank</p>
-                <p class="font-black text-gray-900">${escapeHtml(pay.account.bank)}</p>
-              </div>
-              <div class="bg-white border border-gray-200 rounded-xl p-3">
-                <p class="text-[10px] uppercase text-gray-400 font-black">Account Number</p>
-                <p class="font-mono font-black text-gray-900">${escapeHtml(pay.account.number)}</p>
-              </div>
-            </div>
-
-            <div class="mt-3 bg-gray-900 text-white rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p class="text-[10px] uppercase text-white/70 font-black">Payment Reference (use as narration)</p>
-                <p class="font-mono font-black text-lg">${escapeHtml(pay.reference)}</p>
-              </div>
-              <button onclick="copyText('${escapeJs(pay.reference)}')" class="px-3 py-2 rounded-xl bg-white text-gray-900 font-black text-sm hover:bg-gray-100">
-                Copy Ref
-              </button>
-            </div>
-
-            <p class="text-xs text-gray-500 mt-3">
-              Keep your transfer evidence. After you pay, click “I Have Paid” so staff can quickly locate your payment.
-            </p>
-          </div>
-
-          <div class="mt-4 border-t pt-4 text-xs text-gray-500">
-            <p><span class="font-black text-gray-700">Advert:</span> ${escapeHtml(app.details.purpose)} • ${escapeHtml(app.details.size)} • ${escapeHtml(app.details.duration)}</p>
-            <p><span class="font-black text-gray-700">Sponsor:</span> ${escapeHtml(app.details.sponsor)} • <span class="font-black text-gray-700">Agent:</span> ${escapeHtml(app.details.agent)}</p>
-          </div>
+      const approvedApps=APPLICATIONS_DATA.filter(a=>a.status===APP_STATUS.APPROVED);
+      const counts=approvedApps.reduce((acc,a)=>{ acc[a.state]=(acc[a.state]||0)+1; return acc; },{});
+      const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+      const wrap=document.getElementById("top-states");
+      wrap.innerHTML = top.map(([s,c])=>`
+        <div class="flex items-center justify-between border border-gray-200 rounded-xl p-3 bg-gray-50">
+          <div class="font-black">${escapeHtml(s)}</div>
+          <div class="px-2 py-1 rounded-full border border-gray-200 bg-white font-black text-xs">${c}</div>
         </div>
-      `;
+      `).join("") || `<div class="text-sm text-gray-500">No approved data yet.</div>`;
     }
 
-    function downloadInvoicePDF(){
-      const app = getAppById(__invoiceAppId);
-      if(!app) return showMsgModal("Not Found", "Invoice application not found.");
+    function drawDGChart(){
+      const canvas=document.getElementById("revenueChart");
+      if(!canvas) return;
 
-      const paper = document.getElementById("invoice-content").innerHTML;
-      const w = window.open("", "_blank");
-      w.document.write(`
-        <html><head><title>Invoice ${app.id}</title>
-          <meta charset="UTF-8"/>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <style>body{font-family:Arial,sans-serif;padding:20px}</style>
-        </head><body>${paper}</body></html>
-      `);
-      w.document.close();
-      w.focus();
-      w.print();
-    }
-
-    async function downloadInvoicePNG(){
-      const node = document.getElementById("invoice-paper");
-      if(!node) return;
-      const canvas = await html2canvas(node, { scale: 2, backgroundColor: "#ffffff" });
-      const dataUrl = canvas.toDataURL("image/png");
-
-      const app = getAppById(__invoiceAppId);
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `ARCON-Invoice-${app ? app.id : "invoice"}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    function openIHavePaidFlow(){
-      const app = getAppById(__invoiceAppId);
-      if(!app) return;
-
-      openPromptModal(
-        "I Have Paid",
-        "Enter transfer narration/reference, teller number, or any quick proof note (recommended).",
-        (txt) => {
-          app.status = APP_STATUS.PAYMENT_UNDER_REVIEW;
-          app.payment.payerNarration = txt || null;
-          persist();
-          renderAll();
-          closeInvoiceModal();
-          showMsgModal("Submitted", "Payment marked as PAYMENT_UNDER_REVIEW. ARCON staff will confirm.");
-          if(getPortal() === "advertiser"){
-            switchTab("status");
-            renderAdvertiserStatusResult(app);
-          }
-        }
-      );
-    }
-
-    // -----------------------
-    // ✅ CERTIFICATE + QR
-    // -----------------------
-    let __certAppId = null;
-
-    function buildVerifyURL(certNo){
-      const url = new URL(location.href);
-      url.searchParams.set("portal", "advertiser");
-      url.searchParams.set("cert", certNo);
-      return url.toString();
-    }
-
-    async function openCertificateModal(app){
-      __certAppId = app.id;
-      const certNo = app.certificate?.certNo;
-      const verifyUrl = app.certificate?.qrText || buildVerifyURL(certNo);
-
-      // Generate QR dataURL
-      let qrData = "";
-      try {
-        qrData = await QRCode.toDataURL(verifyUrl, { width: 240, margin: 1 });
-      } catch (e) {
-        qrData = "";
-      }
-
-      document.getElementById("cert-content").innerHTML = `
-        <div id="cert-paper" class="p-2">
-          <div class="border-4 border-gray-900 rounded-2xl p-6">
-            <div class="flex justify-between items-start gap-6 flex-wrap">
-              <div>
-                <div class="text-xs font-black text-gray-500">ARCON</div>
-                <div class="text-2xl font-black">Advertisement Vetting Certificate</div>
-                <div class="text-sm text-gray-500 mt-1">Issued under IRMS — verifiable by QR or certificate number.</div>
-              </div>
-
-              <div class="text-right">
-                <div class="text-xs text-gray-500 font-black">Certificate No</div>
-                <div class="font-mono text-lg font-black">${escapeHtml(certNo)}</div>
-                <div class="text-xs text-gray-500 mt-2 font-black">Issued</div>
-                <div class="font-black">${new Date(app.certificate.issuedAt).toLocaleString()}</div>
-              </div>
-            </div>
-
-            <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              <div class="lg:col-span-2 border border-gray-200 rounded-2xl p-5 bg-gray-50">
-                <div class="text-xs text-gray-500 font-black uppercase">License Details</div>
-                <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <div class="text-xs text-gray-500 font-black">Applicant</div>
-                    <div class="font-black">${escapeHtml(app.applicant)}</div>
-                    <div class="text-gray-600">${escapeHtml(app.email)} • ${escapeHtml(app.phone)}</div>
-                  </div>
-                  <div>
-                    <div class="text-xs text-gray-500 font-black">Application ID</div>
-                    <div class="font-mono font-black">${escapeHtml(app.id)}</div>
-                    <div class="text-gray-600">${escapeHtml(app.type)} • ${escapeHtml(app.state)}</div>
-                  </div>
-                  <div>
-                    <div class="text-xs text-gray-500 font-black">Location</div>
-                    <div class="font-black">${escapeHtml(app.details.lga)}</div>
-                    <div class="text-gray-600">${escapeHtml(app.details.specificLocation)}</div>
-                  </div>
-                  <div>
-                    <div class="text-xs text-gray-500 font-black">Duration</div>
-                    <div class="font-black">${escapeHtml(app.details.duration)}</div>
-                    <div class="text-gray-600">Size: ${escapeHtml(app.details.size)}</div>
-                  </div>
-                </div>
-
-                <div class="mt-5 border-t pt-4 text-xs text-gray-500">
-                  This certificate is verifiable in the ARCON IRMS Verification Portal.
-                </div>
-              </div>
-
-              <div class="border border-gray-200 rounded-2xl p-5">
-                <div class="text-xs text-gray-500 font-black uppercase">Verification QR</div>
-                <div class="mt-3 grid place-items-center">
-                  ${qrData ? `<img src="${qrData}" alt="QR" class="w-56 h-56 rounded-xl border border-gray-200" />` :
-                    `<div class="w-56 h-56 rounded-xl border border-gray-200 grid place-items-center text-xs text-gray-500">QR unavailable</div>`}
-                </div>
-                <div class="mt-3 text-[11px] text-gray-500 break-words">
-                  <span class="font-black text-gray-700">QR Text:</span> ${escapeHtml(verifyUrl)}
-                </div>
-                <button class="mt-3 w-full px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black" onclick="copyText('${escapeJs(verifyUrl)}')">Copy Verification Link</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-
-      const m = document.getElementById("cert-modal");
-      m.classList.remove("hidden");
-      m.classList.add("flex");
-    }
-
-    function closeCertModal(){
-      const m = document.getElementById("cert-modal");
-      m.classList.add("hidden");
-      m.classList.remove("flex");
-      __certAppId = null;
-    }
-
-    async function downloadCertificatePNG(){
-      const node = document.getElementById("cert-paper");
-      if(!node) return;
-      const canvas = await html2canvas(node, { scale: 2, backgroundColor: "#ffffff" });
-      const dataUrl = canvas.toDataURL("image/png");
-      const app = getAppById(__certAppId);
-
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `ARCON-Certificate-${app?.certificate?.certNo || "certificate"}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    function printCertificatePDF(){
-      const app = getAppById(__certAppId);
-      const html = document.getElementById("cert-content").innerHTML;
-      const w = window.open("", "_blank");
-      w.document.write(`
-        <html><head><title>Certificate ${app?.certificate?.certNo || ""}</title>
-          <meta charset="UTF-8"/>
-          <style>body{font-family:Arial,sans-serif;padding:18px}</style>
-        </head><body>${html}</body></html>
-      `);
-      w.document.close();
-      w.focus();
-      w.print();
-    }
-
-    // -----------------------
-    // ✅ APPLY SUBMIT
-    // -----------------------
-    document.addEventListener("DOMContentLoaded", () => {
-      loadData();
-
-      // Apply portal
-      setPortal(getPortal());
-      applyPortalVisibility();
-
-      // UI date
-      document.getElementById("snapshot-date").textContent = new Date().toLocaleString();
-
-      // Fee listeners
-      ["state","category","size","duration_val","duration_unit"].forEach(id=>{
-        const el = document.getElementById(id);
-        if (el) el.addEventListener("input", syncFeeUI);
+      const byDate={};
+      REVENUE_DATA.forEach(r=>{
+        if(r.status!=="CLEARED") return;
+        byDate[r.date]=(byDate[r.date]||0)+(r.amount||0);
       });
 
-      // Owner new
-      const ownerSel = document.getElementById("owner");
-      const newOwner = document.getElementById("new_owner");
-      ownerSel.addEventListener("change", () => {
-        newOwner.classList.toggle("hidden", ownerSel.value !== "New");
-        if (ownerSel.value !== "New") newOwner.value = "";
+      const dates=Object.keys(byDate).sort().slice(-7);
+      const vals=dates.map(d=>byDate[d]);
+
+      if(__revChart) __revChart.destroy();
+      __revChart=new Chart(canvas,{
+        type:"bar",
+        data:{ labels: dates.length ? dates : ["No data"], datasets:[{ label:"Cleared Revenue", data: vals.length ? vals : [0] }] },
+        options:{
+          responsive:true,
+          plugins:{ legend:{ display:false } },
+          scales:{ y:{ ticks:{ callback:(v)=>"₦"+Number(v).toLocaleString() } } }
+        }
       });
-
-      // Submit
-      document.getElementById("applyForm").addEventListener("submit", submitApplication);
-
-      // URL cert autofill on verification view
-      const url = new URL(location.href);
-      const cert = url.searchParams.get("cert");
-      if (cert) {
-        switchTab("verification");
-        document.getElementById("verify-input").value = cert;
-        verifyCertificate();
-      }
-
-      renderAll();
-      syncFeeUI();
-    });
-
-    function submitApplication(e){
-      e.preventDefault();
-      const form = e.target;
-
-      const totalFee = calculateFee();
-      if(totalFee <= 0){
-        showMsgModal("Incomplete Data", "Please fill State, Category, Size and Duration to calculate the fee.");
-        return;
-      }
-
-      const owner = form.owner.value === "New" ? (form.new_owner.value || "—") : form.owner.value;
-      const appId = makeId("APP");
-      const payRef = makePaymentRef(appId);
-
-      const newApp = {
-        id: appId,
-        applicant: form.applicant.value,
-        phone: form.phone.value,
-        email: form.email.value,
-        type: form.type.value,
-        state: form.state.value,
-        date: new Date().toISOString().split("T")[0],
-        status: APP_STATUS.AWAITING_PAYMENT,
-        payment: {
-          amount: totalFee,
-          amountFormatted: formatNGN(totalFee),
-          reference: payRef,
-          account: { ...ARCON_PAY_ACCOUNT },
-          payerNarration: null,
-          confirmedAt: null,
-          receiptNo: null
-        },
-        details: {
-          lga: form.lga.value,
-          duration: `${form.duration_val.value} ${form.duration_unit.value}`,
-          fees: formatNGN(totalFee),
-          agent: owner,
-          sponsor: form.sponsor.value,
-          purpose: form.industry.value,
-          size: form.size.options[form.size.selectedIndex].text,
-          specificLocation: form.lga.value,
-          tax: "Pending"
-        },
-        certificate: null
-      };
-
-      APPLICATIONS_DATA.unshift(newApp);
-      persist();
-
-      // reset form
-      form.reset();
-      document.getElementById("new_owner").classList.add("hidden");
-      syncFeeUI();
-
-      renderAll();
-
-      // Open invoice
-      openInvoiceModal(newApp);
-
-      // Advertisers go status
-      if(getPortal() === "advertiser"){
-        switchTab("status");
-        renderAdvertiserStatusResult(newApp);
-      }
     }
 
-    // -----------------------
-    // ✅ STATUS LOOKUP (Advertiser)
-    // -----------------------
-    function lookupApplicationStatus(){
-      const id = (document.getElementById("status-app-id").value || "").trim().toLowerCase();
-      const contact = (document.getElementById("status-contact").value || "").trim().toLowerCase();
+    function renderRevenue(){
+      const cleared = REVENUE_DATA.filter(r=>r.status==="CLEARED").reduce((s,r)=>s+(r.amount||0),0);
+      const pending = APPLICATIONS_DATA
+        .filter(a => a.status===APP_STATUS.AWAITING_PAYMENT || a.status===APP_STATUS.PAYMENT_UNDER_REVIEW)
+        .reduce((s,a)=>s+(a.payment?.amount||0),0);
 
-      const app = APPLICATIONS_DATA.find(a =>
-        a.id.toLowerCase() === id &&
-        (a.email.toLowerCase() === contact || a.phone.toLowerCase() === contact)
-      );
+      const totalApps = APPLICATIONS_DATA.length || 1;
+      const avg = Math.round(APPLICATIONS_DATA.reduce((s,a)=>s+(a.payment?.amount||0),0) / totalApps);
 
-      const out = document.getElementById("status-result");
-      out.classList.remove("hidden");
+      const recentCount = Math.min(APPLICATIONS_DATA.length, 10);
+      const proj = Math.round(avg * Math.max(5, recentCount) * 4);
 
-      if(!app){
-        out.innerHTML = `<div class="text-sm font-black text-red-600">No match found. Check Application ID and Email/Phone.</div>`;
-        return;
-      }
-      renderAdvertiserStatusResult(app);
+      document.getElementById("rev-cleared").textContent = formatNGN(cleared);
+      document.getElementById("rev-pending").textContent = formatNGN(pending);
+      document.getElementById("rev-avg").textContent = formatNGN(avg);
+      document.getElementById("rev-proj").textContent = formatNGN(proj);
     }
 
-    async function buildReceiptHTML(app){
-      const pay = app.payment;
-      return `
-        <div id="receipt-paper" class="p-2">
-          <div class="border-4 border-gray-900 rounded-2xl p-6">
-            <div class="flex justify-between items-start gap-4 flex-wrap">
-              <div>
-                <div class="text-xs font-black text-gray-500">ARCON</div>
-                <div class="text-2xl font-black">Payment Receipt</div>
-                <div class="text-sm text-gray-500 mt-1">IRMS confirmation of payment clearance</div>
-              </div>
-              <div class="text-right">
-                <div class="text-xs text-gray-500 font-black">Receipt No</div>
-                <div class="font-mono font-black text-lg">${escapeHtml(pay.receiptNo || "—")}</div>
-                <div class="text-xs text-gray-500 mt-2 font-black">Confirmed</div>
-                <div class="font-black">${pay.confirmedAt ? new Date(pay.confirmedAt).toLocaleString() : "—"}</div>
-              </div>
-            </div>
-
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="border border-gray-200 rounded-2xl p-4 bg-gray-50">
-                <div class="text-xs text-gray-500 font-black">Application</div>
-                <div class="font-mono font-black">${escapeHtml(app.id)}</div>
-                <div class="text-sm text-gray-600">${escapeHtml(app.applicant)}</div>
-              </div>
-              <div class="border border-gray-200 rounded-2xl p-4 bg-gray-50">
-                <div class="text-xs text-gray-500 font-black">Amount</div>
-                <div class="text-2xl font-black text-ng-green">${escapeHtml(pay.amountFormatted)}</div>
-                <div class="text-xs text-gray-600 mt-1"><span class="font-black">Payment Ref:</span> ${escapeHtml(pay.reference)}</div>
-              </div>
-            </div>
-
-            <div class="mt-5 text-xs text-gray-500 border-t pt-4">
-              This receipt confirms that ARCON staff verified payment for the application above.
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    async function downloadReceiptPNG(appId){
-      const app = getAppById(appId);
-      if(!app) return;
-
-      const tmp = document.createElement("div");
-      tmp.style.position = "fixed";
-      tmp.style.left = "-99999px";
-      tmp.style.top = "0";
-      tmp.innerHTML = await buildReceiptHTML(app);
-      document.body.appendChild(tmp);
-
-      const node = tmp.querySelector("#receipt-paper");
-      const canvas = await html2canvas(node, { scale: 2, backgroundColor: "#ffffff" });
-      const dataUrl = canvas.toDataURL("image/png");
-
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `ARCON-Receipt-${app.id}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      tmp.remove();
-    }
-
-    function renderAdvertiserStatusResult(app){
-      const out = document.getElementById("status-result");
-      out.classList.remove("hidden");
-
-      const canInvoice = [APP_STATUS.AWAITING_PAYMENT, APP_STATUS.PAYMENT_UNDER_REVIEW].includes(app.status);
-      const canReceipt = [APP_STATUS.UNDER_REVIEW, APP_STATUS.APPROVED].includes(app.status);
-      const canCert = app.status === APP_STATUS.APPROVED;
-
-      out.innerHTML = `
-        <div class="flex justify-between items-start gap-4 flex-wrap">
-          <div>
-            <div class="text-xs font-black text-gray-500">Application</div>
-            <div class="font-mono font-black text-lg">${escapeHtml(app.id)}</div>
-            <div class="text-sm text-gray-600">${escapeHtml(app.applicant)} • ${escapeHtml(app.type)} • ${escapeHtml(app.state)}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-xs font-black text-gray-500">Status</div>
-            <div class="font-black">${escapeHtml(app.status)}</div>
-          </div>
-        </div>
-
-        <div class="mt-4 border border-gray-200 rounded-2xl p-4 bg-gray-50">
-          <div class="text-xs font-black text-gray-500">Amount</div>
-          <div class="text-2xl font-black text-ng-green">${escapeHtml(app.payment.amountFormatted)}</div>
-          <div class="text-xs text-gray-600 mt-2"><span class="font-black">Payment Ref:</span> ${escapeHtml(app.payment.reference)}</div>
-        </div>
-
-        <div class="mt-4 flex flex-wrap gap-2 justify-end">
-          ${canInvoice ? `<button onclick="openInvoiceModal(getAppById('${escapeJs(app.id)}'))" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black">View / Download Invoice</button>` : ``}
-          ${canReceipt ? `<button onclick="downloadReceiptPNG('${escapeJs(app.id)}')" class="px-4 py-2 rounded-xl border border-gray-300 font-black hover:bg-gray-50">Download Receipt (PNG)</button>` : ``}
-          ${canCert ? `<button onclick="openCertificateModal(getAppById('${escapeJs(app.id)}'))" class="px-4 py-2 rounded-xl bg-ng-green text-white font-black hover:bg-ng-green-dark">View Certificate</button>` : ``}
-        </div>
-
-        ${app.status === APP_STATUS.QUERIED ? `
-          <div class="mt-4 border border-orange-200 rounded-2xl p-4 bg-orange-50 text-sm">
-            <div class="font-black text-orange-700">Queried:</div>
-            <div class="text-orange-800">Please check your email/phone for requested clarifications and re-submit as instructed.</div>
-          </div>
-        ` : ``}
-      `;
-    }
-
-    // -----------------------
-    // ✅ STAFF: TABLE + ACTIONS
-    // -----------------------
-    function renderApplicationsTable(){
-      const tbody = document.getElementById("apps-tbody");
-      if(!tbody) return;
-
-      const q = (document.getElementById("staff-search")?.value || "").toLowerCase().trim();
-
-      const rows = APPLICATIONS_DATA
-        .filter(a => {
-          if(!q) return true;
-          return (
-            a.id.toLowerCase().includes(q) ||
-            a.applicant.toLowerCase().includes(q) ||
-            a.state.toLowerCase().includes(q)
-          );
-        })
-        .map(app => {
-          const canConfirm = (app.status === APP_STATUS.AWAITING_PAYMENT || app.status === APP_STATUS.PAYMENT_UNDER_REVIEW);
-          const canApprove = (app.status === APP_STATUS.UNDER_REVIEW);
-          const canQuery = (app.status === APP_STATUS.UNDER_REVIEW);
-
-          return `
-            <tr class="border-b hover:bg-gray-50">
-              <td class="py-3 px-3">
-                <div class="font-mono font-black">${escapeHtml(app.id)}</div>
-                <div class="text-xs text-gray-500">${escapeHtml(app.date)}</div>
-              </td>
-              <td class="py-3 px-3">
-                <div class="font-black">${escapeHtml(app.applicant)}</div>
-                <div class="text-xs text-gray-500">${escapeHtml(app.email)}</div>
-              </td>
-              <td class="py-3 px-3">${escapeHtml(app.state)}</td>
-              <td class="py-3 px-3 font-black">${escapeHtml(app.payment.amountFormatted)}</td>
-              <td class="py-3 px-3">
-                <span class="px-2 py-1 rounded-full text-xs font-black border border-gray-200 bg-white">${escapeHtml(app.status)}</span>
-              </td>
-              <td class="py-3 px-3 text-right">
-                <div class="flex justify-end gap-2 flex-wrap">
-                  <button class="px-3 py-2 rounded-xl border border-gray-300 font-black text-xs hover:bg-gray-50" onclick="openInvoiceModal(getAppById('${escapeJs(app.id)}'))">Invoice</button>
-
-                  ${canConfirm ? `<button class="px-3 py-2 rounded-xl bg-gray-900 text-white font-black text-xs hover:bg-black" onclick="staffConfirmPayment('${escapeJs(app.id)}')">Confirm ₦</button>` : ``}
-
-                  ${canQuery ? `<button class="px-3 py-2 rounded-xl border border-orange-300 text-orange-700 font-black text-xs hover:bg-orange-50" onclick="staffQuery('${escapeJs(app.id)}')">Query</button>` : ``}
-
-                  ${canApprove ? `<button class="px-3 py-2 rounded-xl bg-ng-green text-white font-black text-xs hover:bg-ng-green-dark" onclick="staffApprove('${escapeJs(app.id)}')">Approve</button>` : ``}
-
-                  ${app.status === APP_STATUS.APPROVED ? `<button class="px-3 py-2 rounded-xl border border-gray-300 font-black text-xs hover:bg-gray-50" onclick="openCertificateModal(getAppById('${escapeJs(app.id)}'))">Certificate</button>` : ``}
-                </div>
-              </td>
-            </tr>
-          `;
-        })
-        .join("");
-
-      tbody.innerHTML = rows || `<tr><td class="p-5 text-sm text-gray-500" colspan="6">No applications found.</td></tr>`;
-    }
-
-    function staffConfirmPayment(appId){
-      const app = getAppById(appId);
-      if(!app) return;
-
-      openPromptModal(
-        "Confirm Payment",
-        `Confirm payment for ${appId}. Optionally enter receipt number or staff note.`,
-        (note) => {
-          app.payment.confirmedAt = new Date().toISOString();
-          app.payment.receiptNo = (note && note.trim()) ? note.trim() : makeReceiptNo();
-          app.status = APP_STATUS.UNDER_REVIEW;
-
-          // ledger
-          REVENUE_DATA.unshift({
-            date: new Date().toISOString().split("T")[0],
-            type: "New Application (Vetting)",
-            appId: app.id,
-            amount: app.payment.amount,
-            status: "CLEARED"
-          });
-
-          persist();
-          renderAll();
-          showMsgModal("Payment Confirmed", `${appId} is now UNDER_REVIEW. Receipt: ${app.payment.receiptNo}`);
-        }
-      );
-    }
-
-    function staffQuery(appId){
-      const app = getAppById(appId);
-      if(!app) return;
-
-      openPromptModal(
-        "Query Application",
-        "Enter the query reason (will be shared with applicant).",
-        (reason) => {
-          app.status = APP_STATUS.QUERIED;
-          app.queryReason = reason || "Clarification required.";
-          persist();
-          renderAll();
-          showMsgModal("Queried", `${appId} has been marked QUERIED.`);
-        }
-      );
-    }
-
-    function staffApprove(appId){
-      const app = getAppById(appId);
-      if(!app) return;
-
-      // Issue certificate
-      const certNo = makeCertNo(app.id);
-      app.status = APP_STATUS.APPROVED;
-      app.certificate = {
-        certNo,
-        issuedAt: new Date().toISOString(),
-        qrText: buildVerifyURL(certNo)
-      };
-
-      persist();
-      renderAll();
-      showMsgModal("Approved", `${appId} approved. Certificate issued: ${certNo}`);
-      openCertificateModal(app);
-    }
-
-    // -----------------------
-    // ✅ VERIFICATION
-    // -----------------------
+    // Verification
     function fillFromUrlCert(){
-      const url = new URL(location.href);
-      const cert = url.searchParams.get("cert");
-      if(!cert) return showMsgModal("No URL Cert", "No cert found in URL (use ?cert=CERT-...).");
-      document.getElementById("verify-input").value = cert;
+      const url=new URL(location.href);
+      const cert=url.searchParams.get("cert");
+      if(!cert) return;
+      document.getElementById("verify-input").value=cert;
       verifyCertificate();
     }
 
     function verifyCertificate(){
-      const input = (document.getElementById("verify-input").value || "").trim();
-      const box = document.getElementById("verify-result");
+      const input=(document.getElementById("verify-input").value||"").trim();
+      const box=document.getElementById("verify-result");
       box.classList.remove("hidden");
 
       if(!input){
-        box.innerHTML = `<div class="text-sm font-black text-red-600">Enter a certificate number or QR text.</div>`;
+        box.innerHTML=`<div class="text-sm font-black text-red-600">Enter a certificate number or QR text.</div>`;
         return;
       }
 
-      // Accept either cert number or full URL containing cert=
-      let certNo = input;
-      try {
-        if (input.startsWith("http")) {
-          const u = new URL(input);
-          certNo = u.searchParams.get("cert") || input;
+      let certNo=input;
+      try{
+        if(input.startsWith("http")){
+          const u=new URL(input);
+          certNo=u.searchParams.get("cert") || input;
         }
-      } catch {}
+      }catch{}
 
       const app = APPLICATIONS_DATA.find(a => a.certificate && a.certificate.certNo === certNo);
 
@@ -1620,237 +303,31 @@
       }
 
       box.innerHTML = `
-        <div class="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <div class="font-black text-ng-green">Verified ✔</div>
-            <div class="text-sm text-gray-600 mt-1">
-              Certificate <span class="font-mono font-black">${escapeHtml(app.certificate.certNo)}</span> is valid.
-            </div>
-          </div>
-          <button class="px-4 py-2 rounded-xl bg-gray-900 text-white font-black hover:bg-black" onclick="openCertificateModal(getAppById('${escapeJs(app.id)}'))">View Certificate</button>
+        <div class="font-black text-ng-green">Verified ✔</div>
+        <div class="text-sm text-gray-600 mt-1">
+          Certificate <span class="font-mono font-black">${escapeHtml(app.certificate.certNo)}</span> is valid.
         </div>
-
-        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-          <div class="border border-gray-200 rounded-2xl p-4 bg-white">
-            <div class="text-xs text-gray-500 font-black">Applicant</div>
-            <div class="font-black">${escapeHtml(app.applicant)}</div>
-            <div class="text-gray-600">${escapeHtml(app.email)} • ${escapeHtml(app.phone)}</div>
-          </div>
-          <div class="border border-gray-200 rounded-2xl p-4 bg-white">
-            <div class="text-xs text-gray-500 font-black">Application</div>
-            <div class="font-mono font-black">${escapeHtml(app.id)}</div>
-            <div class="text-gray-600">${escapeHtml(app.type)} • ${escapeHtml(app.state)}</div>
-          </div>
-          <div class="border border-gray-200 rounded-2xl p-4 bg-white">
-            <div class="text-xs text-gray-500 font-black">Location</div>
-            <div class="font-black">${escapeHtml(app.details.lga)}</div>
-            <div class="text-gray-600">${escapeHtml(app.details.specificLocation)}</div>
-          </div>
-          <div class="border border-gray-200 rounded-2xl p-4 bg-white">
-            <div class="text-xs text-gray-500 font-black">Issued</div>
-            <div class="font-black">${new Date(app.certificate.issuedAt).toLocaleString()}</div>
-            <div class="text-gray-600">Duration: ${escapeHtml(app.details.duration)}</div>
-          </div>
+        <div class="text-sm text-gray-600 mt-2">
+          <span class="font-black">Applicant:</span> ${escapeHtml(app.applicant)} •
+          <span class="font-black">State:</span> ${escapeHtml(app.state)}
         </div>
       `;
     }
 
-    function setVeriMode(mode){
-      localStorage.setItem(STORAGE_KEYS.VERI_MODE, mode);
-      document.getElementById("veri-mode-label").textContent = mode;
+    document.addEventListener("DOMContentLoaded", ()=>{
+      loadData();
+      document.getElementById("snapshot-date").textContent = new Date().toLocaleString();
+      switchTab("dashboard");
 
-      document.getElementById("veri-grid").classList.toggle("hidden", mode !== "grid");
-      document.getElementById("veri-list").classList.toggle("hidden", mode !== "list");
-      document.getElementById("veri-map").classList.toggle("hidden", mode !== "map");
-
-      renderVerificationBrowser();
-    }
-
-    function renderVerificationBrowser(){
-      const portal = getPortal();
-      if(!(portal === "dg" || portal === "staff")) return;
-
-      const approved = APPLICATIONS_DATA.filter(a => a.status === APP_STATUS.APPROVED && a.certificate);
-
-      // Grid
-      const grid = document.getElementById("veri-grid");
-      grid.innerHTML = approved.map(a => `
-        <div class="border border-gray-200 rounded-2xl p-4 bg-white">
-          <div class="text-xs text-gray-500 font-black">Certificate</div>
-          <div class="font-mono font-black">${escapeHtml(a.certificate.certNo)}</div>
-          <div class="text-sm text-gray-700 mt-2 font-black">${escapeHtml(a.applicant)}</div>
-          <div class="text-xs text-gray-500">${escapeHtml(a.type)} • ${escapeHtml(a.state)}</div>
-          <div class="text-xs text-gray-500 mt-1">Issued: ${new Date(a.certificate.issuedAt).toLocaleDateString()}</div>
-          <div class="mt-3 flex justify-end">
-            <button class="px-3 py-2 rounded-xl bg-gray-900 text-white font-black text-xs hover:bg-black" onclick="openCertificateModal(getAppById('${escapeJs(a.id)}'))">Open</button>
-          </div>
-        </div>
-      `).join("") || `<div class="text-sm text-gray-500">No approved certificates yet.</div>`;
-
-      // List
-      const listBody = document.getElementById("veri-list-tbody");
-      listBody.innerHTML = approved.map(a => `
-        <tr class="border-b hover:bg-gray-50">
-          <td class="py-3 px-3 font-mono font-black">${escapeHtml(a.certificate.certNo)}</td>
-          <td class="py-3 px-3 font-mono font-black">${escapeHtml(a.id)}</td>
-          <td class="py-3 px-3 font-black">${escapeHtml(a.applicant)}</td>
-          <td class="py-3 px-3">${escapeHtml(a.state)}</td>
-          <td class="py-3 px-3">${new Date(a.certificate.issuedAt).toLocaleDateString()}</td>
-          <td class="py-3 px-3 text-right">
-            <button class="px-3 py-2 rounded-xl bg-gray-900 text-white font-black text-xs hover:bg-black" onclick="openCertificateModal(getAppById('${escapeJs(a.id)}'))">Open</button>
-          </td>
-        </tr>
-      `).join("") || `<tr><td class="p-5 text-sm text-gray-500" colspan="6">No approved certificates yet.</td></tr>`;
-
-      // Map summary (state counts)
-      const stateCounts = approved.reduce((acc,a)=>{
-        acc[a.state] = (acc[a.state]||0)+1;
-        return acc;
-      }, {});
-      const mapWrap = document.getElementById("veri-map-summary");
-      const lines = Object.entries(stateCounts).sort((a,b)=>b[1]-a[1]).map(([s,c]) => `
-        <div class="flex items-center justify-between border border-gray-200 rounded-xl p-3 bg-white">
-          <div class="font-black">${escapeHtml(s)}</div>
-          <div class="px-2 py-1 rounded-full border border-gray-200 bg-gray-50 font-black text-xs">${c}</div>
-        </div>
-      `).join("");
-      mapWrap.innerHTML = lines || `<div class="text-sm text-gray-500">No approved certificates yet.</div>`;
-    }
-
-    // -----------------------
-    // ✅ DG DASHBOARD + CHART
-    // -----------------------
-    let __revChart = null;
-
-    function updateDashboardStats(){
-      const apps = APPLICATIONS_DATA.length;
-      const awaiting = APPLICATIONS_DATA.filter(a => a.status === APP_STATUS.AWAITING_PAYMENT || a.status === APP_STATUS.PAYMENT_UNDER_REVIEW).length;
-      const under = APPLICATIONS_DATA.filter(a => a.status === APP_STATUS.UNDER_REVIEW).length;
-      const approved = APPLICATIONS_DATA.filter(a => a.status === APP_STATUS.APPROVED).length;
-
-      const elA = document.getElementById("stat-apps");
-      if(elA){
-        document.getElementById("stat-apps").textContent = apps;
-        document.getElementById("stat-awaiting").textContent = awaiting;
-        document.getElementById("stat-underreview").textContent = under;
-        document.getElementById("stat-approved").textContent = approved;
+      // If opened from cert link
+      const url=new URL(location.href);
+      const cert=url.searchParams.get("cert");
+      if(cert){
+        switchTab("verification");
+        document.getElementById("verify-input").value=cert;
+        verifyCertificate();
       }
-
-      // top states
-      const approvedApps = APPLICATIONS_DATA.filter(a => a.status === APP_STATUS.APPROVED);
-      const counts = approvedApps.reduce((acc,a)=>{ acc[a.state]=(acc[a.state]||0)+1; return acc; }, {});
-      const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
-
-      const wrap = document.getElementById("top-states");
-      if(wrap){
-        wrap.innerHTML = top.map(([s,c])=>`
-          <div class="flex items-center justify-between border border-gray-200 rounded-xl p-3 bg-gray-50">
-            <div class="font-black">${escapeHtml(s)}</div>
-            <div class="px-2 py-1 rounded-full border border-gray-200 bg-white font-black text-xs">${c}</div>
-          </div>
-        `).join("") || `<div class="text-sm text-gray-500">No approved data yet.</div>`;
-      }
-    }
-
-    function drawDGChart(){
-      const canvas = document.getElementById("revenueChart");
-      if(!canvas) return;
-
-      // group cleared revenue by date (last 7)
-      const byDate = {};
-      REVENUE_DATA.forEach(r=>{
-        if(r.status !== "CLEARED") return;
-        byDate[r.date] = (byDate[r.date] || 0) + (r.amount || 0);
-      });
-
-      const dates = Object.keys(byDate).sort().slice(-7);
-      const vals = dates.map(d => byDate[d]);
-
-      if(__revChart) __revChart.destroy();
-      __revChart = new Chart(canvas, {
-        type: "bar",
-        data: { labels: dates.length ? dates : ["No data"], datasets: [{ label: "Cleared Revenue", data: vals.length ? vals : [0] }]},
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { ticks: { callback: (v)=> "₦" + Number(v).toLocaleString() } }
-          }
-        }
-      });
-    }
-
-    // -----------------------
-    // ✅ REVENUE VIEW (minister-scale numbers)
-    // -----------------------
-    function renderRevenueTable(){
-      const cleared = REVENUE_DATA.filter(r => r.status === "CLEARED").reduce((s,r)=>s+(r.amount||0),0);
-
-      const pending = APPLICATIONS_DATA
-        .filter(a => a.status === APP_STATUS.AWAITING_PAYMENT || a.status === APP_STATUS.PAYMENT_UNDER_REVIEW)
-        .reduce((s,a)=>s+(a.payment?.amount||0),0);
-
-      const totalApps = APPLICATIONS_DATA.length || 1;
-      const avg = Math.round(APPLICATIONS_DATA.reduce((s,a)=>s+(a.payment?.amount||0),0) / totalApps);
-
-      // simple run-rate projection: average fee * avg weekly submissions * 4 (demo)
-      const recentCount = Math.min(APPLICATIONS_DATA.length, 10);
-      const avgFee = avg;
-      const proj = Math.round(avgFee * Math.max(5, recentCount) * 4);
-
-      const a = document.getElementById("rev-cleared");
-      if(a){
-        document.getElementById("rev-cleared").textContent = formatNGN(cleared);
-        document.getElementById("rev-pending").textContent = formatNGN(pending);
-        document.getElementById("rev-avg").textContent = formatNGN(avg);
-        document.getElementById("rev-proj").textContent = formatNGN(proj);
-      }
-
-      const tb = document.getElementById("revenue-tbody");
-      if(!tb) return;
-
-      tb.innerHTML = REVENUE_DATA.map(r=>`
-        <tr class="border-b hover:bg-gray-50">
-          <td class="py-3">${escapeHtml(r.date)}</td>
-          <td class="py-3 font-black">${escapeHtml(r.type)}</td>
-          <td class="py-3 font-mono font-black">${escapeHtml(r.appId)}</td>
-          <td class="py-3 font-black">${formatNGN(r.amount)}</td>
-          <td class="py-3"><span class="px-2 py-1 rounded-full border border-gray-200 bg-white text-xs font-black">${escapeHtml(r.status)}</span></td>
-        </tr>
-      `).join("") || `<tr><td class="py-5 text-sm text-gray-500" colspan="5">No cleared revenue yet. Confirm a payment as staff to populate this.</td></tr>`;
-    }
-
-    function seedDemoPayments(){
-      // converts any awaiting payments into cleared under review (demo)
-      const pick = APPLICATIONS_DATA.find(a => a.status === APP_STATUS.AWAITING_PAYMENT || a.status === APP_STATUS.PAYMENT_UNDER_REVIEW);
-      if(!pick) return showMsgModal("No Pending", "No pending application to convert. Create one via Advertiser portal.");
-      pick.payment.confirmedAt = new Date().toISOString();
-      pick.payment.receiptNo = makeReceiptNo();
-      pick.status = APP_STATUS.UNDER_REVIEW;
-
-      REVENUE_DATA.unshift({
-        date: new Date().toISOString().split("T")[0],
-        type: "New Application (Vetting)",
-        appId: pick.id,
-        amount: pick.payment.amount,
-        status: "CLEARED"
-      });
-
-      persist();
-      renderAll();
-      showMsgModal("Seeded", `Demo payment confirmed for ${pick.id}.`);
-    }
-
-    // -----------------------
-    // ✅ GLOBAL RENDER
-    // -----------------------
-    function renderAll(){
-      renderApplicationsTable();
-      renderRevenueTable();
-      updateDashboardStats();
-      renderVerificationBrowser();
-      if(getPortal() === "dg") drawDGChart();
-    }
+    });
   </script>
 </body>
 </html>
