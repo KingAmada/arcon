@@ -35,10 +35,6 @@
     body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
     .hero-bg { background-image: linear-gradient(rgba(0, 50, 30, 0.85), rgba(0, 50, 30, 0.9)), url('https://images.unsplash.com/photo-1572061486895-3c8e76c27f31?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; }
     
-    /* Certificate Specific Styles */
-    .cert-pattern { background-image: radial-gradient(#008751 0.5px, transparent 0.5px); background-size: 10px 10px; opacity: 0.1; }
-    .seal-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-    
     @media print {
       .no-print { display: none !important; }
       body { background: white; }
@@ -87,7 +83,7 @@
 
   <main id="view-landing" class="flex-grow flex flex-col">
     <section class="hero-bg flex-grow flex items-center justify-center text-center px-4 py-20">
-      <div class="max-w-3xl mx-auto text-white space-y-6 animate-fade-in">
+      <div class="max-w-3xl mx-auto text-white space-y-6">
         <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1 rounded-full border border-white/20 text-xs font-bold uppercase tracking-wider text-green-100 mb-4">
           <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> Official Portal
         </div>
@@ -134,7 +130,7 @@
 
     <div class="flex-grow overflow-y-auto p-6 md:p-10 relative">
       
-      <div id="dash-overview" class="space-y-8 animate-fade-in">
+      <div id="dash-overview" class="space-y-8">
         <div class="flex justify-between items-end">
           <div>
             <h2 class="text-2xl font-serif font-bold text-gray-800">Dashboard</h2>
@@ -169,7 +165,7 @@
         </div>
       </div>
 
-      <div id="dash-apply" class="hidden max-w-4xl mx-auto animate-fade-in">
+      <div id="dash-apply" class="hidden max-w-4xl mx-auto">
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           <div class="bg-gray-900 text-white p-6 flex justify-between items-center">
             <div>
@@ -185,19 +181,19 @@
               <h4 class="text-sm font-bold text-ng-green uppercase border-b pb-2">1. Applicant & Ownership</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="label-style">Applicant Name</label>
-                  <input type="text" name="applicant" required class="input-style">
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Applicant Name</label>
+                  <input type="text" name="applicant" required class="input-style w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-green-600">
                 </div>
                 <div>
-                  <label class="label-style">Board Owner</label>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Board Owner</label>
                   <div class="flex">
-                     <select id="owner-select" onchange="toggleOwnerInput()" class="input-style rounded-r-none border-r-0">
+                     <select id="owner-select" onchange="toggleOwnerInput()" class="input-style w-full p-3 border border-gray-300 rounded-l-lg outline-none bg-white">
                        <option value="Self">Self / In-house</option>
                        <option value="New">Register New...</option>
                        <option value="MediaReach">MediaReach OMD</option>
                        <option value="Insight">Insight Publicis</option>
                      </select>
-                     <input type="text" id="new-owner-input" placeholder="Enter Name" class="input-style rounded-l-none hidden bg-gray-50">
+                     <input type="text" id="new-owner-input" placeholder="Enter Name" class="hidden w-full p-3 border border-gray-300 rounded-r-lg outline-none">
                   </div>
                 </div>
               </div>
@@ -207,8 +203,8 @@
               <h4 class="text-sm font-bold text-ng-green uppercase border-b pb-2">2. Advert Details</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="label-style">Industry Category</label>
-                  <select id="industry" onchange="calcFee()" class="input-style" required>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Industry Category</label>
+                  <select id="industry" onchange="calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none" required>
                     <option value="">Select Category</option>
                     <option value="Corporate">Corporate / Commercial</option>
                     <option value="Political">Political Campaign</option>
@@ -218,27 +214,27 @@
                   </select>
                 </div>
                 <div>
-                  <label class="label-style">Sponsor Brand</label>
-                  <input type="text" name="sponsor" placeholder="Who is paying?" required class="input-style">
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sponsor Brand</label>
+                  <input type="text" name="sponsor" placeholder="Who is paying?" required class="w-full p-3 border border-gray-300 rounded-lg outline-none">
                 </div>
                 <div>
-                   <label class="label-style">Asset Size</label>
-                   <select id="size" onchange="toggleSize(); calcFee()" class="input-style">
+                   <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Asset Size</label>
+                   <select id="size" onchange="toggleSize(); calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
                      <option value="18">48-Sheet (18 sqm)</option>
                      <option value="36">96-Sheet (36 sqm)</option>
                      <option value="108">Unipole (108 sqm)</option>
                      <option value="custom">Custom Size</option>
                    </select>
                    <div id="custom-dims" class="hidden grid grid-cols-2 gap-2 mt-2">
-                     <input type="number" id="w" placeholder="W (m)" class="input-style text-sm" oninput="calcFee()">
-                     <input type="number" id="h" placeholder="H (m)" class="input-style text-sm" oninput="calcFee()">
+                     <input type="number" id="w" placeholder="W (m)" class="p-2 border rounded" oninput="calcFee()">
+                     <input type="number" id="h" placeholder="H (m)" class="p-2 border rounded" oninput="calcFee()">
                    </div>
                 </div>
                 <div>
-                   <label class="label-style">Duration</label>
+                   <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Duration</label>
                    <div class="flex gap-2">
-                     <input type="number" id="dur-val" value="1" min="1" class="input-style w-20" oninput="calcFee()">
-                     <select id="dur-unit" class="input-style flex-grow" onchange="calcFee()">
+                     <input type="number" id="dur-val" value="1" min="1" class="w-20 p-3 border rounded-lg" oninput="calcFee()">
+                     <select id="dur-unit" class="flex-grow p-3 border rounded-lg bg-white" onchange="calcFee()">
                        <option value="Months">Months</option>
                        <option value="Weeks">Weeks</option>
                        <option value="Years">Years</option>
@@ -252,8 +248,8 @@
               <h4 class="text-sm font-bold text-ng-green uppercase border-b pb-2">3. Location</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="label-style">State Jurisdiction</label>
-                  <select id="state" onchange="popLGA(); calcFee()" class="input-style" required>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">State Jurisdiction</label>
+                  <select id="state" onchange="popLGA(); calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none" required>
                     <option value="">Select State</option>
                     <option value="Lagos">Lagos</option>
                     <option value="Abuja FCT">Abuja FCT</option>
@@ -262,8 +258,8 @@
                   </select>
                 </div>
                 <div>
-                  <label class="label-style">Local Govt (LGA)</label>
-                  <select id="lga" class="input-style"><option>Select State First</option></select>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Local Govt (LGA)</label>
+                  <select id="lga" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none"><option>Select State First</option></select>
                 </div>
               </div>
             </div>
@@ -286,7 +282,7 @@
         </div>
       </div>
 
-      <div id="dash-assets" class="hidden space-y-6 animate-fade-in">
+      <div id="dash-assets" class="hidden space-y-6">
         <div class="flex justify-between items-center">
           <h2 class="text-2xl font-serif font-bold text-gray-800">My Assets</h2>
           <div class="relative">
@@ -316,7 +312,7 @@
 
 
   <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
       <div class="flex text-center border-b font-bold text-sm">
         <button id="tab-signin" onclick="switchAuthTab('signin')" class="flex-1 py-4 bg-gray-50 text-gray-500">Sign In</button>
         <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-4 bg-gray-50 text-gray-500">Register</button>
@@ -324,8 +320,8 @@
 
       <div id="form-signin" class="p-8 space-y-4">
         <h3 class="text-xl font-bold text-gray-800">Welcome Back</h3>
-        <input type="email" id="login-email" placeholder="Email Address" class="input-style">
-        <input type="password" id="login-pin" placeholder="PIN / Password" class="input-style">
+        <input type="email" id="login-email" placeholder="Email Address" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
+        <input type="password" id="login-pin" placeholder="PIN / Password" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
         <button onclick="doLogin()" class="w-full bg-ng-green text-white py-3 rounded-lg font-bold shadow hover:bg-ng-green-dark">Login to Dashboard</button>
       </div>
 
@@ -338,27 +334,27 @@
         </div>
         <input type="hidden" id="reg-type" value="ind">
 
-        <input type="text" id="reg-name" placeholder="Full Name / Company Name" class="input-style">
-        <input type="tel" placeholder="Phone Number" class="input-style">
+        <input type="text" id="reg-name" placeholder="Full Name / Company Name" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
+        <input type="tel" placeholder="Phone Number" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
         <div class="grid grid-cols-2 gap-4">
-           <input type="text" placeholder="State" class="input-style">
-           <input type="text" placeholder="City" class="input-style">
+           <input type="text" placeholder="State" class="w-full p-3 border rounded-lg outline-none">
+           <input type="text" placeholder="City" class="w-full p-3 border rounded-lg outline-none">
         </div>
-        <input type="email" id="reg-email" placeholder="Email Address" class="input-style">
+        <input type="email" id="reg-email" placeholder="Email Address" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
         
-        <input type="text" id="reg-id" placeholder="NIN Number" class="input-style">
+        <input type="text" id="reg-id" placeholder="NIN Number" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
         
-        <input type="password" placeholder="Create 4-digit PIN" class="input-style">
+        <input type="password" placeholder="Create 4-digit PIN" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
         
         <button onclick="doLogin()" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold shadow hover:bg-black">Complete Registration</button>
       </div>
 
-      <button onclick="document.getElementById('auth-modal').classList.add('hidden')" class="w-full py-3 text-sm text-gray-500 hover:text-gray-800">Cancel</button>
+      <button onclick="closeModal('auth-modal')" class="w-full py-3 text-sm text-gray-500 hover:text-gray-800">Cancel</button>
     </div>
   </div>
 
   <div id="payment-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
       <div class="bg-gray-900 p-4 text-white flex justify-between">
          <h3 class="font-bold flex items-center gap-2"><i class="ph ph-cardholder"></i> Payment Gateway</h3>
          <button onclick="closeModal('payment-modal')" class="hover:text-gray-300"><i class="ph ph-x text-lg"></i></button>
@@ -387,7 +383,7 @@
   </div>
 
   <div id="certificate-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto">
-     <div id="certificate-container" class="bg-white w-full max-w-3xl relative shadow-2xl my-auto animate-fade-in print:shadow-none">
+     <div id="certificate-container" class="bg-white w-full max-w-3xl relative shadow-2xl my-auto print:shadow-none">
         
         <button onclick="closeModal('certificate-modal')" class="absolute -top-10 right-0 text-white hover:text-red-400 no-print font-bold flex items-center gap-1">
           Close <i class="ph ph-x-circle text-2xl"></i>
@@ -458,7 +454,7 @@
   </div>
 
   <div id="verify-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl animate-fade-in relative">
+    <div class="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl relative">
       <button onclick="closeModal('verify-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="ph ph-x text-lg"></i></button>
       
       <div class="text-center mb-6">
@@ -467,7 +463,7 @@
         <p class="text-xs text-gray-500 mt-1">Enter the License ID found on the billboard or certificate.</p>
       </div>
 
-      <input type="text" id="verify-input" placeholder="e.g. APP-2025-001" class="input-style text-center font-mono uppercase text-lg tracking-widest mb-4">
+      <input type="text" id="verify-input" placeholder="e.g. APP-2025-001" class="w-full p-3 border rounded-lg text-center font-mono uppercase text-lg tracking-widest mb-4">
       <button onclick="performVerify()" class="w-full bg-ng-green text-white py-3 rounded-lg font-bold shadow hover:bg-ng-green-dark">Check Status</button>
 
       <div id="verify-result" class="mt-6 hidden"></div>
@@ -525,19 +521,16 @@
     }
 
     function doLogin() {
-      // Mock Login
       const email = getEl('login-email').value || getEl('reg-email').value || "user@demo.com";
       const name = getEl('reg-name').value || "Sarki Amada";
       currentUser = { name: name, type: getEl('reg-type').value === 'corp' ? 'Corporate' : 'Individual' };
 
-      // Update UI
       getEl('user-name-display').innerText = currentUser.name;
       getEl('user-type-display').innerText = currentUser.type;
       getEl('auth-buttons').classList.add('hidden');
       getEl('user-menu').classList.remove('hidden');
       getEl('user-menu').classList.add('flex');
 
-      // Switch View
       closeModal('auth-modal');
       getEl('view-landing').classList.add('hidden');
       getEl('view-dashboard').classList.remove('hidden');
@@ -551,7 +544,7 @@
     }
 
     function goHome() {
-      if(currentUser) return; // Stay on dashboard if logged in
+      if(currentUser) return; 
       location.reload();
     }
 
@@ -565,7 +558,6 @@
       ['overview','apply','assets'].forEach(t => getEl('dash-'+t).classList.add('hidden'));
       getEl('dash-'+tab).classList.remove('hidden');
       
-      // Nav Styles
       ['overview','apply','assets'].forEach(t => {
         const btn = getEl('nav-'+t);
         if(t === tab) btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-3 bg-green-50 text-ng-green border-l-4 border-ng-green transition";
@@ -602,7 +594,7 @@
       });
     }
 
-    // --- 3. APPLICATION & FEES (Restored Logic) ---
+    // --- 3. APPLICATION & FEES ---
     const RATES = { 'Lagos': 100000, 'Abuja FCT': 85000, 'Rivers': 75000, 'Kano': 60000 };
     const LGAS = { 
       'Lagos': ['Ikeja','Eti-Osa','Surulere'], 'Abuja FCT':['AMAC','Bwari','Gwagwalada'], 
@@ -637,23 +629,20 @@
 
        let base = RATES[state] || 50000;
        
-       // Multipliers
        if(ind === 'Political') base *= 1.5;
        if(ind === 'Religious' || ind === 'SME') base *= 0.7;
 
-       // Size Logic
        let sizeMod = 1;
        const sz = getEl('size').value;
        if(sz === 'custom') {
           const w = getEl('w').value || 0;
           const h = getEl('h').value || 0;
-          sizeMod = (w * h) / 10; // rough calc
+          sizeMod = (w * h) / 10;
        } else {
           sizeMod = parseInt(sz) / 18; 
        }
        if(sizeMod < 1) sizeMod = 1;
 
-       // Duration
        const dVal = parseInt(getEl('dur-val').value) || 1;
        const dUnit = getEl('dur-unit').value;
        let months = dVal;
@@ -665,7 +654,7 @@
        return total;
     }
 
-    // --- 4. PAYMENT & QR GENERATION ---
+    // --- 4. PAYMENT & QR ---
     let pendingApp = null;
 
     function handleFormSubmit(e) {
@@ -687,15 +676,11 @@
     }
 
     function processPayment() {
-       // Mock Payment Success
        closeModal('payment-modal');
-       
-       // 1. Add to Assets List
        myAssets.unshift(pendingApp);
        updateDashStats();
        dashSwitch('assets');
-
-       // 2. Alert & Show Cert Immediately
+       
        setTimeout(() => {
           alert(`Payment Successful!\nLicense ${pendingApp.id} is now ACTIVE.`);
           generateCertificate(pendingApp.id);
@@ -712,9 +697,8 @@
        getEl('cert-type').innerText = asset.type;
        getEl('cert-loc').innerText = asset.state;
 
-       // Generate QR
        const qrContainer = getEl('cert-qrcode');
-       qrContainer.innerHTML = ''; // Clear prev
+       qrContainer.innerHTML = ''; 
        new QRCode(qrContainer, {
           text: `ARCON-VERIFY:${asset.id}|${asset.status}`,
           width: 90,
@@ -735,7 +719,6 @@
        const resDiv = getEl('verify-result');
        resDiv.classList.remove('hidden');
 
-       // Check both myAssets (mock session) AND some hardcoded valids
        const found = myAssets.find(a => a.id === input) || (input === 'APP-2025-001' ? {sponsor:'Zenith Bank', status:'Active'} : null);
 
        if(found) {
@@ -758,14 +741,6 @@
             </div>`;
        }
     }
-
-    // --- UTILS ---
-    window.input-style = "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm bg-white";
-    window.label-style = "block text-xs font-bold text-gray-500 uppercase mb-1";
-    // Apply styles dynamically for cleaner HTML
-    document.querySelectorAll('.input-style').forEach(el => el.className += " w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm bg-white");
-    document.querySelectorAll('.label-style').forEach(el => el.className += " block text-xs font-bold text-gray-500 uppercase mb-1");
-
   </script>
 </body>
 </html>
