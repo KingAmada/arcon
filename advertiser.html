@@ -15,7 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <!-- QR (Scan) -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <!-- Invoice downloads -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1868,64 +1868,97 @@
       }
     }
 
-    async function startScanner(){
-      try{
-        if(!window.Html5Qrcode){
-          getEl('scanner-status').innerText = "Lib Missing";
-          return alert("Scanner library not loaded. Check the html5-qrcode script tag.");
+   async function startScanner() {
+        // 1. Check if library loaded
+        if (!window.Html5Qrcode) {
+            getEl('scanner-status').innerText = "Lib Error";
+            return alert("Scanner library failed to load. Please check your internet connection or the CDN URL.");
         }
 
-        getEl('scanner-status').innerText = "Starting…";
+        getEl('scanner-status').innerText = "Starting...";
 
-        if(qrScanner) await stopScanner();
+        // 2. Stop existing instance if running
+        if (qrScanner) {
+            await stopScanner();
+        }
 
-        qrScanner = new Html5Qrcode("reader");
+        // 3. CLEAR THE CONTAINER (Crucial Step)
+        // The library requires an empty <div> to attach the video feed.
+        const readerDiv = getEl('reader');
+        readerDiv.innerHTML = ""; 
 
-        const config = { fps: 10, qrbox: { width: 250, height: 250 }, rememberLastUsedCamera: true };
+        try {
+            // 4. Initialize
+            qrScanner = new Html5Qrcode("reader");
 
-        await qrScanner.start(
-          { facingMode: "environment" },
-          config,
-          (decodedText) => {
-            const id = extractIdFromPayload(decodedText);
-            getEl('verify-input').value = id;
-            getEl('scanner-status').innerText = "Scanned";
-            stopScanner().finally(() => performVerify(true));
-          },
-          () => {}
-        );
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
 
-        getEl('scanner-status').innerText = "Running";
-      }catch(err){
-        console.error(err);
-        getEl('scanner-status').innerText = "Failed";
-        alert(
-          "Scanner failed to start.\n\nCommon causes:\n" +
-          "1) Page opened via frame-forwarding\n" +
-          "2) Camera permission denied\n" +
-          "3) No camera / camera busy\n\n" +
-          "Error: " + (err?.message || err)
-        );
-      }
+            // 5. Start Camera
+            await qrScanner.start(
+                { facingMode: "environment" }, // Prefer back camera
+                config,
+                (decodedText) => {
+                    // Success Callback
+                    console.log("Scanned:", decodedText);
+                    const id = extractIdFromPayload(decodedText);
+                    
+                    // Update UI
+                    getEl('verify-input').value = id;
+                    getEl('scanner-status').innerText = "Scanned";
+                    
+                    // Stop and Verify
+                    stopScanner().then(() => {
+                        performVerify(true);
+                    });
+                },
+                (errorMessage) => {
+                    // Scanning... (ignore read errors as they happen every frame)
+                }
+            );
+
+            getEl('scanner-status').innerText = "Running";
+            
+        } catch (err) {
+            console.error(err);
+            getEl('scanner-status').innerText = "Failed";
+            
+            // Restore the placeholder UI if it fails
+            stopScanner(); 
+            
+            alert("Camera failed to start.\n\n" +
+                  "1. Ensure you are on HTTPS (not http).\n" +
+                  "2. Ensure you allowed camera permissions.\n" +
+                  "3. Close other apps using the camera.");
+        }
     }
 
-    async function stopScanner(){
-      try{
-        if(qrScanner){
-          await qrScanner.stop().catch(()=>{});
-          await qrScanner.clear().catch(()=>{});
-          qrScanner = null;
+    async function stopScanner() {
+        try {
+            if (qrScanner) {
+                // Try to stop, ignore errors if it's already stopped
+                await qrScanner.stop().catch(e => console.warn(e));
+                await qrScanner.clear().catch(e => console.warn(e));
+                qrScanner = null;
+            }
+        } catch (e) {
+            console.error("Stop failed", e);
         }
+
+        // RESTORE PLACEHOLDER UI
+        // We put this back so the user knows what to do
         const reader = getEl('reader');
         reader.innerHTML = `
-          <div class="text-center text-gray-400 text-sm font-semibold p-6">
-            <i class="ph ph-camera text-3xl mb-2"></i>
-            <p>Click “Start Scanner” and allow camera permission.</p>
-            <p class="text-xs mt-2">Must be HTTPS. Avoid frame-forwarded domains.</p>
-          </div>
+            <div class="text-center text-gray-400 text-sm font-semibold p-6">
+                <i class="ph ph-camera text-3xl mb-2"></i>
+                <p>Click “Start Scanner” and allow camera permission.</p>
+                <p class="text-xs mt-2">Must be HTTPS.</p>
+            </div>
         `;
         getEl('scanner-status').innerText = "Stopped";
-      }catch(e){}
     }
 
     // -----------------------
