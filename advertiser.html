@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ARCON - Advertiser Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { 'ng-green': '#008751', 'ng-green-dark': '#00643C', 'gold': '#D4AF37' } } }
+    }
+  </script>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@400;700&display=swap'); body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-ng-green rounded-full flex items-center justify-center text-white font-serif font-bold">A</div>
+          <div>
+            <h1 class="font-serif font-bold text-ng-green-dark leading-none">ARCON</h1>
+            <p class="text-[10px] text-gray-500 uppercase tracking-wider">Advertiser Services</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button onclick="switchTab('apply')" id="nav-apply" class="px-3 py-2 rounded-md text-sm font-medium bg-ng-green text-white">New Application</button>
+          <button onclick="switchTab('status')" id="nav-status" class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-ng-green">My Applications</button>
+          <button onclick="switchTab('verify')" id="nav-verify" class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-ng-green">Verify Asset</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    
+    <section id="apply-view" class="space-y-8">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <h2 class="text-2xl font-serif font-bold text-gray-800 mb-6 border-b pb-4">New Advertisement License</h2>
+        
+        <form id="app-form" onsubmit="handlePreSubmit(event)" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Company / Applicant Name</label>
+              <input type="text" name="applicant" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ng-green outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sponsor Name</label>
+              <input type="text" name="sponsor" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ng-green outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">State</label>
+              <select name="state" id="state" onchange="calculateFee()" class="w-full p-3 border rounded-lg outline-none">
+                <option value="">Select State</option>
+                <option value="Abuja FCT">Abuja FCT</option>
+                <option value="Lagos">Lagos</option>
+                <option value="Rivers">Rivers</option>
+                <option value="Kano">Kano</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Type</label>
+              <select name="type" class="w-full p-3 border rounded-lg outline-none">
+                <option value="Digital Billboard">Digital Billboard</option>
+                <option value="Static Billboard">Static Billboard</option>
+                <option value="Lamp Post">Lamp Post</option>
+              </select>
+            </div>
+            <div>
+               <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Duration (Months)</label>
+               <input type="number" id="duration" name="duration" value="1" min="1" onchange="calculateFee()" class="w-full p-3 border rounded-lg outline-none">
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center border-t pt-6">
+            <div>
+              <p class="text-sm text-gray-500">Estimated Total Fee</p>
+              <h3 id="fee-display" class="text-3xl font-bold text-ng-green">₦0.00</h3>
+            </div>
+            <button type="submit" class="bg-gray-900 text-white px-8 py-3 rounded-lg font-bold hover:bg-black transition">Proceed to Payment</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="status-view" class="hidden space-y-6">
+      <h2 class="text-2xl font-serif font-bold text-gray-800">My Applications</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="p-4 font-bold text-gray-600">App ID</th>
+              <th class="p-4 font-bold text-gray-600">Type</th>
+              <th class="p-4 font-bold text-gray-600">Status</th>
+              <th class="p-4 font-bold text-gray-600 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="status-table" class="divide-y divide-gray-100">
+            <tr>
+              <td class="p-4 font-mono">APP-2025-001</td>
+              <td class="p-4">Digital Billboard (Lagos)</td>
+              <td class="p-4"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold">Pending Approval</span></td>
+              <td class="p-4 text-right"><button class="text-blue-600 hover:underline">View Invoice</button></td>
+            </tr>
+             <tr>
+              <td class="p-4 font-mono">APP-2025-002</td>
+              <td class="p-4">Lamp Post (Abuja)</td>
+              <td class="p-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">Approved</span></td>
+              <td class="p-4 text-right"><button class="text-ng-green font-bold hover:underline">Download Cert</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="verify-view" class="hidden max-w-xl mx-auto text-center pt-10">
+      <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+        <div class="w-16 h-16 bg-green-50 text-ng-green rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Public Verification Portal</h2>
+        <p class="text-sm text-gray-500 mb-6">Enter a Certificate Number or Scan QR Code to verify ARCON approval.</p>
+        
+        <input type="text" placeholder="Enter Certificate No. (e.g., APP-2025-001)" class="w-full p-4 border border-gray-300 rounded-lg mb-4 text-center text-lg font-mono uppercase focus:ring-2 focus:ring-ng-green outline-none">
+        <button onclick="alert('Verification System Active: Mock Valid.')" class="w-full bg-ng-green text-white py-3 rounded-lg font-bold hover:bg-ng-green-dark">Verify Now</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="pay-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-fade-in">
+      <div class="bg-gray-900 p-4 text-white flex justify-between items-center">
+        <h3 class="font-bold">Payment Required</h3>
+        <button onclick="closePayModal()" class="hover:text-gray-300">&times;</button>
+      </div>
+      <div class="p-6 text-center">
+        <p class="text-sm text-gray-500 mb-2">Please pay the application fee of</p>
+        <h2 id="modal-amount" class="text-4xl font-black text-ng-green mb-6">₦0.00</h2>
+        
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-left">
+          <p class="text-xs font-bold text-gray-400 uppercase mb-1">Bank Name</p>
+          <p class="font-bold text-gray-800 mb-3">Stanbic IBTC Bank</p>
+          
+          <p class="text-xs font-bold text-gray-400 uppercase mb-1">Account Name</p>
+          <p class="font-bold text-gray-800 mb-3">ARCON ADs VETTING</p>
+          
+          <p class="text-xs font-bold text-gray-400 uppercase mb-1">Account Number</p>
+          <div class="flex justify-between items-center">
+            <p class="font-mono text-xl font-bold text-gray-800">5770242424</p>
+            <button onclick="navigator.clipboard.writeText('5770242424')" class="text-xs text-blue-600 hover:underline">Copy</button>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="downloadInvoice()" class="flex-1 py-3 border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50">Download Invoice</button>
+          <button onclick="confirmPayment()" class="flex-1 py-3 bg-ng-green text-white rounded-lg font-bold hover:bg-ng-green-dark">I Have Paid</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const RATES = {'Lagos': 150000, 'Abuja FCT': 120000, 'Rivers': 100000, 'Kano': 80000};
+    let currentFee = 0;
+
+    function switchTab(id){
+      ['apply','status','verify'].forEach(t => document.getElementById(t+'-view').classList.add('hidden'));
+      document.getElementById(id+'-view').classList.remove('hidden');
+      
+      document.querySelectorAll('nav button').forEach(b => b.classList.replace('bg-ng-green','text-gray-600'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-white','hover:text-ng-green'));
+      
+      const btn = document.getElementById('nav-'+id);
+      btn.classList.remove('text-gray-600','hover:text-ng-green');
+      btn.classList.add('bg-ng-green','text-white');
+    }
+
+    function calculateFee(){
+      const state = document.getElementById('state').value;
+      const duration = document.getElementById('duration').value || 1;
+      const base = RATES[state] || 50000;
+      currentFee = base * duration;
+      document.getElementById('fee-display').innerText = new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(currentFee);
+      document.getElementById('modal-amount').innerText = document.getElementById('fee-display').innerText;
+    }
+
+    function handlePreSubmit(e){
+      e.preventDefault();
+      if(currentFee === 0) { alert('Please select a state.'); return; }
+      document.getElementById('pay-modal').classList.remove('hidden');
+    }
+
+    function closePayModal(){
+      document.getElementById('pay-modal').classList.add('hidden');
+    }
+
+    function downloadInvoice(){
+      const text = `INVOICE - AWAITING PAYMENT\n\nPay To: ARCON ADs VETTING\nBank: Stanbic IBTC\nAcc: 5770242424\nAmount: ${document.getElementById('modal-amount').innerText}\nDate: ${new Date().toLocaleDateString()}`;
+      const blob = new Blob([text], {type:'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ARCON_Invoice.txt';
+      a.click();
+    }
+
+    function confirmPayment(){
+      closePayModal();
+      alert('Application Submitted! Please allow 24-48 hours for payment confirmation.');
+      switchTab('status');
+      // Logic to add to table would go here
+    }
+  </script>
+</body>
+</html>
