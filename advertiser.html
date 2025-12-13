@@ -2,26 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ARCON | Advertiser Services & Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>ARCON | Advertising Regulatory Council of Nigeria</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Icons -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-  <!-- QR (Generate) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
-  <!-- QR (Scan) -->
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
-  <!-- Invoice downloads -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <!-- Optional chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <script>
@@ -31,14 +23,16 @@
           colors: {
             arconGreen: "#008751",
             arconGreenDark: "#00643C",
-            arconYellow: "#F5A800",     // OrangeYellow
-            arconYellowDark: "#D48F00",
+            arconYellow: "#F5A800",
             ink: "#0B1220",
           },
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
             serif: ['Merriweather', 'serif'],
-            mono: ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          screens: {
+            'print': {'raw': 'print'},
           }
         }
       }
@@ -47,1935 +41,727 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Merriweather:wght@400;700;900&family=Fira+Code:wght@400;600&display=swap');
-    body { font-family: Inter, system-ui, sans-serif; background:#f8fafc; }
+    
+    body { font-family: Inter, system-ui, sans-serif; background:#f8fafc; -webkit-tap-highlight-color: transparent; }
+    
     .hero-bg {
-      background-image:
-        linear-gradient(rgba(0, 135, 81, 0.92), rgba(0, 100, 60, 0.92)),
-        url('https://images.unsplash.com/photo-1572061486895-3c8e76c27f31?q=80&w=2070&auto=format&fit=crop');
-      background-size: cover;
-      background-position: center;
+      background-image: linear-gradient(rgba(0, 135, 81, 0.95), rgba(0, 70, 40, 0.95)), url('https://images.unsplash.com/photo-1572061486895-3c8e76c27f31?q=80&w=2070');
+      background-size: cover; background-position: center;
     }
-    .chip { @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest; }
 
+    /* TOAST ANIMATION */
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    .toast-enter { animation: slideIn 0.5s forwards; }
+    .toast-exit { animation: fadeOut 0.5s forwards; }
+
+    /* PRINT STYLES - FIXED FOR CERTIFICATE */
     @media print {
+      @page { margin: 0; size: A4; }
+      body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      
+      /* Hide everything except certificate */
+      body > *:not(#certificate-modal) { display: none !important; }
+      
+      #certificate-modal { 
+        position: fixed !important; top: 0 !important; left: 0 !important; 
+        width: 100vw !important; height: 100vh !important; 
+        background: white !important; z-index: 99999 !important; 
+        overflow: hidden !important; padding: 0 !important; display: block !important;
+      }
+
+      #certificate-container {
+        box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: none !important;
+        transform: scale(0.95); transform-origin: top center; /* Shrink slightly to fit margins */
+      }
+
+      /* Buttons & Close icons hidden */
       .no-print { display: none !important; }
-      body { background: white; }
-      #certificate-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; padding: 0; background: white; }
-      #certificate-container { box-shadow: none; transform: scale(1); margin: 0; width: 100%; }
+      
+      /* Ensure Grid holds structure */
+      .print-grid-fix { display: grid !important; grid-template-columns: repeat(5, 1fr) !important; }
+      .print-col-span-4 { grid-column: span 4 / span 4 !important; }
+      .print-col-span-1 { grid-column: span 1 / span 1 !important; }
     }
   </style>
 </head>
 
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen text-ink">
 
-  <!-- HEADER -->
+  <div id="toast-container" class="fixed top-20 right-4 z-[100] flex flex-col gap-2 pointer-events-none no-print"></div>
+
   <header class="bg-white border-b border-gray-200 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
         <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
-          <div class="h-10 w-10 rounded-md shadow-sm overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
-            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-full w-full object-cover" alt="ARCON Logo">
-          </div>
+          <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-10 w-10 rounded shadow-sm">
           <div class="leading-tight">
-            <h1 class="font-serif font-black text-arconGreenDark text-lg">ARCON</h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-extrabold">Integrated Regulatory Platform</p>
+            <h1 class="font-serif font-black text-arconGreenDark text-lg tracking-tight">ARCON</h1>
+            <p class="text-[9px] text-gray-500 uppercase tracking-widest font-extrabold hidden sm:block">Integrated Regulatory Platform</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-4">
-          <button onclick="openVerifyModal()" class="hidden md:flex items-center gap-2 text-sm font-extrabold text-gray-600 hover:text-arconGreen transition">
-            <i class="ph ph-scan text-lg"></i> Verify Asset
+        <div class="flex items-center gap-3">
+          <button onclick="openVerifyModal()" class="hidden md:flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-arconGreen">
+            <i class="ph ph-scan text-lg"></i> Verify
           </button>
 
-          <div class="h-6 w-px bg-gray-200 hidden md:block"></div>
-
-          <div id="auth-buttons" class="flex items-center gap-3">
-            <button onclick="openAuthModal('signin')" class="text-sm font-extrabold text-gray-600 hover:text-gray-900">Sign In</button>
-            <button onclick="openAuthModal('signup')" class="bg-arconGreen text-white px-5 py-2 rounded-lg text-sm font-extrabold shadow hover:bg-arconGreenDark transition">Register</button>
+          <div id="auth-buttons" class="flex items-center gap-2">
+            <button onclick="openAuthModal('signin')" class="text-sm font-bold text-gray-600 px-3 py-2">Sign In</button>
+            <button onclick="openAuthModal('signup')" class="bg-arconGreen text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-arconGreenDark transition">Register</button>
           </div>
 
           <div id="user-menu" class="hidden items-center gap-3">
-            <span class="text-xs text-right hidden sm:block">
-              <span class="block font-extrabold text-gray-800" id="user-name-display">User</span>
-              <span class="block text-gray-400" id="user-type-display">Individual</span>
-            </span>
-            <div class="h-9 w-9 bg-arconGreenDark text-white rounded-full flex items-center justify-center font-extrabold shadow" id="avatar-badge">OA</div>
-            <button onclick="doLogout()" class="text-red-500 hover:bg-red-50 p-2 rounded"><i class="ph ph-sign-out text-lg"></i></button>
+             <div class="text-right hidden sm:block">
+              <span class="block text-xs font-bold text-gray-800" id="user-name-display">User</span>
+              <span class="block text-[10px] text-gray-400" id="user-type-display">Agency</span>
+            </div>
+            <div class="h-8 w-8 bg-arconGreenDark text-white rounded-full flex items-center justify-center font-bold text-xs" id="avatar-badge">AG</div>
+            <button onclick="doLogout()" class="text-red-500 p-2"><i class="ph ph-sign-out text-lg"></i></button>
           </div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- LANDING -->
   <main id="view-landing" class="flex-grow flex flex-col">
-    <section class="hero-bg flex-grow flex items-center justify-center text-center px-4 py-20">
-      <div class="max-w-3xl mx-auto text-white space-y-6">
-        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1 rounded-full border border-white/20 text-xs font-extrabold uppercase tracking-wider text-green-100 mb-4">
-          <span class="w-2 h-2 rounded-full bg-arconYellow animate-pulse"></span> Official Portal
+    <section class="hero-bg py-16 px-4 text-center text-white relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+      
+      <div class="relative z-10 max-w-4xl mx-auto space-y-6">
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 text-[10px] font-bold uppercase tracking-wider text-green-100">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Enforcement Active
         </div>
 
-        <h1 class="text-4xl md:text-6xl font-serif font-black leading-tight drop-shadow-lg">
+        <h1 class="text-3xl md:text-5xl font-serif font-black leading-tight drop-shadow-md">
           Advertising Regulatory <br/> Council of Nigeria
         </h1>
 
-        <p class="text-lg text-green-50 max-w-2xl mx-auto leading-relaxed drop-shadow">
-          Apply for advertisement licenses, verify compliance, and manage your regulatory assets in one secure platform.
+        <p class="text-green-50 text-sm md:text-lg max-w-xl mx-auto leading-relaxed">
+          Ensure your brand is safe. Unvetted advertisements are subject to immediate removal and regulatory fines.
         </p>
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-          <button onclick="openAuthModal('signup')" class="bg-arconYellow hover:bg-arconYellowDark text-ink px-8 py-4 rounded-xl font-black text-lg shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
-            Get Started <i class="ph ph-arrow-right-bold"></i>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+          <button onclick="openAuthModal('signup')" class="bg-arconYellow hover:bg-arconYellowDark text-ink px-8 py-4 rounded-xl font-black text-lg shadow-xl flex items-center justify-center gap-2 transform active:scale-95 transition">
+            Get Licensed <i class="ph ph-arrow-right-bold"></i>
           </button>
-          <button onclick="openVerifyModal()" class="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl font-black text-lg shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
-            <i class="ph ph-seal-check text-arconGreen text-xl"></i> Verify Asset
+          <button onclick="openVerifyModal()" class="bg-white text-gray-900 px-8 py-4 rounded-xl font-black text-lg shadow-xl flex items-center justify-center gap-2 transform active:scale-95 transition">
+            <i class="ph ph-scan text-arconGreen text-xl"></i> Verify Asset
           </button>
         </div>
+      </div>
+    </section>
 
-        <p class="text-xs text-green-100/80 mt-8">
-          Tip: QR scanning requires HTTPS and camera permission. Avoid framed/forwarded domains (frame redirect).
-        </p>
+    <section class="bg-ink text-white py-10 px-4">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center border-b border-gray-800 pb-8 mb-8">
+          <div>
+            <div class="text-3xl font-black text-arconYellow">50k+</div>
+            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Assets Vetted</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-green-400">24h</div>
+            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Approval Time</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-red-500">₦500k</div>
+            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Fine for Illegal Ads</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-blue-400">100%</div>
+            <div class="text-xs text-gray-400 uppercase tracking-widest mt-1">Compliance</div>
+          </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 bg-gray-900 p-6 rounded-2xl border border-gray-800">
+          <div class="flex items-start gap-4">
+            <div class="bg-red-500/20 p-3 rounded-full text-red-500"><i class="ph ph-warning-octagon text-2xl"></i></div>
+            <div>
+              <h3 class="font-bold text-lg text-white">Don't Risk Your Brand Reputation</h3>
+              <p class="text-sm text-gray-400">Illegal advertisements are removed daily. Secure your APCON Certificate of Approval today.</p>
+            </div>
+          </div>
+          <button onclick="openAuthModal('signin')" class="w-full md:w-auto px-6 py-3 rounded-lg bg-white text-ink font-black text-sm whitespace-nowrap">Login to Portal</button>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- DASHBOARD -->
   <main id="view-dashboard" class="hidden flex-grow bg-gray-50 flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden">
-
-    <!-- Sidebar -->
-    <aside class="w-full md:w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col no-print z-30">
-      <nav class="p-4 space-y-2 flex-grow">
-        <button onclick="dashSwitch('overview')" id="nav-overview" class="w-full text-left px-4 py-3 rounded-lg text-sm font-extrabold flex items-center gap-3 bg-green-50 text-arconGreen border-l-4 border-arconGreen">
-          <i class="ph ph-squares-four text-lg"></i> Overview
+    <aside class="w-full md:w-20 lg:w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-row md:flex-col justify-between md:justify-start z-30 no-print">
+      <nav class="p-2 md:p-4 flex md:flex-col gap-1 w-full overflow-x-auto md:overflow-visible">
+        <button onclick="dashSwitch('overview')" id="nav-overview" class="flex-1 md:flex-none text-left px-3 py-3 rounded-lg text-xs md:text-sm font-bold flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-green-50 text-arconGreen">
+          <i class="ph ph-squares-four text-xl"></i> <span class="hidden md:inline">Overview</span>
         </button>
-        <button onclick="dashSwitch('apply')" id="nav-apply" class="w-full text-left px-4 py-3 rounded-lg text-sm font-extrabold flex items-center gap-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent transition">
-          <i class="ph ph-plus-circle text-lg"></i> New Application
+        <button onclick="dashSwitch('apply')" id="nav-apply" class="flex-1 md:flex-none text-left px-3 py-3 rounded-lg text-xs md:text-sm font-bold flex flex-col md:flex-row items-center gap-2 md:gap-3 text-gray-600 hover:bg-gray-50">
+          <i class="ph ph-plus-circle text-xl"></i> <span class="hidden md:inline">New Application</span>
         </button>
-        <button onclick="dashSwitch('assets')" id="nav-assets" class="w-full text-left px-4 py-3 rounded-lg text-sm font-extrabold flex items-center gap-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent transition">
-          <i class="ph ph-files text-lg"></i> My Assets
+        <button onclick="dashSwitch('assets')" id="nav-assets" class="flex-1 md:flex-none text-left px-3 py-3 rounded-lg text-xs md:text-sm font-bold flex flex-col md:flex-row items-center gap-2 md:gap-3 text-gray-600 hover:bg-gray-50">
+          <i class="ph ph-files text-xl"></i> <span class="hidden md:inline">My Assets</span>
         </button>
       </nav>
-
-      <div class="p-4 border-t border-gray-200">
-        <div class="bg-arconYellow/10 border border-arconYellow/30 rounded-lg p-3">
-          <p class="text-xs font-extrabold text-ink uppercase mb-1">Support</p>
-          <p class="text-xs text-gray-700">Need help? Call ARCON<br>+234 800 ARCON NG</p>
-        </div>
-      </div>
     </aside>
 
-    <!-- Content -->
-    <div class="flex-grow overflow-y-auto p-6 md:p-10 relative">
-
-      <!-- OVERVIEW -->
-      <div id="dash-overview" class="space-y-8">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-3">
+    <div class="flex-grow overflow-y-auto p-4 md:p-8 relative">
+      <div id="dash-overview" class="space-y-6 max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
-            <h2 class="text-2xl font-serif font-black text-gray-800">Dashboard</h2>
-            <p class="text-sm text-gray-500">Real-time status of your regulatory compliance & assets.</p>
+            <h2 class="text-2xl font-serif font-black text-gray-800">Overview</h2>
+            <p class="text-xs text-gray-500">Compliance Status</p>
           </div>
-          <div class="flex gap-3">
-            <button onclick="openVerifyModal()" class="px-4 py-2 rounded-lg border font-extrabold text-gray-700 hover:bg-white flex items-center gap-2">
-              <i class="ph ph-scan"></i> Verify Asset
-            </button>
-            <button onclick="dashSwitch('apply')" class="bg-arconGreen text-white px-4 py-2 rounded-lg text-sm font-extrabold shadow hover:bg-arconGreenDark">Apply Now</button>
-          </div>
+          <button onclick="dashSwitch('apply')" class="w-full md:w-auto bg-arconGreen text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg hover:bg-arconGreenDark active:scale-95 transition">
+            + New Application
+          </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
-            <div class="w-12 h-12 bg-green-100 text-arconGreen rounded-full flex items-center justify-center text-2xl"><i class="ph ph-check-circle"></i></div>
-            <div>
-              <p class="text-xs font-extrabold text-gray-400 uppercase">Active</p>
-              <h3 class="text-2xl font-black text-gray-900" id="stat-active">0</h3>
-            </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+          <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="text-2xl font-black text-arconGreen" id="stat-active">0</div>
+            <div class="text-xs text-gray-500 font-bold uppercase">Active Licenses</div>
           </div>
-
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
-            <div class="w-12 h-12 bg-arconYellow/20 text-arconYellowDark rounded-full flex items-center justify-center text-2xl"><i class="ph ph-clock"></i></div>
-            <div>
-              <p class="text-xs font-extrabold text-gray-400 uppercase">Expiring Soon</p>
-              <h3 class="text-2xl font-black text-gray-900" id="stat-expiring">0</h3>
-              <p class="text-[10px] text-red-500 font-extrabold">≤ 30 days</p>
-            </div>
+          <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100">
+             <div class="text-2xl font-black text-arconYellowDark" id="stat-expiring">0</div>
+             <div class="text-xs text-gray-500 font-bold uppercase">Expiring Soon</div>
           </div>
-
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
-            <div class="w-12 h-12 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-2xl"><i class="ph ph-hourglass"></i></div>
-            <div>
-              <p class="text-xs font-extrabold text-gray-400 uppercase">Pending</p>
-              <h3 class="text-2xl font-black text-gray-900" id="stat-pending">0</h3>
-            </div>
+          <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100">
+             <div class="text-2xl font-black text-gray-700" id="stat-pending">0</div>
+             <div class="text-xs text-gray-500 font-bold uppercase">Pending</div>
           </div>
-
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
-            <div class="w-12 h-12 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-2xl"><i class="ph ph-receipt"></i></div>
-            <div>
-              <p class="text-xs font-extrabold text-gray-400 uppercase">Total</p>
-              <h3 class="text-2xl font-black text-gray-900" id="stat-total">0</h3>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 lg:col-span-2">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <p class="text-xs font-extrabold uppercase tracking-widest text-gray-500">Compliance Snapshot</p>
-                <h3 class="text-lg font-black text-gray-900">Assets by Status</h3>
-              </div>
-              <span class="chip bg-arconYellow/15 text-ink border border-arconYellow/40"><i class="ph ph-shield-check"></i> Live</span>
-            </div>
-            <canvas id="statusChart" height="120"></canvas>
-            <p class="text-xs text-gray-500 mt-3">Tip: keep certificates updated to avoid enforcement actions.</p>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <p class="text-xs font-extrabold uppercase tracking-widest text-gray-500">Next Expiries</p>
-            <h3 class="text-lg font-black text-gray-900 mb-4">Renewal Radar</h3>
-            <div id="next-expiries" class="space-y-3"></div>
-            <button onclick="dashSwitch('assets')" class="mt-4 w-full py-3 rounded-xl bg-ink text-white font-black hover:bg-black">
-              View All Assets
-            </button>
+          <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100">
+             <div class="text-2xl font-black text-ink" id="stat-total">0</div>
+             <div class="text-xs text-gray-500 font-bold uppercase">Total Assets</div>
           </div>
         </div>
       </div>
 
-      <!-- APPLY -->
-      <div id="dash-apply" class="hidden max-w-5xl mx-auto">
+      <div id="dash-apply" class="hidden max-w-3xl mx-auto pb-20">
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-          <div class="bg-arconGreenDark text-white p-6 flex justify-between items-center">
-            <div>
-              <h3 class="text-xl font-black">New License Application</h3>
-              <p class="text-sm text-green-100">Includes Board Owner + Advertising Company details, as requested.</p>
-            </div>
-            <div class="bg-white/10 p-2 rounded font-extrabold text-xs">Step 1 of 2</div>
+          <div class="bg-arconGreenDark text-white p-5">
+            <h3 class="text-lg font-black">New License Application</h3>
           </div>
-
-          <form id="application-form" onsubmit="handleFormSubmit(event)" class="p-8 space-y-10">
-
-            <!-- Advert Content -->
+          
+          <form id="application-form" onsubmit="handleFormSubmit(event)" class="p-5 md:p-8 space-y-8">
             <div class="space-y-4">
-              <h4 class="text-sm font-extrabold text-arconGreen uppercase border-b pb-2">2. Advert Content</h4>
+               <h4 class="text-xs font-black text-arconGreen uppercase border-b pb-1">1. Agency Details (Auto-Filled)</h4>
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                 <div class="md:col-span-2">
+                   <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Agency Name</label>
+                   <input id="agency-name" required class="w-full p-2 bg-white border rounded text-sm font-bold text-gray-700">
+                 </div>
+                 <div>
+                   <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">RC Number (Required)</label>
+                   <input id="agency-rc" required placeholder="e.g. RC123456" class="w-full p-2 bg-white border border-gray-300 rounded text-sm focus:border-arconGreen outline-none">
+                 </div>
+                 <div>
+                   <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Phone</label>
+                   <input id="agency-phone" required class="w-full p-2 bg-white border rounded text-sm text-gray-700">
+                 </div>
+               </div>
+            </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Advert Purpose / Category</label>
-                  <select id="industry" onchange="calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen" required>
+            <div class="space-y-4">
+              <h4 class="text-xs font-black text-arconGreen uppercase border-b pb-1">2. Ad Content & Location</h4>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Advert Category</label>
+                  <select id="industry" onchange="calcFee()" class="w-full p-3 border rounded-lg bg-white text-sm outline-none focus:ring-1 focus:ring-arconGreen" required>
                     <option value="">Select Category</option>
-                    <option value="Election Campaign / Political">Election Campaign / Political</option>
-                    <option value="New Product Launch">New Product Launch</option>
                     <option value="Corporate Branding">Corporate Branding</option>
+                    <option value="New Product Launch">New Product Launch</option>
                     <option value="Religious Program / Crusade">Religious Program / Crusade</option>
-                    <option value="Wedding / Birthday / Social">Wedding / Birthday / Social</option>
-                    <option value="Obituary / Memorial">Obituary / Memorial</option>
+                    <option value="Election Campaign / Political">Election Campaign / Political</option>
                     <option value="SME / Small Business">SME / Small Business</option>
-                    <option value="NGO / Public Service">NGO / Public Service</option>
                   </select>
                 </div>
-
                 <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Sponsor Name</label>
-                  <input type="text" id="sponsor" placeholder="e.g. King" required class="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Sponsor Name (Client)</label>
+                  <input type="text" id="sponsor" placeholder="e.g. Coca-Cola" required class="w-full p-3 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-arconGreen">
                 </div>
-
-                <!-- Board owner (restored) -->
+                
                 <div class="md:col-span-2">
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Board Owner</label>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <select id="board-owner-mode" onchange="toggleBoardOwner()" class="p-3 border rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen" required>
-                      <option value="">Select Board Owner</option>
-                      <option value="self">Self (Logged-in User)</option>
-                      <option value="sponsor">Sponsor (Same as Sponsor Name)</option>
-                      <option value="existing">Select Existing Board Owner</option>
-                      <option value="new">Add New Board Owner</option>
-                    </select>
-
-                    <select id="board-owner-existing" class="hidden p-3 border rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen">
-                      <option value="">Choose Saved Board Owner</option>
-                    </select>
-
-                    <input id="board-owner-name" class="hidden p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen" placeholder="Board Owner Name (required if new)">
-                  </div>
-
-                  <div id="board-owner-extra" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-                    <input id="board-owner-phone" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen" placeholder="Board Owner Phone">
-                    <input id="board-owner-email" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen" placeholder="Board Owner Email">
-                    <input id="board-owner-address" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen" placeholder="Board Owner Address">
-                  </div>
-
-                  <p class="text-[11px] text-gray-500 mt-2">
-                    Board Owner will show on the certificate as the asset owner of record.
-                  </p>
+                   <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Board Owner</label>
+                   <select id="board-owner-mode" class="w-full p-3 border rounded-lg bg-white text-sm" required>
+                     <option value="self">Same as Agency (Logged In User)</option>
+                     <option value="sponsor">Same as Sponsor</option>
+                   </select>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Advertisement Type</label>
-                  <select id="ad-type" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen" required>
-                    <option value="">Select Type</option>
-                    <option value="Digital LED Billboard">Digital LED Billboard</option>
-                    <option value="Static Billboard">Static Billboard</option>
-                    <option value="Unipole">Unipole</option>
-                    <option value="Gantry">Gantry</option>
-                    <option value="Street Lamp Post">Street Lamp Post</option>
-                    <option value="Wall Drape / Mural">Wall Drape / Mural</option>
-                    <option value="Bridge Panel">Bridge Panel</option>
-                    <option value="Bus Shelter">Bus Shelter</option>
-                    <option value="Mobile Truck / Bus Branding">Mobile Truck / Bus Branding</option>
-                    <option value="Flyer / Poster">Flyer / Poster</option>
-                  </select>
+                   <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Media Type</label>
+                   <select id="ad-type" class="w-full p-3 border rounded-lg bg-white text-sm" required>
+                     <option value="Static Billboard">Static Billboard</option>
+                     <option value="Digital LED Billboard">Digital LED Billboard</option>
+                     <option value="Unipole">Unipole</option>
+                     <option value="Street Lamp Post">Street Lamp Post</option>
+                   </select>
                 </div>
-
                 <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Asset Size</label>
-                  <select id="size" onchange="toggleSize(); calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen" required>
-                    <option value="">Select Standard Size</option>
-                    <option value="A5 Paper Size">A5 Paper Size</option>
-                    <option value="A4 Paper Size">A4 Paper Size</option>
-                    <option value="A3 Paper Size">A3 Paper Size</option>
-                    <option value="4-Sheet (1m x 1.5m)">4-Sheet (1m x 1.5m)</option>
-                    <option value="6-Sheet (1.2m x 1.8m)">6-Sheet (1.2m x 1.8m)</option>
-                    <option value="12-Sheet (3m x 1.5m)">12-Sheet (3m x 1.5m)</option>
-                    <option value="32-Sheet (4m x 3m)">32-Sheet (4m x 3m)</option>
-                    <option value="48-Sheet (Standard Billboard 6m x 3m)">48-Sheet (Standard Billboard 6m x 3m)</option>
-                    <option value="96-Sheet (Superwide 12m x 3m)">96-Sheet (Superwide 12m x 3m)</option>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Size</label>
+                  <select id="size" onchange="calcFee()" class="w-full p-3 border rounded-lg bg-white text-sm" required>
+                    <option value="48-Sheet (Standard Billboard 6m x 3m)">48-Sheet (Standard Billboard)</option>
                     <option value="Unipole (18m x 6m)">Unipole (18m x 6m)</option>
                     <option value="Gantry (20m x 4m)">Gantry (20m x 4m)</option>
-                    <option value="custom">Custom Size (Enter Dimensions)</option>
-                  </select>
-
-                  <div id="custom-dims" class="hidden grid grid-cols-2 gap-2 mt-2">
-                    <input type="number" id="w" placeholder="Width (m)" class="p-2 border rounded outline-none focus:ring-2 focus:ring-arconGreen" oninput="calcFee()">
-                    <input type="number" id="h" placeholder="Height (m)" class="p-2 border rounded outline-none focus:ring-2 focus:ring-arconGreen" oninput="calcFee()">
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Duration</label>
-                  <div class="flex gap-2">
-                    <input type="number" id="dur-val" value="1" min="1" class="w-24 p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen" oninput="calcFee()">
-                    <select id="dur-unit" class="flex-grow p-3 border rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen" onchange="calcFee()">
-                      <option value="Months">Months</option>
-                      <option value="Weeks">Weeks</option>
-                      <option value="Days">Days</option>
-                      <option value="Years">Years</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">State Jurisdiction</label>
-                  <select id="state" onchange="popLGA(); calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen" required>
-                    <option value="">Loading states…</option>
                   </select>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Local Govt (LGA)</label>
-                  <select id="lga" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-arconGreen" required>
-                    <option value="">Select State First</option>
-                  </select>
+                   <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">State</label>
+                   <select id="state" class="w-full p-3 border rounded-lg bg-white text-sm" required onchange="calcFee()">
+                     <option value="Lagos">Lagos</option>
+                     <option value="Abuja FCT">Abuja FCT</option>
+                     <option value="Kano">Kano</option>
+                     <option value="Rivers">Rivers</option>
+                     <option value="Enugu">Enugu</option>
+                   </select>
                 </div>
 
-                <div class="md:col-span-2">
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Upload Visual Concept / Artwork</label>
-                  <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-white hover:bg-gray-50 transition-colors cursor-pointer group relative">
-                    <input type="file" id="media" multiple accept="image/*,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                    <div class="bg-arconYellow/15 p-3 rounded-full shadow-sm inline-block mb-3 group-hover:scale-110 transition-transform">
-                      <i class="ph ph-upload-simple text-3xl text-arconGreen"></i>
-                    </div>
-                    <p class="text-sm text-gray-500 font-semibold">Click to upload multiple files or drag and drop</p>
-                    <p class="text-xs text-gray-400 mt-1">Supports JPG, PNG, PDF (images show on certificate)</p>
-                  </div>
-
-                  <div id="media-preview" class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Advertising Company (Agency) -->
-            <div class="space-y-4">
-              <h4 class="text-sm font-extrabold text-arconGreen uppercase border-b pb-2">3. Advertising Company (Agency)</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-2">
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Agency Name</label>
-                  <input id="agency-name" required placeholder="e.g. Micro Press LTD" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-                </div>
                 <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">RC Number (optional)</label>
-                  <input id="agency-rc" placeholder="e.g. RC123456" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-                </div>
-                <div class="md:col-span-3">
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Agency Address</label>
-                  <input id="agency-address" placeholder="Office address" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-                </div>
-                <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Contact Person</label>
-                  <input id="agency-contact" required placeholder="Name of contact person" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-                </div>
-                <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Phone</label>
-                  <input id="agency-phone" required placeholder="+234…" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-                </div>
-                <div>
-                  <label class="block text-xs font-extrabold text-gray-500 uppercase mb-1">Email</label>
-                  <input id="agency-email" type="email" required placeholder="email@company.com" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Duration (Months)</label>
+                  <input type="number" id="dur-val" value="1" min="1" class="w-full p-3 border rounded-lg text-sm" oninput="calcFee()">
                 </div>
               </div>
             </div>
 
-            <!-- Fee bar -->
-            <div class="bg-arconYellow/10 border border-arconYellow/30 p-6 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
-              <div class="text-center md:text-left">
-                <p class="text-xs text-gray-500 uppercase font-extrabold">Estimated Total Fee</p>
-                <h3 id="fee-display" class="text-3xl font-black text-arconGreen">₦0.00</h3>
-                <p id="fee-breakdown" class="text-xs text-gray-600 mt-1">Includes ARCON Vetting + State Tax (demo).</p>
-              </div>
-              <div class="flex gap-4">
-                <button type="button" onclick="dashSwitch('overview')" class="px-6 py-3 rounded-lg border border-gray-300 font-extrabold text-gray-600 hover:bg-white">Cancel</button>
-                <button type="submit" class="px-8 py-3 rounded-lg bg-arconGreen text-white font-black shadow hover:bg-arconGreenDark flex items-center gap-2">
-                  <i class="ph ph-receipt"></i> Generate Invoice
-                </button>
-              </div>
+            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:bg-gray-50">
+              <input type="file" id="media" multiple accept="image/*" class="hidden" onchange="previewMedia(this)">
+              <label for="media" class="cursor-pointer block">
+                <i class="ph ph-upload-simple text-2xl text-arconGreen"></i>
+                <p class="text-xs font-bold text-gray-500 mt-2">Tap to upload Visuals (Images)</p>
+              </label>
+              <div id="media-preview" class="flex gap-2 justify-center mt-4 flex-wrap"></div>
             </div>
 
+            <div class="bg-gray-900 text-white p-4 rounded-xl flex items-center justify-between sticky bottom-4 shadow-xl">
+              <div>
+                <p class="text-[10px] text-gray-400 uppercase">Total Fee</p>
+                <h3 id="fee-display" class="text-2xl font-black">₦0.00</h3>
+              </div>
+              <button type="submit" class="bg-arconGreen px-6 py-2 rounded-lg font-bold text-sm hover:bg-green-500">
+                Proceed
+              </button>
+            </div>
           </form>
         </div>
       </div>
 
-      <!-- ASSETS -->
-      <div id="dash-assets" class="hidden space-y-6">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
-          <div>
-            <h2 class="text-2xl font-serif font-black text-gray-800">My Assets</h2>
-            <p class="text-sm text-gray-500">Includes QR next to certificate + downloadable QR.</p>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <div class="relative">
-              <input id="assets-search" type="text" placeholder="Search ID / Sponsor…" oninput="renderAssets()"
-                class="pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-arconGreen outline-none bg-white w-full sm:w-64">
-              <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-
-            <div class="flex gap-2">
-              <button onclick="setAssetsView('list')" id="btn-view-list" class="px-3 py-2 rounded-lg border bg-white font-extrabold text-sm hover:bg-gray-50 flex items-center gap-2">
-                <i class="ph ph-list-bullets"></i> List
-              </button>
-              <button onclick="setAssetsView('grid')" id="btn-view-grid" class="px-3 py-2 rounded-lg border bg-white font-extrabold text-sm hover:bg-gray-50 flex items-center gap-2">
-                <i class="ph ph-squares-four"></i> Grid
-              </button>
-            </div>
-          </div>
+      <div id="dash-assets" class="hidden space-y-4 max-w-6xl mx-auto">
+        <h2 class="text-xl font-bold text-gray-800">My Assets</h2>
+        <div id="assets-container" class="space-y-4">
+           <div class="text-center py-10 text-gray-400">No assets found. Create an application.</div>
         </div>
-
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <select id="filter-status" onchange="renderAssets()" class="p-2 border rounded-lg bg-white font-semibold outline-none focus:ring-2 focus:ring-arconGreen">
-              <option value="all">All Status</option>
-              <option value="Active">Active</option>
-              <option value="Pending">Pending</option>
-              <option value="Expired">Expired</option>
-            </select>
-
-            <select id="filter-state" onchange="renderAssets()" class="p-2 border rounded-lg bg-white font-semibold outline-none focus:ring-2 focus:ring-arconGreen">
-              <option value="all">All States</option>
-            </select>
-
-            <select id="sort-assets" onchange="renderAssets()" class="p-2 border rounded-lg bg-white font-semibold outline-none focus:ring-2 focus:ring-arconGreen">
-              <option value="newest">Sort: Newest</option>
-              <option value="expiry">Sort: Expiry Date</option>
-              <option value="sponsor">Sort: Sponsor</option>
-            </select>
-
-            <button onclick="openVerifyModal()" class="p-2 rounded-lg bg-arconYellow text-ink font-black hover:bg-arconYellowDark flex items-center justify-center gap-2">
-              <i class="ph ph-scan"></i> Verify Asset
-            </button>
-          </div>
-        </div>
-
-        <div id="assets-list" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-black text-gray-500 uppercase">
-              <tr>
-                <th class="p-4">License ID</th>
-                <th class="p-4">Details</th>
-                <th class="p-4">Dates</th>
-                <th class="p-4">QR</th>
-                <th class="p-4 text-right">Certificate</th>
-              </tr>
-            </thead>
-            <tbody id="assets-table" class="divide-y divide-gray-100"></tbody>
-          </table>
-        </div>
-
-        <div id="assets-grid" class="hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
       </div>
-
     </div>
   </main>
 
-  <!-- AUTH MODAL -->
-  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-      <div class="flex text-center border-b font-black text-sm">
-        <button id="tab-signin" onclick="switchAuthTab('signin')" class="flex-1 py-4 bg-gray-50 text-gray-500">Sign In</button>
-        <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-4 bg-gray-50 text-gray-500">Register</button>
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl">
+       <div class="flex text-center border-b font-bold text-xs">
+        <button onclick="switchAuth('signin')" id="tab-signin" class="flex-1 py-4 bg-white text-arconGreen">Sign In</button>
+        <button onclick="switchAuth('signup')" id="tab-signup" class="flex-1 py-4 bg-gray-50 text-gray-500">Register</button>
       </div>
-
-      <div id="form-signin" class="p-8 space-y-4">
-        <h3 class="text-xl font-black text-gray-800">Welcome Back</h3>
-        <input type="email" id="login-email" placeholder="Email Address" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-        <input type="password" id="login-pin" placeholder="PIN / Password" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-        <button onclick="doLogin()" class="w-full bg-arconGreen text-white py-3 rounded-lg font-black shadow hover:bg-arconGreenDark">Login to Dashboard</button>
+      <div class="p-6 space-y-4">
+         <div id="form-signin">
+            <input type="email" id="login-email" value="micro@press.com" class="w-full p-3 border rounded-lg text-sm mb-3" placeholder="Email">
+            <button onclick="doLogin()" class="w-full bg-arconGreen text-white py-3 rounded-lg font-black text-sm">Login</button>
+         </div>
+         <div id="form-signup" class="hidden space-y-3">
+            <input type="text" id="reg-name" placeholder="Agency Name" class="w-full p-3 border rounded-lg text-sm">
+            <input type="text" id="reg-rc" placeholder="RC Number" class="w-full p-3 border rounded-lg text-sm">
+            <button onclick="doLogin()" class="w-full bg-ink text-white py-3 rounded-lg font-black text-sm">Register</button>
+         </div>
       </div>
-
-      <div id="form-signup" class="hidden p-8 space-y-4 max-h-[70vh] overflow-y-auto">
-        <h3 class="text-xl font-black text-gray-800">Create Account</h3>
-
-        <div class="flex gap-4 p-1 bg-gray-100 rounded-lg">
-          <button onclick="setRegType('ind')" id="btn-ind" class="flex-1 py-1 rounded bg-white shadow-sm text-xs font-black text-arconGreen">Individual</button>
-          <button onclick="setRegType('corp')" id="btn-corp" class="flex-1 py-1 rounded text-gray-500 text-xs font-black">Company</button>
-        </div>
-        <input type="hidden" id="reg-type" value="ind">
-
-        <input type="text" id="reg-name" placeholder="Full Name / Company Name" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-        <input type="tel" id="reg-phone" placeholder="Phone Number" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-        <input type="email" id="reg-email" placeholder="Email Address" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-        <input type="text" id="reg-id" placeholder="NIN Number" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-        <input type="password" id="reg-pass" placeholder="Create PIN / Password" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-arconGreen">
-
-        <button onclick="doLogin(true)" class="w-full bg-ink text-white py-3 rounded-lg font-black shadow hover:bg-black">Complete Registration</button>
-      </div>
-
-      <button onclick="closeModal('auth-modal')" class="w-full py-3 text-sm text-gray-500 hover:text-gray-800">Cancel</button>
+       <button onclick="closeModal('auth-modal')" class="w-full py-3 text-xs text-gray-500">Cancel</button>
     </div>
   </div>
 
-  <!-- INVOICE MODAL -->
-  <div id="payment-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-    <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden my-auto">
-      <div class="bg-arconGreenDark p-4 text-white flex justify-between items-center">
-        <h3 class="font-black flex items-center gap-2"><i class="ph ph-receipt"></i> ARCON Invoice</h3>
-        <button onclick="closePaymentModal()" class="hover:text-gray-200"><i class="ph ph-x text-lg"></i></button>
+  <div id="verify-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden relative flex flex-col max-h-[90vh]">
+      <button onclick="closeVerifyModal()" class="absolute top-3 right-3 z-10 bg-gray-100 rounded-full p-2 text-gray-600"><i class="ph ph-x"></i></button>
+      
+      <div class="p-5 text-center flex-shrink-0">
+        <h3 class="font-black text-lg text-gray-800">Verify Compliance</h3>
+        <p class="text-xs text-gray-500 mt-1">Scan QR or Enter License ID</p>
       </div>
 
-      <div class="p-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          <!-- INVOICE SHEET -->
-          <div id="invoice-sheet" class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl overflow-hidden">
-            <div class="bg-white p-6 border-b border-gray-200">
-              <div class="flex items-center justify-between gap-6">
-                <div class="flex items-center gap-3">
-                  <div class="h-14 w-14 rounded-xl overflow-hidden border border-gray-200 bg-white">
-                    <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-full w-full object-cover" />
-                  </div>
-                  <div>
-                    <div class="text-xs font-black uppercase tracking-widest text-gray-500">Advertising Regulatory Council of Nigeria</div>
-                    <div class="text-2xl font-black text-arconGreenDark">INVOICE</div>
-                    <div class="mt-1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-arconYellow/20 text-ink text-[11px] font-extrabold uppercase tracking-widest">
-                      <span class="w-2 h-2 rounded-full bg-arconGreen"></span> Official Payment Notice
-                    </div>
-                  </div>
-                </div>
-
-                <div class="text-right">
-                  <div class="text-xs font-black text-gray-500 uppercase">Invoice No.</div>
-                  <div id="invoice-no" class="font-mono font-black tracking-widest text-ink">INV-0000</div>
-                  <div class="text-xs mt-2 text-gray-600">
-                    <span class="font-black">Issue Date:</span> <span id="invoice-date">—</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-6 space-y-5">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                  <div class="text-xs font-black uppercase tracking-widest text-gray-500">Application ID</div>
-                  <div id="invoice-appid-2" class="font-mono text-xl font-black tracking-widest mt-1">APP-0000-000</div>
-                  <div class="text-xs text-gray-700 mt-2">
-                    <span class="font-black">Sponsor:</span> <span id="invoice-sponsor">—</span>
-                  </div>
-                </div>
-
-                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                  <div class="text-xs font-black uppercase tracking-widest text-gray-500">License Window</div>
-                  <div class="text-sm text-gray-800 mt-1 space-y-1">
-                    <div><span class="font-black">Issue:</span> <span id="invoice-issue">—</span></div>
-                    <div><span class="font-black">Expiry:</span> <span id="invoice-expiry">—</span></div>
-                  </div>
-                  <div class="mt-2 inline-flex px-3 py-1 rounded-full bg-arconYellow/25 text-ink text-xs font-black uppercase tracking-widest">
-                    Awaiting Payment
-                  </div>
-                </div>
-              </div>
-
-              <div class="border border-gray-200 rounded-xl overflow-hidden">
-                <div class="bg-arconGreenDark px-4 py-3 text-xs font-black uppercase tracking-widest text-white flex items-center justify-between">
-                  <span>Advert Details</span>
-                  <span class="text-[10px] bg-white/10 px-2 py-1 rounded-full">ARCON • Compliance</span>
-                </div>
-                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div><span class="font-black">Purpose:</span> <span id="invoice-purpose">—</span></div>
-                  <div><span class="font-black">Ad Type:</span> <span id="invoice-type">—</span></div>
-                  <div><span class="font-black">Asset Size:</span> <span id="invoice-size">—</span></div>
-                  <div><span class="font-black">Duration:</span> <span id="invoice-duration">—</span></div>
-                  <div class="md:col-span-2"><span class="font-black">Location:</span> <span id="invoice-location">—</span></div>
-                </div>
-              </div>
-
-              <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                <div class="bg-arconYellow/10 border border-arconYellow/30 rounded-xl p-4 flex-1">
-                  <div class="text-xs font-black uppercase tracking-widest text-ink">Payment Account</div>
-                  <div class="mt-2 text-sm text-gray-800 space-y-1">
-                    <div><span class="font-black">Bank:</span> Stanbic IBTC Bank</div>
-                    <div><span class="font-black">Account Name:</span> ARCON ADs VETTING</div>
-                    <div class="flex items-center justify-between bg-white border border-arconYellow/30 rounded-lg px-3 py-2 mt-2">
-                      <span class="font-mono text-lg font-black tracking-widest">5770242424</span>
-                      <button onclick="navigator.clipboard.writeText('5770242424')" class="text-xs font-black text-arconGreen hover:underline">Copy</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-arconGreen text-white rounded-xl p-5 w-full md:w-72">
-                  <div class="text-xs font-black uppercase tracking-widest text-green-100">Total Amount Due</div>
-                  <div id="pay-amount-2" class="text-3xl font-black mt-2">₦0.00</div>
-                  <div class="text-xs text-green-100 mt-2">Includes ARCON Vetting + State Tax (demo).</div>
-                </div>
-              </div>
-
-              <div class="text-xs text-gray-500 border-t pt-4">
-                This invoice is generated electronically by ARCON Integrated Platform. Keep your Application ID for verification.
-              </div>
-            </div>
-          </div>
-
-          <!-- QR SIDE PANEL -->
-          <div class="bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
-            <div class="text-center">
-              <div class="text-xs font-black uppercase tracking-widest text-gray-500">Application QR</div>
-              <div class="text-xs text-gray-400 mt-1">Scan to verify & display certificate.</div>
-            </div>
-
-            <div class="flex items-center justify-center">
-              <div id="invoice-qr" class="bg-white p-3 border border-gray-200 rounded-2xl shadow-sm"></div>
-            </div>
-
-            <div class="text-center">
-              <div class="text-xs text-gray-500">Application ID</div>
-              <div id="invoice-appid" class="font-mono font-black tracking-widest text-gray-900">APP-0000-000</div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-3">
-              <button onclick="downloadInvoicePDF()" class="w-full py-3 rounded-xl bg-ink text-white font-black hover:bg-black">
-                Download Invoice (PDF)
-              </button>
-              <button onclick="downloadInvoicePNG()" class="w-full py-3 rounded-xl border font-black text-gray-800 hover:bg-gray-50">
-                Download Invoice (PNG)
-              </button>
-              <button onclick="downloadInvoiceQR()" class="w-full py-3 rounded-xl bg-arconYellow text-ink font-black hover:bg-arconYellowDark">
-                Download QR (PNG)
-              </button>
-              <button onclick="processPayment()" class="w-full py-3 rounded-xl bg-arconGreen text-white font-black hover:bg-arconGreenDark">
-                Confirm Payment
-              </button>
-            </div>
-
-            <p class="text-xs text-gray-500">
-              QR scanning fails mostly when opened via <b>frame forwarding</b>. Use GitHub Pages URL directly or HTTP-redirect forwarding.
-            </p>
-          </div>
-
+      <div class="flex-grow overflow-y-auto px-5 pb-5">
+        <div id="reader" class="w-full aspect-square bg-black rounded-xl overflow-hidden mb-4 relative">
+          <div class="absolute inset-0 flex items-center justify-center text-gray-500 text-xs pointer-events-none">Camera Inactive</div>
         </div>
+
+        <div class="flex gap-2 mb-4">
+          <button onclick="startScanner()" class="flex-1 bg-arconGreen text-white py-2 rounded-lg text-xs font-bold">Start Camera</button>
+          <button onclick="stopScanner()" class="flex-1 bg-gray-100 text-gray-800 py-2 rounded-lg text-xs font-bold">Stop</button>
+        </div>
+
+        <div class="border-t pt-4">
+          <input type="text" id="verify-input" placeholder="APP-2025-XXXX" class="w-full text-center p-3 border rounded-lg font-mono font-bold uppercase mb-2">
+          <button onclick="performVerify()" class="w-full bg-ink text-white py-3 rounded-lg font-bold text-sm">Check Status</button>
+        </div>
+
+        <div id="verify-result" class="mt-4 hidden p-3 rounded-lg bg-gray-50 border text-sm"></div>
       </div>
     </div>
   </div>
 
-  <!-- CERTIFICATE MODAL -->
-  <div id="certificate-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto">
-    <div id="certificate-container" class="bg-white w-full max-w-5xl relative shadow-2xl my-auto print:shadow-none">
-
-      <button onclick="closeModal('certificate-modal')" class="absolute -top-10 right-0 text-white hover:text-red-300 no-print font-black flex items-center gap-1">
+  <div id="certificate-modal" class="hidden fixed inset-0 z-[60] bg-black/90 p-2 md:p-4 overflow-y-auto items-center justify-center flex">
+    <div id="certificate-container" class="bg-white w-full max-w-[210mm] relative shadow-2xl mx-auto origin-top">
+      
+      <button onclick="closeModal('certificate-modal')" class="absolute -top-10 right-0 text-white font-bold flex gap-2 items-center no-print">
         Close <i class="ph ph-x-circle text-2xl"></i>
       </button>
 
-      <div class="p-10 border-[12px] border-double border-arconGreen relative overflow-hidden bg-white">
-        <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-          <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-96 grayscale">
+      <div class="p-8 md:p-12 border-[10px] border-double border-arconGreen relative overflow-hidden bg-white min-h-[297mm] flex flex-col justify-between">
+        
+        <div class="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none">
+           <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-96 grayscale">
         </div>
 
-        <div class="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-arconYellow m-2"></div>
-        <div class="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-arconYellow m-2"></div>
+        <div class="absolute top-0 left-0 w-20 h-20 border-t-4 border-l-4 border-arconYellow m-2"></div>
+        <div class="absolute bottom-0 right-0 w-20 h-20 border-b-4 border-r-4 border-arconYellow m-2"></div>
 
         <div class="text-center relative z-10">
-          <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-20 mx-auto mb-2">
-          <h2 class="text-3xl font-serif font-black text-arconGreenDark">FEDERAL REPUBLIC OF NIGERIA</h2>
-          <p class="text-xs font-black uppercase tracking-[0.3em] text-gray-600 mb-6">Advertising Regulatory Council of Nigeria</p>
-
-          <div class="border-t border-b border-arconYellow py-2 my-6">
-            <h1 class="text-4xl md:text-5xl font-serif font-black text-ink">CERTIFICATE OF APPROVAL</h1>
+          <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-16 mx-auto mb-2">
+          <h2 class="text-xl md:text-2xl font-serif font-black text-arconGreenDark">FEDERAL REPUBLIC OF NIGERIA</h2>
+          <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Advertising Regulatory Council of Nigeria</p>
+          
+          <div class="border-t border-b border-arconYellow py-3 my-6">
+            <h1 class="text-3xl md:text-5xl font-serif font-black text-ink">CERTIFICATE OF APPROVAL</h1>
           </div>
         </div>
 
-        <!-- Core details -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-8 relative z-10 text-sm font-serif">
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">License Number</span>
-            <span id="cert-id" class="text-lg font-black text-ink font-mono">APP-0000-000</span>
-          </div>
+        <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-sm font-serif relative z-10">
+           <div class="border-b border-gray-100 pb-1">
+             <span class="block text-[10px] font-sans font-bold text-gray-400 uppercase">License Number</span>
+             <span id="c-id" class="font-black text-lg">APP-0000</span>
+           </div>
+           <div class="border-b border-gray-100 pb-1">
+             <span class="block text-[10px] font-sans font-bold text-gray-400 uppercase">Issue Date</span>
+             <span id="c-issue" class="font-bold">2025-12-13</span>
+           </div>
+           <div class="border-b border-gray-100 pb-1">
+             <span class="block text-[10px] font-sans font-bold text-gray-400 uppercase">Sponsor</span>
+             <span id="c-sponsor" class="font-bold">Name</span>
+           </div>
+           <div class="border-b border-gray-100 pb-1">
+             <span class="block text-[10px] font-sans font-bold text-gray-400 uppercase">Category</span>
+             <span id="c-cat" class="font-bold">Category</span>
+           </div>
+           <div class="border-b border-gray-100 pb-1 col-span-2">
+             <span class="block text-[10px] font-sans font-bold text-gray-400 uppercase">Location</span>
+             <span id="c-loc" class="font-bold">Lagos</span>
+           </div>
+        </div>
 
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Board Owner</span>
-            <span id="cert-board-owner" class="text-lg font-black text-ink">—</span>
+        <div class="mt-6 border border-gray-200 rounded-lg overflow-hidden relative z-10">
+          <div class="bg-arconGreenDark text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest">Advertising Company (Agency)</div>
+          <div class="p-3 text-sm grid grid-cols-2 gap-2">
+            <div><span class="font-bold">Name:</span> <span id="c-ag-name">Micro Press</span></div>
+            <div><span class="font-bold">RC No:</span> <span id="c-ag-rc">RC123</span></div>
           </div>
+        </div>
 
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Sponsor Name</span>
-            <span id="cert-sponsor" class="text-lg font-black text-ink">—</span>
-          </div>
-
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Advert Purpose</span>
-            <span id="cert-purpose" class="text-lg font-black text-ink">—</span>
-          </div>
-
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Advertisement Type</span>
-            <span id="cert-type" class="text-lg font-black text-ink">—</span>
-          </div>
-
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Asset Size</span>
-            <span id="cert-size" class="text-lg font-black text-ink">—</span>
-          </div>
-
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Location</span>
-            <span id="cert-loc" class="text-lg font-black text-ink">—</span>
-          </div>
-
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Issue Date</span>
-            <span id="cert-issue" class="text-lg font-black text-ink">—</span>
-          </div>
-
-          <div class="border-b border-gray-200 pb-1">
-            <span class="block text-[10px] text-gray-500 uppercase font-sans font-black">Expiry Date</span>
-            <span id="cert-expiry" class="text-lg font-black text-ink">—</span>
-          </div>
-
-          <div class="col-span-1 md:col-span-2 mt-2">
-            <div class="bg-arconYellow/10 border border-arconYellow/30 p-3 text-center rounded">
-              <p id="cert-status" class="text-arconGreen font-black uppercase tracking-widest text-xs font-sans">This asset is compliant with ARCON regulations</p>
+        <div class="mt-8 relative z-10">
+          <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Authenticated Visual & Code</p>
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 print-grid-fix">
+            <div class="md:col-span-4 print-col-span-4 border border-gray-100 p-2 rounded bg-gray-50 h-32 flex items-center justify-center overflow-hidden">
+               <img id="c-img" class="h-full object-contain" src="">
+            </div>
+            <div class="md:col-span-1 print-col-span-1 flex flex-col items-center justify-center">
+               <div id="c-qr" class="bg-white p-2 border border-gray-200"></div>
+               <p class="text-[8px] uppercase font-bold mt-1 text-center">Scan to Verify</p>
             </div>
           </div>
         </div>
 
-        <!-- Advertising company details -->
-        <div class="relative z-10 mt-8">
-          <div class="border border-gray-200 rounded-2xl overflow-hidden">
-            <div class="bg-arconGreenDark px-4 py-3 text-xs font-black uppercase tracking-widest text-white flex items-center justify-between">
-              <span>Advertising Company (Agency)</span>
-              <span class="text-[10px] bg-white/10 px-2 py-1 rounded-full">On record</span>
-            </div>
-            <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              <div><span class="font-black">Agency Name:</span> <span id="cert-agency-name">—</span></div>
-              <div><span class="font-black">RC No:</span> <span id="cert-agency-rc">—</span></div>
-              <div class="md:col-span-2"><span class="font-black">Address:</span> <span id="cert-agency-address">—</span></div>
-              <div><span class="font-black">Contact:</span> <span id="cert-agency-contact">—</span></div>
-              <div><span class="font-black">Phone:</span> <span id="cert-agency-phone">—</span></div>
-              <div class="md:col-span-2"><span class="font-black">Email:</span> <span id="cert-agency-email">—</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Media + QR on same line -->
-        <div class="relative z-10 mt-8">
-          <p class="text-xs font-black uppercase tracking-widest text-gray-500 mb-3">Uploaded Visual Concept / Artwork</p>
-
-          <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
-            <div class="lg:col-span-4">
-              <div id="cert-media" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-            </div>
-
-            <div class="lg:col-span-1">
-              <div class="border border-gray-200 rounded-2xl p-3 bg-white">
-                <div class="text-center">
-                  <div class="text-[10px] font-black uppercase tracking-widest text-gray-500">Verification QR</div>
-                  <div id="cert-qrcode" class="bg-white p-2 border border-gray-200 shadow-sm inline-block rounded-xl mt-2"></div>
-
-                  <button onclick="downloadCertificateQR()" class="mt-3 w-full text-xs font-black px-3 py-2 rounded-lg bg-arconYellow text-ink hover:bg-arconYellowDark no-print">
-                    Download QR
-                  </button>
-
-                  <p class="text-[9px] uppercase font-black mt-2 text-gray-400 font-sans">Scan to Authenticate</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Director signature moved to center -->
-        <div class="mt-10 relative z-10 flex justify-center">
-          <div class="text-center">
-            <div class="w-60 border-b-2 border-ink mb-2 mx-auto"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Signature_sample.svg/1200px-Signature_sample.svg.png" class="h-8 mx-auto opacity-80 -mt-10 mb-2">
-            <p class="font-black text-xs uppercase font-sans">Director General</p>
-            <p class="text-[10px] text-gray-400 font-sans">ARCON</p>
-          </div>
+        <div class="mt-auto pt-10 text-center relative z-10">
+           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Signature_sample.svg/1200px-Signature_sample.svg.png" class="h-10 mx-auto opacity-70 mb-2">
+           <div class="w-48 border-t-2 border-ink mx-auto pt-1">
+             <p class="font-black text-xs uppercase">Director General</p>
+             <p class="text-[9px] text-gray-400">ARCON</p>
+           </div>
         </div>
 
       </div>
 
-      <div class="bg-gray-100 p-4 flex flex-col sm:flex-row justify-center gap-3 no-print">
-        <button onclick="window.print()" class="bg-ink text-white px-6 py-2 rounded font-black hover:bg-black">Print Certificate</button>
-        <button onclick="openVerifyModal()" class="px-6 py-2 rounded font-black border hover:bg-white">Verify Another</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- VERIFY MODAL -->
-  <div id="verify-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-auto relative">
-
-      <div class="p-6 md:p-8">
-        <button onclick="closeVerifyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="ph ph-x text-lg"></i></button>
-
-        <div class="text-center mb-8">
-          <div class="w-16 h-16 bg-arconYellow/15 rounded-full flex items-center justify-center mx-auto text-arconGreen text-3xl mb-3">
-            <i class="ph ph-scan"></i>
-          </div>
-          <h3 class="text-3xl font-black text-ink">Verify Asset Compliance</h3>
-          <p class="text-sm text-gray-500 mt-2">Scan QR code or enter the License ID manually. After scan, the certificate opens automatically.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Scanner -->
-          <div class="border border-gray-200 rounded-2xl p-5">
-            <div class="flex items-center justify-between mb-3">
-              <p class="text-xs font-black uppercase tracking-widest text-gray-500">QR Scanner</p>
-              <span id="scanner-status" class="text-xs font-black px-3 py-1 rounded-full bg-gray-100 text-gray-700">Ready</span>
-            </div>
-
-            <div id="reader" class="w-full rounded-xl overflow-hidden border bg-gray-50 min-h-[260px] flex items-center justify-center">
-              <div class="text-center text-gray-400 text-sm font-semibold p-6">
-                <i class="ph ph-camera text-3xl mb-2"></i>
-                <p>Click “Start Scanner” and allow camera permission.</p>
-                <p class="text-xs mt-2">Must be HTTPS. Avoid frame-forwarded domains.</p>
-              </div>
-            </div>
-
-            <div class="flex gap-3 mt-4">
-              <button onclick="startScanner()" class="flex-1 py-3 rounded-xl bg-arconGreen text-white font-black hover:bg-arconGreenDark flex items-center justify-center gap-2">
-                <i class="ph ph-camera"></i> Start Scanner
-              </button>
-              <button onclick="stopScanner()" class="flex-1 py-3 rounded-xl border font-black text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2">
-                <i class="ph ph-stop"></i> Stop
-              </button>
-            </div>
-
-            <p class="text-xs text-gray-500 mt-3">
-              If scanner fails on GitHub Pages, ensure you are not using frame forwarding and you allowed camera permission.
-            </p>
-          </div>
-
-          <!-- Manual -->
-          <div class="border border-gray-200 rounded-2xl p-5">
-            <p class="text-xs font-black uppercase tracking-widest text-gray-500 mb-3">Manual License ID</p>
-            <input type="text" id="verify-input" placeholder="E.g. APP-2025-001" class="w-full p-4 border rounded-xl text-center font-mono uppercase text-lg tracking-widest mb-4 outline-none focus:ring-2 focus:ring-arconGreen">
-            <button onclick="performVerify(true)" class="w-full bg-ink text-white py-4 rounded-xl font-black shadow hover:bg-black flex items-center justify-center gap-2">
-              <i class="ph ph-seal-check"></i> Check Status
-            </button>
-            <div id="verify-result" class="mt-5 hidden"></div>
-          </div>
-        </div>
+      <div class="bg-gray-100 p-4 flex justify-center gap-4 no-print rounded-b-lg">
+        <button onclick="window.print()" class="bg-ink text-white px-6 py-2 rounded font-bold hover:bg-black">Print / PDF</button>
       </div>
     </div>
   </div>
 
   <script>
-    // -----------------------
-    // Helpers
-    // -----------------------
+    // --- STATE MANAGEMENT ---
+    let currentUser = null;
+    let myAssets = JSON.parse(localStorage.getItem('arcon_assets_v2') || "[]");
+    let qrScanner = null;
+
+    // --- HELPERS ---
     const getEl = (id) => document.getElementById(id);
     const openModal = (id) => getEl(id).classList.remove('hidden');
     const closeModal = (id) => getEl(id).classList.add('hidden');
+    const money = (n) => new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(n);
 
-    const money = (n) => new Intl.NumberFormat('en-NG', { style:'currency', currency:'NGN' }).format(Number(n || 0));
-    const safeUpper = (s)=> String(s||'').trim().toUpperCase();
-    function iso(d){ return new Date(d).toISOString().slice(0,10); }
-
-    function addDays(date, days){ const d = new Date(date); d.setDate(d.getDate() + Number(days || 0)); return d; }
-    function addMonths(date, months){ const d = new Date(date); d.setMonth(d.getMonth() + Number(months || 0)); return d; }
-    function addYears(date, years){ const d = new Date(date); d.setFullYear(d.getFullYear() + Number(years || 0)); return d; }
-
-    function computeExpiry(issueDateISO, durationVal, durationUnit){
-      const d = new Date(issueDateISO);
-      const n = Number(durationVal || 0);
-      if(!n) return iso(d);
-      if(durationUnit === 'Days') return iso(addDays(d, n));
-      if(durationUnit === 'Weeks') return iso(addDays(d, n * 7));
-      if(durationUnit === 'Months') return iso(addMonths(d, n));
-      if(durationUnit === 'Years') return iso(addYears(d, n));
-      return iso(addMonths(d, n));
+    // --- TOAST NOTIFICATIONS (SOCIAL PROOF) ---
+    const msgs = [
+      "Access Bank PLC just verified an asset.",
+      "Dangote Group applied for a new license.",
+      "Micro Press LTD renewed a billboard license.",
+      "MTN Nigeria verified 3 assets in Lagos.",
+      "Glo approved for 48-Sheet in Abuja."
+    ];
+    function showToast() {
+      const txt = msgs[Math.floor(Math.random() * msgs.length)];
+      const div = document.createElement('div');
+      div.className = "bg-white/90 backdrop-blur border border-gray-200 shadow-lg p-3 rounded-lg text-xs flex items-center gap-2 toast-enter max-w-xs";
+      div.innerHTML = `<i class="ph ph-check-circle text-arconGreen text-lg"></i> <span class="font-semibold text-gray-700">${txt}</span>`;
+      getEl('toast-container').appendChild(div);
+      setTimeout(() => {
+        div.classList.remove('toast-enter');
+        div.classList.add('toast-exit');
+        setTimeout(() => div.remove(), 500);
+      }, 4000);
     }
+    setInterval(showToast, 6000); // Trigger every 6s
 
-    function daysToExpiry(expiryISO){
-      const a = new Date();
-      const b = new Date(expiryISO);
-      return Math.ceil((b - a) / (1000*60*60*24));
+    // --- AUTH ---
+    function openAuthModal(tab) {
+      openModal('auth-modal');
+      switchAuth(tab);
     }
-
-    function escapeHtml(str){
-      return String(str || '')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'","&#039;");
-    }
-    function cssSafe(s){ return String(s).replace(/[^a-zA-Z0-9_-]/g,'_'); }
-
-    // -----------------------
-    // Auth (demo)
-    // -----------------------
-    let currentUser = null;
-    function openAuthModal(tab) { openModal('auth-modal'); switchAuthTab(tab); }
-
-    function switchAuthTab(tab) {
-      const signInForm = getEl('form-signin');
-      const signUpForm = getEl('form-signup');
-      const tabIn = getEl('tab-signin');
-      const tabUp = getEl('tab-signup');
-
-      if (tab === 'signin') {
-        signInForm.classList.remove('hidden');
-        signUpForm.classList.add('hidden');
-        tabIn.className = "flex-1 py-4 bg-white text-arconGreen font-black border-t-2 border-arconGreen";
-        tabUp.className = "flex-1 py-4 bg-gray-50 text-gray-500 font-black";
+    function switchAuth(tab) {
+      if(tab === 'signin') {
+        getEl('form-signin').classList.remove('hidden');
+        getEl('form-signup').classList.add('hidden');
+        getEl('tab-signin').className = "flex-1 py-4 bg-white text-arconGreen border-t-2 border-arconGreen";
+        getEl('tab-signup').className = "flex-1 py-4 bg-gray-50 text-gray-500";
       } else {
-        signInForm.classList.add('hidden');
-        signUpForm.classList.remove('hidden');
-        tabIn.className = "flex-1 py-4 bg-gray-50 text-gray-500 font-black";
-        tabUp.className = "flex-1 py-4 bg-white text-arconGreen font-black border-t-2 border-arconGreen";
+        getEl('form-signin').classList.add('hidden');
+        getEl('form-signup').classList.remove('hidden');
+        getEl('tab-signup').className = "flex-1 py-4 bg-white text-arconGreen border-t-2 border-arconGreen";
+        getEl('tab-signin').className = "flex-1 py-4 bg-gray-50 text-gray-500";
       }
     }
-
-    function setRegType(type) {
-      getEl('reg-type').value = type;
-      const btnInd = getEl('btn-ind');
-      const btnCorp = getEl('btn-corp');
-      const idInput = getEl('reg-id');
-      if(type === 'ind') {
-        btnInd.className = "flex-1 py-1 rounded bg-white shadow-sm text-xs font-black text-arconGreen";
-        btnCorp.className = "flex-1 py-1 rounded text-gray-500 text-xs font-black";
-        idInput.placeholder = "NIN Number (11 Digits)";
-      } else {
-        btnCorp.className = "flex-1 py-1 rounded bg-white shadow-sm text-xs font-black text-arconGreen";
-        btnInd.className = "flex-1 py-1 rounded text-gray-500 text-xs font-black";
-        idInput.placeholder = "RC Number";
-      }
-    }
-
-    function doLogin(){
-      const name = getEl('reg-name').value || "User";
-      const email = getEl('reg-email').value || "user@email.com";
-      const phone = getEl('reg-phone').value || "";
+    function doLogin() {
       currentUser = {
-        name,
-        email,
-        phone,
-        type: getEl('reg-type').value === 'corp' ? 'Corporate' : 'Individual'
+        name: "Micro Press LTD",
+        rc: "RC75875",
+        email: getEl('login-email').value || "user@email.com",
+        phone: "+2349032222984",
+        type: "Agency"
       };
-
+      
+      // Update UI
       getEl('user-name-display').innerText = currentUser.name;
-      getEl('user-type-display').innerText = currentUser.type;
-      getEl('avatar-badge').innerText = (currentUser.name || 'U').split(' ').map(x => x[0]).slice(0,2).join('').toUpperCase();
-
       getEl('auth-buttons').classList.add('hidden');
       getEl('user-menu').classList.remove('hidden');
       getEl('user-menu').classList.add('flex');
-
+      
       closeModal('auth-modal');
       getEl('view-landing').classList.add('hidden');
       getEl('view-dashboard').classList.remove('hidden');
       getEl('view-dashboard').classList.add('flex');
-
-      loadAssetsFromStorage();
-      loadBoardOwnersFromStorage();
+      
       updateDash();
       dashSwitch('overview');
     }
+    function doLogout() { location.reload(); }
+    function goHome() { if(!currentUser) location.reload(); }
 
-    function doLogout(){ location.reload(); }
-    function goHome(){ if(currentUser) return; location.reload(); }
-
-    // -----------------------
-    // State/LGA
-    // -----------------------
-    const NIGERIA_JSON_URL = "https://gist.githubusercontent.com/devhammed/0bb9eeac9ff22c895100d072f489dc98/raw/a7b19911407a89947c452339fee59f9335dc8225/nigeria-state-and-lgas.json";
-    let STATES_LGAS = [];
-
-    async function loadStatesLgas(){
-      try{
-        const res = await fetch(NIGERIA_JSON_URL, { cache: "force-cache" });
-        const data = await res.json();
-        STATES_LGAS = Array.isArray(data) ? data : [];
-      }catch(e){
-        STATES_LGAS = [
-          { state: "Abuja FCT", lgas: ["AMAC","Bwari","Gwagwalada","Kuje","Kwali","Abaji"] },
-          { state: "Lagos", lgas: ["Ikeja","Eti-Osa","Surulere","Lagos Island","Ikorodu"] },
-          { state: "Rivers", lgas: ["Port Harcourt","Obio-Akpor"] },
-          { state: "Kano", lgas: ["Kano Municipal","Fagge"] },
-        ];
-      }
-      populateStateSelects();
-    }
-
-    function populateStateSelects(){
-      const stateSel = getEl('state');
-      const filterState = getEl('filter-state');
-      const states = STATES_LGAS.map(x => x.state).filter(Boolean).sort((a,b)=>a.localeCompare(b));
-      stateSel.innerHTML = `<option value="">Select State</option>` + states.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-      filterState.innerHTML = `<option value="all">All States</option>` + states.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-    }
-
-    function popLGA(){
-      const st = getEl('state').value;
-      const lgaSel = getEl('lga');
-      lgaSel.innerHTML = `<option value="">Select LGA</option>`;
-      const found = STATES_LGAS.find(x => x.state === st);
-      (found?.lgas || []).forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = l; opt.innerText = l;
-        lgaSel.appendChild(opt);
-      });
-    }
-
-    // -----------------------
-    // Board Owners (saved)
-    // -----------------------
-    const BOARD_KEY = "arcon_board_owners_v1";
-    let savedBoardOwners = []; // [{name,phone,email,address}]
-
-    function loadBoardOwnersFromStorage(){
-      try{
-        const raw = localStorage.getItem(BOARD_KEY);
-        savedBoardOwners = raw ? JSON.parse(raw) : [];
-      }catch(e){ savedBoardOwners = []; }
-      refreshBoardOwnerDropdown();
-    }
-
-    function saveBoardOwnersToStorage(){
-      try{ localStorage.setItem(BOARD_KEY, JSON.stringify(savedBoardOwners)); }catch(e){}
-    }
-
-    function refreshBoardOwnerDropdown(){
-      const sel = getEl('board-owner-existing');
-      if(!sel) return;
-      sel.innerHTML = `<option value="">Choose Saved Board Owner</option>` +
-        savedBoardOwners.map((b, idx) => `<option value="${idx}">${escapeHtml(b.name)}</option>`).join('');
-    }
-
-    function toggleBoardOwner(){
-      const mode = getEl('board-owner-mode').value;
-      const selExisting = getEl('board-owner-existing');
-      const nameInput = getEl('board-owner-name');
-      const extra = getEl('board-owner-extra');
-
-      selExisting.classList.add('hidden');
-      nameInput.classList.add('hidden');
-      extra.classList.add('hidden');
-
-      if(mode === 'existing'){
-        selExisting.classList.remove('hidden');
-      } else if(mode === 'new'){
-        nameInput.classList.remove('hidden');
-        extra.classList.remove('hidden');
-      }
-    }
-
-    // -----------------------
-    // Fees (demo)
-    // -----------------------
-    const STATE_TAX = { 'Lagos': 100000, 'Abuja FCT': 85000, 'Rivers': 75000, 'Kano': 60000, 'default': 50000 };
-    const PURPOSE_MULT = {
-      "Election Campaign / Political": 1.6,
-      "New Product Launch": 1.2,
-      "Corporate Branding": 1.0,
-      "Religious Program / Crusade": 0.6,
-      "Wedding / Birthday / Social": 0.5,
-      "Obituary / Memorial": 0.4,
-      "SME / Small Business": 0.75,
-      "NGO / Public Service": 0.35,
-      "default": 1.0
-    };
-
-    function parseAreaFromSizeLabel(label){
-      if(label === "A5 Paper Size") return 0.031;
-      if(label === "A4 Paper Size") return 0.062;
-      if(label === "A3 Paper Size") return 0.125;
-      if(label.startsWith("4-Sheet")) return 1.5;
-      if(label.startsWith("6-Sheet")) return 2.16;
-      if(label.startsWith("12-Sheet")) return 4.5;
-      if(label.startsWith("32-Sheet")) return 12;
-      if(label.startsWith("48-Sheet")) return 18;
-      if(label.startsWith("96-Sheet")) return 36;
-      if(label.startsWith("Unipole")) return 108;
-      if(label.startsWith("Gantry")) return 80;
-      return 1;
-    }
-
-    function durationToMonths(val, unit){
-      const n = Number(val || 0);
-      if(!n) return 0;
-      if(unit === 'Years') return n * 12;
-      if(unit === 'Months') return n;
-      if(unit === 'Weeks') return n / 4.345;
-      if(unit === 'Days') return n / 30.437;
-      return n;
-    }
-
-    function toggleSize(){
-      const val = getEl('size').value;
-      const box = getEl('custom-dims');
-      if(val === 'custom') box.classList.remove('hidden'); else box.classList.add('hidden');
-    }
-
-    function calcFee(){
-      const purpose = getEl('industry').value;
-      const state = getEl('state').value;
-      const size = getEl('size').value;
-      const dVal = Number(getEl('dur-val').value || 0);
-      const dUnit = getEl('dur-unit').value;
-
-      if(!purpose || !state || !size || !dVal){
-        getEl('fee-display').innerText = "₦0.00";
-        return 0;
-      }
-
-      const baseTax = STATE_TAX[state] || STATE_TAX.default;
-      const mult = PURPOSE_MULT[purpose] || PURPOSE_MULT.default;
-
-      let area = 0;
-      if(size === 'custom'){
-        area = Number(getEl('w').value || 0) * Number(getEl('h').value || 0);
-      } else {
-        area = parseAreaFromSizeLabel(size);
-      }
-      if(area <= 0) area = 1;
-
-      const months = durationToMonths(dVal, dUnit);
-      const vetting = Math.round(2500 * area * mult * months);
-      const total = Math.round(vetting + baseTax);
-
-      getEl('fee-display').innerText = money(total);
-      getEl('fee-breakdown').innerText = `ARCON Vetting (demo) + State Tax (${state}).`;
-      return total;
-    }
-
-    // -----------------------
-    // Media previews
-    // -----------------------
-    let pickedMedia = [];
-    getEl('media')?.addEventListener('change', async (e) => {
-      pickedMedia = await readFilesAsDataUrls(e.target.files);
-      renderMediaPreview(pickedMedia);
-    });
-
-    function renderMediaPreview(files){
-      const box = getEl('media-preview');
-      if(!box) return;
-      box.innerHTML = '';
-      if(!files?.length){
-        box.innerHTML = `<div class="text-xs text-gray-400 font-semibold">No files selected yet.</div>`;
-        return;
-      }
-      files.slice(0,8).forEach(f => {
-        const card = document.createElement('div');
-        card.className = "border rounded-xl overflow-hidden bg-white";
-        const isImg = (f.type || '').startsWith('image/');
-        card.innerHTML = `
-          <div class="h-24 bg-gray-50 flex items-center justify-center overflow-hidden">
-            ${isImg ? `<img src="${f.dataUrl}" class="w-full h-full object-cover">`
-                    : `<div class="text-center text-gray-400"><i class="ph ph-file-pdf text-3xl"></i><div class="text-xs font-semibold mt-1">PDF</div></div>`}
-          </div>
-          <div class="p-2 text-[10px] text-gray-500 font-bold truncate" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</div>
-        `;
-        box.appendChild(card);
-      });
-    }
-
-    function readFilesAsDataUrls(fileList){
-      const files = Array.from(fileList || []);
-      return Promise.all(files.map(f => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ name: f.name, type: f.type, dataUrl: reader.result });
-        reader.onerror = () => resolve({ name: f.name, type: f.type, dataUrl: '' });
-        reader.readAsDataURL(f);
-      })));
-    }
-
-    // -----------------------
-    // Assets storage & data
-    // -----------------------
-    const STORAGE_KEY = "arcon_assets_demo_v3";
-    let myAssets = [];
-    let assetsView = "list";
-    let pendingApp = null;
-    let lastOpenedCertId = null;
-
-    function seedIfEmpty(){
-      if(myAssets.length) return;
-      const today = iso(new Date());
-      myAssets = [
-        {
-          id: 'APP-2025-001',
-          sponsor: 'Zenith Bank',
-          boardOwner: { name: 'Zenith Bank', phone:'', email:'', address:'' },
-          purpose: 'Corporate Branding',
-          adType: 'Unipole',
-          size: 'Unipole (18m x 6m)',
-          durationVal: 12,
-          durationUnit: 'Months',
-          state: 'Lagos',
-          lga: 'Ikeja',
-          status: 'Active',
-          createdAt: today,
-          expiry: computeExpiry(today, 12, "Months"),
-          fee: 185000,
-          agency: { name: 'Micro Press LTD', rc:'', address:'', contact:'', phone:'', email:'' },
-          media: []
-        }
-      ];
-      saveAssetsToStorage();
-    }
-
-    function saveAssetsToStorage(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(myAssets)); }catch(e){} }
-    function loadAssetsFromStorage(){
-      try{ myAssets = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }catch(e){ myAssets = []; }
-      seedIfEmpty();
-    }
-
-    // -----------------------
-    // Dashboard navigation
-    // -----------------------
+    // --- DASHBOARD ---
     function dashSwitch(tab) {
-      ['overview','apply','assets'].forEach(t => getEl('dash-'+t).classList.add('hidden'));
-      getEl('dash-'+tab).classList.remove('hidden');
-
       ['overview','apply','assets'].forEach(t => {
-        const btn = getEl('nav-'+t);
-        if(t === tab) btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm font-extrabold flex items-center gap-3 bg-green-50 text-arconGreen border-l-4 border-arconGreen transition";
-        else btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm font-extrabold flex items-center gap-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent transition";
+         getEl('dash-'+t).classList.add('hidden');
+         const nav = getEl('nav-'+t);
+         if(t === tab) nav.className = "flex-1 md:flex-none text-left px-3 py-3 rounded-lg text-xs md:text-sm font-bold flex flex-col md:flex-row items-center gap-2 md:gap-3 bg-green-50 text-arconGreen";
+         else nav.className = "flex-1 md:flex-none text-left px-3 py-3 rounded-lg text-xs md:text-sm font-bold flex flex-col md:flex-row items-center gap-2 md:gap-3 text-gray-600 hover:bg-gray-50";
       });
-
-      if(tab === 'assets') renderAssets();
-      if(tab === 'overview') updateDash();
-    }
-
-    function updateDash(){
-      const active = myAssets.filter(a => deriveStatus(a) === 'Active');
-      const pending = myAssets.filter(a => deriveStatus(a) === 'Pending');
-      const expSoon = active.filter(a => daysToExpiry(a.expiry) <= 30 && daysToExpiry(a.expiry) >= 0);
-
-      getEl('stat-active').innerText = active.length;
-      getEl('stat-expiring').innerText = expSoon.length;
-      getEl('stat-pending').innerText = pending.length;
-      getEl('stat-total').innerText = myAssets.length;
-
-      renderNextExpiries();
-      renderStatusChart(active.length, expSoon.length, pending.length, myAssets.filter(a => deriveStatus(a) === 'Expired').length);
-    }
-
-    function deriveStatus(asset){
-      if(asset.status === 'Pending') return 'Pending';
-      if(asset.expiry && daysToExpiry(asset.expiry) < 0) return 'Expired';
-      return 'Active';
-    }
-
-    function renderNextExpiries(){
-      const box = getEl('next-expiries');
-      if(!box) return;
-
-      const items = [...myAssets]
-        .filter(a => a.expiry)
-        .sort((a,b) => new Date(a.expiry) - new Date(b.expiry))
-        .slice(0, 4);
-
-      if(!items.length){
-        box.innerHTML = `<div class="text-sm text-gray-500">No assets yet.</div>`;
-        return;
-      }
-
-      box.innerHTML = items.map(a => {
-        const d = daysToExpiry(a.expiry);
-        const tag = d < 0 ? "Expired" : `${d} days`;
-        const chipClass = d < 0 ? "bg-red-100 text-red-700" : (d <= 30 ? "bg-arconYellow/25 text-ink" : "bg-green-100 text-green-700");
-        return `
-          <button onclick="generateCertificate('${escapeHtml(a.id)}')" class="w-full text-left border rounded-xl p-3 hover:bg-gray-50">
-            <div class="flex justify-between items-start gap-3">
-              <div>
-                <div class="font-black text-gray-900">${escapeHtml(a.sponsor || '—')}</div>
-                <div class="text-xs text-gray-500 font-semibold">${escapeHtml(a.id)} • ${escapeHtml(a.state || '')}</div>
-              </div>
-              <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase ${chipClass}">${tag}</span>
-            </div>
-            <div class="text-xs text-gray-500 mt-2"><span class="font-black">Expiry:</span> ${escapeHtml(a.expiry)}</div>
-          </button>
-        `;
-      }).join('');
-    }
-
-    let chartInstance = null;
-    function renderStatusChart(activeCount, expSoonCount, pendingCount, expiredCount){
-      const canvas = getEl('statusChart');
-      if(!canvas || !window.Chart) return;
-
-      const data = {
-        labels: ["Active", "Expiring Soon", "Pending", "Expired"],
-        datasets: [{ label: "Count", data: [activeCount, expSoonCount, pendingCount, expiredCount] }]
-      };
-
-      if(chartInstance){
-        chartInstance.data = data;
-        chartInstance.update();
-        return;
-      }
-
-      chartInstance = new Chart(canvas, {
-        type: "bar",
-        data,
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-      });
-    }
-
-    // -----------------------
-    // Assets view / render
-    // -----------------------
-    function setAssetsView(view){ assetsView = view; renderAssets(); }
-
-    function renderAssets(){
-      getEl('btn-view-list').className = `px-3 py-2 rounded-lg border bg-white font-extrabold text-sm hover:bg-gray-50 flex items-center gap-2 ${assetsView==='list' ? 'ring-2 ring-arconGreen' : ''}`;
-      getEl('btn-view-grid').className = `px-3 py-2 rounded-lg border bg-white font-extrabold text-sm hover:bg-gray-50 flex items-center gap-2 ${assetsView==='grid' ? 'ring-2 ring-arconGreen' : ''}`;
-
-      getEl('assets-list').classList.toggle('hidden', assetsView !== 'list');
-      getEl('assets-grid').classList.toggle('hidden', assetsView !== 'grid');
-
-      const q = (getEl('assets-search')?.value || '').trim().toLowerCase();
-      const st = getEl('filter-status')?.value || 'all';
-      const ss = getEl('filter-state')?.value || 'all';
-      const sort = getEl('sort-assets')?.value || 'newest';
-
-      let rows = [...myAssets].map(a => ({...a, derivedStatus: deriveStatus(a)}));
-
-      if(q){
-        rows = rows.filter(a =>
-          (a.id || '').toLowerCase().includes(q) ||
-          (a.sponsor || '').toLowerCase().includes(q) ||
-          (a.boardOwner?.name || '').toLowerCase().includes(q)
-        );
-      }
-      if(st !== 'all') rows = rows.filter(a => a.derivedStatus === st);
-      if(ss !== 'all') rows = rows.filter(a => (a.state || '') === ss);
-
-      if(sort === 'newest') rows.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-      else if(sort === 'expiry') rows.sort((a,b) => new Date(a.expiry || 0) - new Date(b.expiry || 0));
-      else if(sort === 'sponsor') rows.sort((a,b) => (a.sponsor || '').localeCompare(b.sponsor || ''));
-
-      if(assetsView === 'list') renderAssetsTable(rows);
-      else renderAssetsGrid(rows);
-    }
-
-    function renderMiniQr(containerId, text){
-      const box = getEl(containerId);
-      if(!box) return;
-      box.innerHTML = '';
-      try{ new QRCode(box, { text, width: 70, height: 70, correctLevel: QRCode.CorrectLevel.M }); }
-      catch(e){ box.innerHTML = `<div class="text-[10px] text-gray-400 font-semibold">QR error</div>`; }
-    }
-
-    function renderAssetsTable(rows){
-      const tbody = getEl('assets-table');
-      tbody.innerHTML = '';
-
-      rows.forEach(asset => {
-        const d = asset.expiry ? daysToExpiry(asset.expiry) : 99999;
-        const badgeClass =
-          asset.derivedStatus === 'Pending' ? 'bg-blue-100 text-blue-700' :
-          asset.derivedStatus === 'Expired' ? 'bg-red-100 text-red-700' :
-          (d <= 30 ? 'bg-arconYellow/25 text-ink' : 'bg-green-100 text-green-700');
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-4 font-mono font-black text-gray-700">${escapeHtml(asset.id)}</td>
-          <td class="p-4">
-            <div class="font-black text-gray-900">${escapeHtml(asset.sponsor || '—')}</div>
-            <div class="text-xs text-gray-500 font-semibold">
-              Owner: ${escapeHtml(asset.boardOwner?.name || '—')} • ${escapeHtml(asset.purpose || '—')}
-            </div>
-            <div class="text-xs text-gray-500 font-semibold">
-              ${escapeHtml(asset.adType || '—')} • ${escapeHtml(asset.state || '')}${asset.lga ? ', '+escapeHtml(asset.lga) : ''}
-            </div>
-            <div class="mt-2">
-              <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase ${badgeClass}">
-                ${escapeHtml(asset.derivedStatus)}${asset.derivedStatus==='Active' && d<=30 ? ' (Soon)' : ''}
-              </span>
-            </div>
-          </td>
-          <td class="p-4 text-xs text-gray-600">
-            <div><span class="font-black">Issue:</span> ${escapeHtml(asset.createdAt || '—')}</div>
-            <div><span class="font-black">Expiry:</span> ${escapeHtml(asset.expiry || '—')}</div>
-          </td>
-          <td class="p-4">
-            <div id="mini-qr-${cssSafe(asset.id)}" class="w-16 h-16 border rounded-lg bg-white flex items-center justify-center"></div>
-            <button onclick="downloadAssetQR('${escapeHtml(asset.id)}')" class="mt-2 text-[10px] font-black text-arconGreen hover:underline">Download</button>
-          </td>
-          <td class="p-4 text-right space-y-2">
-            <button onclick="generateCertificate('${escapeHtml(asset.id)}')" class="bg-ink text-white text-xs font-black px-3 py-2 rounded-lg hover:bg-black w-full">
-              View Certificate
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-        renderMiniQr(`mini-qr-${cssSafe(asset.id)}`, makeVerifyPayload(asset.id));
-      });
-    }
-
-    function renderAssetsGrid(rows){
-      const grid = getEl('assets-grid');
-      grid.innerHTML = '';
-
-      rows.forEach(asset => {
-        const d = asset.expiry ? daysToExpiry(asset.expiry) : 99999;
-        const badgeClass =
-          asset.derivedStatus === 'Pending' ? 'bg-blue-100 text-blue-700' :
-          asset.derivedStatus === 'Expired' ? 'bg-red-100 text-red-700' :
-          (d <= 30 ? 'bg-arconYellow/25 text-ink' : 'bg-green-100 text-green-700');
-
-        const card = document.createElement('div');
-        card.className = "bg-white border border-gray-200 rounded-2xl shadow-sm p-5 hover:shadow-md transition";
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-xs font-black uppercase tracking-widest text-gray-500">License</div>
-              <div class="font-mono font-black text-lg text-ink">${escapeHtml(asset.id)}</div>
-              <div class="mt-2 font-black text-gray-900">${escapeHtml(asset.sponsor || '—')}</div>
-              <div class="text-xs text-gray-500 font-semibold mt-1">Owner: ${escapeHtml(asset.boardOwner?.name || '—')}</div>
-            </div>
-            <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase ${badgeClass}">${escapeHtml(asset.derivedStatus)}</span>
-          </div>
-
-          <div class="mt-4 text-xs text-gray-600 space-y-1">
-            <div><span class="font-black">Type:</span> ${escapeHtml(asset.adType || '—')}</div>
-            <div><span class="font-black">Size:</span> ${escapeHtml(asset.size || '—')}</div>
-            <div><span class="font-black">Location:</span> ${escapeHtml(asset.state || '')}${asset.lga ? ', '+escapeHtml(asset.lga) : ''}</div>
-            <div><span class="font-black">Issue:</span> ${escapeHtml(asset.createdAt || '—')}</div>
-            <div><span class="font-black">Expiry:</span> ${escapeHtml(asset.expiry || '—')}</div>
-          </div>
-
-          <div class="mt-4 flex items-center justify-between">
-            <div>
-              <div id="grid-qr-${cssSafe(asset.id)}" class="w-20 h-20 border rounded-xl bg-white flex items-center justify-center"></div>
-              <button onclick="downloadAssetQR('${escapeHtml(asset.id)}')" class="mt-2 text-[10px] font-black text-arconGreen hover:underline">Download QR</button>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <button onclick="generateCertificate('${escapeHtml(asset.id)}')" class="px-4 py-2 rounded-xl bg-ink text-white font-black hover:bg-black">
-                View Certificate
-              </button>
-              <button onclick="openVerifyModal('${escapeHtml(asset.id)}')" class="px-4 py-2 rounded-xl border font-black hover:bg-gray-50">
-                Verify
-              </button>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-        renderMiniQr(`grid-qr-${cssSafe(asset.id)}`, makeVerifyPayload(asset.id));
-      });
-    }
-
-    // -----------------------
-    // Verify payload
-    // -----------------------
-    function makeVerifyPayload(id){ return `ARCON-VERIFY:${id}`; }
-    function extractIdFromPayload(payload){
-      const text = String(payload || '').trim();
-      const m = text.match(/APP-\d{4}-\d{3,6}/i);
-      if(m) return safeUpper(m[0]);
-      const m2 = text.match(/ARCON-VERIFY:\s*([A-Z0-9-]+)/i);
-      if(m2) return safeUpper(m2[1]);
-      return safeUpper(text);
-    }
-
-    // -----------------------
-    // Submit -> Invoice
-    // -----------------------
-    async function handleFormSubmit(e){
-      e.preventDefault();
-
-      const fee = calcFee();
-      if(fee <= 0) return alert("Please fill Purpose, Sponsor, Type, Size, Duration, State & LGA.");
-
-      // Validate board owner selection
-      const bomode = getEl('board-owner-mode').value;
-      if(!bomode) return alert("Please select Board Owner.");
-
-      const sponsor = getEl('sponsor').value.trim();
-      let boardOwner = { name: "", phone:"", email:"", address:"" };
-
-      if(bomode === 'self'){
-        boardOwner.name = currentUser?.name || "Self";
-        boardOwner.phone = currentUser?.phone || "";
-        boardOwner.email = currentUser?.email || "";
-      } else if(bomode === 'sponsor'){
-        boardOwner.name = sponsor;
-      } else if(bomode === 'existing'){
-        const idx = Number(getEl('board-owner-existing').value);
-        if(Number.isNaN(idx) || !savedBoardOwners[idx]) return alert("Select an existing board owner.");
-        boardOwner = {...savedBoardOwners[idx]};
-      } else if(bomode === 'new'){
-        const name = getEl('board-owner-name').value.trim();
-        if(!name) return alert("Enter new Board Owner Name.");
-        boardOwner = {
-          name,
-          phone: getEl('board-owner-phone').value.trim(),
-          email: getEl('board-owner-email').value.trim(),
-          address: getEl('board-owner-address').value.trim(),
-        };
-        // Save new board owner for future dropdown use
-        savedBoardOwners.unshift(boardOwner);
-        // de-dupe by name
-        savedBoardOwners = savedBoardOwners.filter((b, i, arr) => arr.findIndex(x => safeUpper(x.name) === safeUpper(b.name)) === i).slice(0, 50);
-        saveBoardOwnersToStorage();
-        refreshBoardOwnerDropdown();
-      }
-
-      // agency
-      const agency = {
-        name: getEl('agency-name').value.trim(),
-        rc: getEl('agency-rc').value.trim(),
-        address: getEl('agency-address').value.trim(),
-        contact: getEl('agency-contact').value.trim(),
-        phone: getEl('agency-phone').value.trim(),
-        email: getEl('agency-email').value.trim(),
-      };
-
-      const purpose = getEl('industry').value;
-      const adType = getEl('ad-type').value;
-      const size = getEl('size').value;
-      const durationVal = Number(getEl('dur-val').value || 0);
-      const durationUnit = getEl('dur-unit').value;
-      const state = getEl('state').value;
-      const lga = getEl('lga').value;
-
-      const issue = iso(new Date());
-      const expiry = computeExpiry(issue, durationVal, durationUnit);
-
-      const mediaInput = getEl('media');
-      if(mediaInput && mediaInput.files && mediaInput.files.length){
-        if(!pickedMedia.length) pickedMedia = await readFilesAsDataUrls(mediaInput.files);
-      }
-
-      const appId = `APP-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000) + 1000}`;
-
-      pendingApp = {
-        id: appId,
-        sponsor,
-        boardOwner,
-        purpose,
-        adType,
-        size: size === 'custom'
-          ? `Custom Size (${Number(getEl('w').value||0)}m x ${Number(getEl('h').value||0)}m)`
-          : size,
-        durationVal,
-        durationUnit,
-        state,
-        lga,
-        status: 'Pending',
-        createdAt: issue,
-        expiry,
-        fee,
-        agency,
-        media: pickedMedia || []
-      };
-
-      // Fill invoice
-      getEl('invoice-no').innerText = `INV-${Math.floor(Math.random()*900000)+100000}`;
-      getEl('invoice-date').innerText = issue;
-
-      getEl('invoice-appid').innerText = appId;
-      getEl('invoice-appid-2').innerText = appId;
-      getEl('invoice-sponsor').innerText = sponsor || '—';
-      getEl('invoice-purpose').innerText = purpose || '—';
-      getEl('invoice-type').innerText = adType || '—';
-      getEl('invoice-size').innerText = pendingApp.size || '—';
-      getEl('invoice-duration').innerText = `${durationVal} ${durationUnit}`;
-      getEl('invoice-location').innerText = `${state}${lga ? ', ' + lga : ''}`;
-      getEl('invoice-issue').innerText = issue;
-      getEl('invoice-expiry').innerText = expiry;
-
-      getEl('pay-amount-2').innerText = money(fee);
-
-      // Invoice QR
-      const invQr = getEl('invoice-qr');
-      invQr.innerHTML = '';
-      new QRCode(invQr, { text: makeVerifyPayload(appId), width: 160, height: 160, correctLevel: QRCode.CorrectLevel.H });
-
-      openModal('payment-modal');
-    }
-
-    function closePaymentModal(){ closeModal('payment-modal'); }
-
-    function processPayment(){
-      if(!pendingApp) return;
-
-      pendingApp.status = 'Active';
-      myAssets.unshift(pendingApp);
-      saveAssetsToStorage();
-
-      closeModal('payment-modal');
-
-      try{
-        getEl('application-form').reset();
-        getEl('custom-dims').classList.add('hidden');
+      getEl('dash-'+tab).classList.remove('hidden');
+      
+      if(tab === 'apply' && currentUser) {
+        // AUTOFILL AGENCY
+        getEl('agency-name').value = currentUser.name;
+        getEl('agency-rc').value = currentUser.rc;
+        getEl('agency-phone').value = currentUser.phone;
+        // Reset file preview
         getEl('media-preview').innerHTML = '';
-        // reset board owner UI
-        getEl('board-owner-existing').classList.add('hidden');
-        getEl('board-owner-name').classList.add('hidden');
-        getEl('board-owner-extra').classList.add('hidden');
-      }catch(e){}
-      pickedMedia = [];
-      pendingApp = null;
-
-      updateDash();
-      dashSwitch('assets');
-
-      setTimeout(() => alert(`Payment Confirmed!\nLicense is now ACTIVE.`), 150);
-
-      const last = myAssets[0];
-      if(last?.id) generateCertificate(last.id);
+        currentFiles = [];
+      }
+      
+      if(tab === 'assets') renderAssets();
     }
 
-    // -----------------------
-    // Certificate
-    // -----------------------
-    function generateCertificate(id){
-      const asset = myAssets.find(a => a.id === id);
-      if(!asset) return alert("Certificate not found.");
-      lastOpenedCertId = id;
+    function updateDash() {
+      const active = myAssets.length;
+      getEl('stat-active').innerText = active;
+      getEl('stat-total').innerText = active;
+      // demo stats
+      getEl('stat-expiring').innerText = Math.floor(active * 0.2); 
+    }
 
-      getEl('cert-id').innerText = asset.id;
-      getEl('cert-board-owner').innerText = asset.boardOwner?.name || '—';
-      getEl('cert-sponsor').innerText = asset.sponsor || '—';
-      getEl('cert-purpose').innerText = asset.purpose || '—';
-      getEl('cert-type').innerText = asset.adType || '—';
-      getEl('cert-size').innerText = asset.size || '—';
-      getEl('cert-loc').innerText = `${asset.state || ''}${asset.lga ? ', ' + asset.lga : ''}`;
-      getEl('cert-issue').innerText = asset.createdAt || '—';
-      getEl('cert-expiry').innerText = asset.expiry || '—';
-
-      const derived = deriveStatus(asset);
-      getEl('cert-status').innerText =
-        derived === 'Active' ? 'This asset is compliant with ARCON regulations'
-        : (derived === 'Expired' ? 'This certificate has expired — renewal required' : 'This application is pending confirmation');
-
-      // Agency fields
-      getEl('cert-agency-name').innerText = asset.agency?.name || '—';
-      getEl('cert-agency-rc').innerText = asset.agency?.rc || '—';
-      getEl('cert-agency-address').innerText = asset.agency?.address || '—';
-      getEl('cert-agency-contact').innerText = asset.agency?.contact || '—';
-      getEl('cert-agency-phone').innerText = asset.agency?.phone || '—';
-      getEl('cert-agency-email').innerText = asset.agency?.email || '—';
-
-      // QR
-      const qrContainer = getEl('cert-qrcode');
-      qrContainer.innerHTML = '';
-      new QRCode(qrContainer, { text: makeVerifyPayload(asset.id), width: 120, height: 120, correctLevel: QRCode.CorrectLevel.H });
-
-      // Media
-      const mediaBox = getEl('cert-media');
-      mediaBox.innerHTML = '';
-      const media = asset.media || [];
-      if(!media.length){
-        mediaBox.innerHTML = `<div class="col-span-2 md:col-span-4 text-sm text-gray-400 font-semibold bg-gray-50 border rounded-xl p-4 text-center">
-          No uploaded visuals attached to this certificate.
-        </div>`;
-      } else {
-        media.slice(0, 8).forEach(f => {
-          const isImg = (f.type || '').startsWith('image/');
-          const card = document.createElement('div');
-          card.className = "border rounded-xl overflow-hidden bg-white";
-          card.innerHTML = `
-            <div class="h-28 bg-gray-50 flex items-center justify-center overflow-hidden">
-              ${isImg ? `<img src="${f.dataUrl}" class="w-full h-full object-cover">`
-                      : `<div class="text-center text-gray-400"><i class="ph ph-file-pdf text-3xl"></i><div class="text-xs font-semibold mt-1">PDF</div></div>`}
-            </div>
-            <div class="p-2 text-[10px] text-gray-500 font-bold truncate" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</div>
-          `;
-          mediaBox.appendChild(card);
+    // --- APPLICATION LOGIC ---
+    let currentFiles = [];
+    function previewMedia(input) {
+      const container = getEl('media-preview');
+      container.innerHTML = '';
+      currentFiles = [];
+      
+      if(input.files) {
+        Array.from(input.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+             currentFiles.push(e.target.result);
+             const img = document.createElement('img');
+             img.src = e.target.result;
+             img.className = "h-16 w-16 object-cover rounded border";
+             container.appendChild(img);
+          };
+          reader.readAsDataURL(file);
         });
       }
-
-      openModal('certificate-modal');
     }
 
-    function getQRCodeDataURL(containerId){
-      const box = getEl(containerId);
-      if(!box) throw new Error("QR container not found");
-      const canvas = box.querySelector('canvas');
-      if(canvas) return canvas.toDataURL('image/png');
-      const img = box.querySelector('img');
-      if(img && img.src) return img.src;
-      throw new Error("QR not rendered yet");
+    function calcFee() {
+       const state = getEl('state').value;
+       const dur = getEl('dur-val').value;
+       let base = 50000;
+       if(state === 'Lagos') base = 100000;
+       if(state === 'Abuja FCT') base = 85000;
+       getEl('fee-display').innerText = money(base * dur);
     }
 
-    function downloadBlob(url, filename){
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const id = "APP-" + new Date().getFullYear() + "-" + Math.floor(Math.random()*9000);
+      const newAsset = {
+        id: id,
+        agency: {
+          name: getEl('agency-name').value,
+          rc: getEl('agency-rc').value
+        },
+        sponsor: getEl('sponsor').value,
+        cat: getEl('industry').value,
+        loc: getEl('state').value,
+        date: new Date().toISOString().split('T')[0],
+        img: currentFiles[0] || 'https://via.placeholder.com/300?text=No+Image'
+      };
+      
+      myAssets.unshift(newAsset);
+      localStorage.setItem('arcon_assets_v2', JSON.stringify(myAssets));
+      
+      alert(`License Generated Successfully!\nID: ${id}`);
+      getEl('application-form').reset();
+      updateDash();
+      dashSwitch('assets');
     }
 
-    function downloadCertificateQR(){
-      if(!lastOpenedCertId) return alert("Open a certificate first.");
-      try{
-        const dataUrl = getQRCodeDataURL('cert-qrcode');
-        downloadBlob(dataUrl, `ARCON-CERT-QR-${lastOpenedCertId}.png`);
-      }catch(e){ alert(e.message); }
-    }
-
-    function downloadAssetQR(id){
-      const tmp = document.createElement('div');
-      tmp.style.position = "fixed"; tmp.style.left = "-9999px"; tmp.style.top = "-9999px";
-      document.body.appendChild(tmp);
-      new QRCode(tmp, { text: makeVerifyPayload(id), width: 250, height: 250, correctLevel: QRCode.CorrectLevel.H });
-
-      setTimeout(() => {
-        try{
-          const canvas = tmp.querySelector('canvas');
-          const img = tmp.querySelector('img');
-          const dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
-          if(!dataUrl) throw new Error("QR export failed.");
-          downloadBlob(dataUrl, `ARCON-QR-${id}.png`);
-        }catch(e){ alert(e.message); }
-        finally{ tmp.remove(); }
-      }, 60);
-    }
-
-    // -----------------------
-    // Invoice downloads
-    // -----------------------
-    async function downloadInvoicePNG(){
-      const node = getEl('invoice-sheet');
-      const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#ffffff' });
-      const id = getEl('invoice-appid')?.innerText || 'APP';
-      downloadBlob(canvas.toDataURL('image/png'), `ARCON-Invoice-${id}.png`);
-    }
-
-    async function downloadInvoicePDF(){
-      const node = getEl('invoice-sheet');
-      const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#ffffff' });
-      const imgData = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      const imgProps = pdf.getImageProperties(imgData);
-      const ratio = imgProps.width / imgProps.height;
-
-      let w = pageWidth;
-      let h = w / ratio;
-      if(h > pageHeight){ h = pageHeight; w = h * ratio; }
-
-      const x = (pageWidth - w) / 2;
-      const y = (pageHeight - h) / 2;
-
-      pdf.addImage(imgData, 'PNG', x, y, w, h);
-
-      const id = getEl('invoice-appid')?.innerText || 'APP';
-      pdf.save(`ARCON-Invoice-${id}.pdf`);
-    }
-
-    function downloadInvoiceQR(){
-      try{
-        const id = getEl('invoice-appid')?.innerText || 'APP';
-        const dataUrl = getQRCodeDataURL('invoice-qr');
-        downloadBlob(dataUrl, `ARCON-QR-${id}.png`);
-      }catch(e){ alert(e.message); }
-    }
-
-    // -----------------------
-    // Verify modal (scanner)
-    // -----------------------
-    let qrScanner = null;
-
-    function openVerifyModal(prefillId=''){
-      openModal('verify-modal');
-      getEl('verify-result').classList.add('hidden');
-      getEl('verify-input').value = prefillId ? safeUpper(prefillId) : '';
-      getEl('scanner-status').innerText = "Ready";
-    }
-
-    function closeVerifyModal(){
-      stopScanner();
-      closeModal('verify-modal');
-    }
-
-    function performVerify(openCertificate=false){
-      const input = safeUpper(getEl('verify-input').value);
-      const resDiv = getEl('verify-result');
-      resDiv.classList.remove('hidden');
-
-      const found = myAssets.find(a => safeUpper(a.id) === input);
-
-      if(found){
-        resDiv.innerHTML = `
-          <div class="bg-green-50 border border-green-200 p-4 rounded-xl flex gap-3 text-left">
-            <div class="text-green-600 text-2xl"><i class="ph ph-check-circle-fill"></i></div>
-            <div>
-              <h4 class="font-black text-green-800">Valid License</h4>
-              <p class="text-xs text-gray-700 mt-1">
-                <span class="font-black">ID:</span> ${escapeHtml(input)}<br>
-                <span class="font-black">Owner:</span> ${escapeHtml(found.boardOwner?.name || '—')}<br>
-                <span class="font-black">Sponsor:</span> ${escapeHtml(found.sponsor || '—')}<br>
-                <span class="font-black">Status:</span> ${escapeHtml(deriveStatus(found))}<br>
-                <span class="font-black">Expiry:</span> ${escapeHtml(found.expiry || '—')}
-              </p>
-            </div>
-          </div>`;
-        if(openCertificate){
-          closeVerifyModal();
-          generateCertificate(found.id);
-        }
-      }else{
-        resDiv.innerHTML = `
-          <div class="bg-red-50 border border-red-200 p-4 rounded-xl flex gap-3 text-left">
-            <div class="text-red-600 text-2xl"><i class="ph ph-x-circle-fill"></i></div>
-            <div>
-              <h4 class="font-black text-red-800">Invalid / Not Found</h4>
-              <p class="text-xs text-gray-700 mt-1">This license ID does not exist in this demo registry.</p>
-            </div>
-          </div>`;
+    // --- RENDER ASSETS ---
+    function renderAssets() {
+      const container = getEl('assets-container');
+      container.innerHTML = '';
+      
+      if(myAssets.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-gray-400">No assets found. Create an application.</div>`;
+        return;
       }
-    }
 
-   async function startScanner() {
-        // 1. Check if library loaded
-        if (!window.Html5Qrcode) {
-            getEl('scanner-status').innerText = "Lib Error";
-            return alert("Scanner library failed to load. Please check your internet connection or the CDN URL.");
-        }
-
-        getEl('scanner-status').innerText = "Starting...";
-
-        // 2. Stop existing instance if running
-        if (qrScanner) {
-            await stopScanner();
-        }
-
-        // 3. CLEAR THE CONTAINER (Crucial Step)
-        // The library requires an empty <div> to attach the video feed.
-        const readerDiv = getEl('reader');
-        readerDiv.innerHTML = ""; 
-
-        try {
-            // 4. Initialize
-            qrScanner = new Html5Qrcode("reader");
-
-            const config = {
-                fps: 10,
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            };
-
-            // 5. Start Camera
-            await qrScanner.start(
-                { facingMode: "environment" }, // Prefer back camera
-                config,
-                (decodedText) => {
-                    // Success Callback
-                    console.log("Scanned:", decodedText);
-                    const id = extractIdFromPayload(decodedText);
-                    
-                    // Update UI
-                    getEl('verify-input').value = id;
-                    getEl('scanner-status').innerText = "Scanned";
-                    
-                    // Stop and Verify
-                    stopScanner().then(() => {
-                        performVerify(true);
-                    });
-                },
-                (errorMessage) => {
-                    // Scanning... (ignore read errors as they happen every frame)
-                }
-            );
-
-            getEl('scanner-status').innerText = "Running";
-            
-        } catch (err) {
-            console.error(err);
-            getEl('scanner-status').innerText = "Failed";
-            
-            // Restore the placeholder UI if it fails
-            stopScanner(); 
-            
-            alert("Camera failed to start.\n\n" +
-                  "1. Ensure you are on HTTPS (not http).\n" +
-                  "2. Ensure you allowed camera permissions.\n" +
-                  "3. Close other apps using the camera.");
-        }
-    }
-
-    async function stopScanner() {
-        try {
-            if (qrScanner) {
-                // Try to stop, ignore errors if it's already stopped
-                await qrScanner.stop().catch(e => console.warn(e));
-                await qrScanner.clear().catch(e => console.warn(e));
-                qrScanner = null;
-            }
-        } catch (e) {
-            console.error("Stop failed", e);
-        }
-
-        // RESTORE PLACEHOLDER UI
-        // We put this back so the user knows what to do
-        const reader = getEl('reader');
-        reader.innerHTML = `
-            <div class="text-center text-gray-400 text-sm font-semibold p-6">
-                <i class="ph ph-camera text-3xl mb-2"></i>
-                <p>Click “Start Scanner” and allow camera permission.</p>
-                <p class="text-xs mt-2">Must be HTTPS.</p>
-            </div>
+      myAssets.forEach(a => {
+        const div = document.createElement('div');
+        div.className = "bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-4";
+        div.innerHTML = `
+           <div class="flex items-start gap-4">
+             <div class="h-16 w-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+               <img src="${a.img}" class="h-full w-full object-cover">
+             </div>
+             <div>
+               <div class="font-black text-ink">${a.id}</div>
+               <div class="text-sm text-gray-600">${a.sponsor}</div>
+               <div class="text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded-full inline-block mt-1">Active</div>
+             </div>
+           </div>
+           <div class="flex gap-2">
+             <button onclick="viewCert('${a.id}')" class="flex-1 md:flex-none px-4 py-2 bg-ink text-white rounded-lg text-xs font-bold">Certificate</button>
+             <button onclick="downloadQR('${a.id}')" class="flex-1 md:flex-none px-4 py-2 border rounded-lg text-xs font-bold">QR Code</button>
+           </div>
         `;
-        getEl('scanner-status').innerText = "Stopped";
+        container.appendChild(div);
+      });
     }
 
-    // -----------------------
-    // Init
-    // -----------------------
-    document.addEventListener('DOMContentLoaded', async () => {
-      await loadStatesLgas();
-      setAssetsView('list');
+    // --- CERTIFICATE VIEWER ---
+    function viewCert(id) {
+       const asset = myAssets.find(x => x.id === id);
+       if(!asset) return;
+       
+       getEl('c-id').innerText = asset.id;
+       getEl('c-sponsor').innerText = asset.sponsor;
+       getEl('c-cat').innerText = asset.cat;
+       getEl('c-loc').innerText = asset.loc;
+       getEl('c-issue').innerText = asset.date;
+       getEl('c-ag-name').innerText = asset.agency.name;
+       getEl('c-ag-rc').innerText = asset.agency.rc;
+       getEl('c-img').src = asset.img;
 
-      // Board owner dropdown ready (even before login)
-      loadBoardOwnersFromStorage();
+       const qrDiv = getEl('c-qr');
+       qrDiv.innerHTML = '';
+       new QRCode(qrDiv, { text: `ARCON-VERIFY:${asset.id}`, width: 80, height: 80 });
 
-      // Optional verify link
-      const params = new URLSearchParams(location.search);
-      const v = params.get('verify');
-      if(v) openVerifyModal(safeUpper(v));
-    });
+       openModal('certificate-modal');
+    }
+
+    // --- VERIFY MODAL ---
+    function openVerifyModal() { openModal('verify-modal'); }
+    function closeVerifyModal() { stopScanner(); closeModal('verify-modal'); }
+    
+    function performVerify() {
+       const val = getEl('verify-input').value;
+       const res = getEl('verify-result');
+       res.classList.remove('hidden');
+       
+       if(myAssets.find(x => x.id === val)) {
+         res.innerHTML = `<span class="text-green-600 font-black">VALID:</span> License ${val} is Active.`;
+         res.className = "mt-4 p-3 rounded-lg bg-green-50 border border-green-200 text-sm block";
+         setTimeout(() => { viewCert(val); closeVerifyModal(); }, 1000);
+       } else {
+         res.innerHTML = `<span class="text-red-600 font-black">INVALID:</span> License ID not found.`;
+         res.className = "mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm block";
+       }
+    }
+
+    // --- QR SCANNER ---
+    async function startScanner() {
+       if(qrScanner) await stopScanner();
+       const reader = getEl('reader');
+       reader.innerHTML = "";
+       
+       try {
+         qrScanner = new Html5Qrcode("reader");
+         await qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 200 }, (decoded) => {
+             const id = decoded.replace('ARCON-VERIFY:', '');
+             getEl('verify-input').value = id;
+             performVerify();
+             stopScanner();
+         });
+       } catch(e) {
+         alert("Camera failed. Use manual entry.");
+       }
+    }
+    async function stopScanner() {
+      if(qrScanner) { await qrScanner.stop().catch(()=>{}); qrScanner.clear(); qrScanner = null; }
+      getEl('reader').innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-gray-500 text-xs pointer-events-none">Camera Inactive</div>';
+    }
+
+    // --- INIT ---
+    if(localStorage.getItem('arcon_assets_v2')) {
+       // do nothing
+    } else {
+       // Seed dummy data
+       myAssets = [
+         { id: 'APP-2025-1001', agency: {name:'Micro Press', rc:'RC75875'}, sponsor: 'Zenith Bank', cat: 'Corporate Branding', loc: 'Lagos', date: '2025-12-01', img: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300' }
+       ];
+       localStorage.setItem('arcon_assets_v2', JSON.stringify(myAssets));
+    }
+
   </script>
 </body>
 </html>
