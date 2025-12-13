@@ -3,218 +3,623 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ARCON - Advertiser Portal</title>
+  <title>ARCON | Advertiser Services Portal</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
   <script>
     tailwind.config = {
-      theme: { extend: { colors: { 'ng-green': '#008751', 'ng-green-dark': '#00643C', 'gold': '#D4AF37' } } }
+      theme: {
+        extend: {
+          colors: {
+            'ng-green': '#008751',
+            'ng-green-dark': '#00643C',
+            'ng-green-light': '#E6F3ED',
+            'gold': '#D4AF37',
+            'govt-gray': '#F9FAFB'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Merriweather', 'serif'],
+          }
+        }
+      }
     }
   </script>
-  <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@400;700&display=swap'); body{font-family:'Inter',sans-serif;}</style>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
-  <nav class="bg-white border-b border-gray-200 sticky top-0 z-30">
+  <nav class="bg-white border-b border-gray-200 z-30 flex-none shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-ng-green rounded-full flex items-center justify-center text-white font-serif font-bold">A</div>
-          <div>
-            <h1 class="font-serif font-bold text-ng-green-dark leading-none">ARCON</h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-wider">Advertiser Services</p>
+          <div class="bg-ng-green/10 p-2 rounded-lg border border-ng-green/20">
+            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-8 w-8 rounded object-cover" alt="ARCON">
+          </div>
+          <div class="hidden md:block">
+            <h1 class="font-serif font-bold text-ng-green-dark text-lg leading-tight">ARCON</h1>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Advertiser Services Portal</p>
           </div>
         </div>
-        <div class="flex items-center space-x-4">
-          <button onclick="switchTab('apply')" id="nav-apply" class="px-3 py-2 rounded-md text-sm font-medium bg-ng-green text-white">New Application</button>
-          <button onclick="switchTab('status')" id="nav-status" class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-ng-green">My Applications</button>
-          <button onclick="switchTab('verify')" id="nav-verify" class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-ng-green">Verify Asset</button>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-ng-green-light text-ng-green">
+            <i class="ph ph-squares-four mr-1.5 text-lg align-middle"></i>Dashboard
+          </button>
+          <button onclick="switchTab('apply')" id="nav-apply" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+            <i class="ph ph-plus-circle mr-1.5 text-lg align-middle"></i>New Application
+          </button>
+          <button onclick="switchTab('my-assets')" id="nav-my-assets" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+            <i class="ph ph-files mr-1.5 text-lg align-middle"></i>My Applications
+          </button>
+          <button onclick="switchTab('verify')" id="nav-verify" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+            <i class="ph ph-seal-check mr-1.5 text-lg align-middle"></i>Verify Asset
+          </button>
+        </div>
+
+        <div class="flex items-center ml-4 pl-4 border-l border-gray-200">
+          <div class="text-right mr-3 hidden md:block">
+            <p class="text-xs font-bold text-gray-800">MediaReach OMD</p>
+            <p class="text-[10px] text-gray-500">Authorized Agent</p>
+          </div>
+          <div class="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md">
+            MO
+          </div>
         </div>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-    
-    <section id="apply-view" class="space-y-8">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-        <h2 class="text-2xl font-serif font-bold text-gray-800 mb-6 border-b pb-4">New Advertisement License</h2>
-        
-        <form id="app-form" onsubmit="handlePreSubmit(event)" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Company / Applicant Name</label>
-              <input type="text" name="applicant" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ng-green outline-none">
+  <main class="flex-grow overflow-y-auto p-4 md:p-8 relative">
+    <div class="max-w-7xl mx-auto">
+      
+      <section id="view-dashboard" class="fade-in space-y-6">
+        <div class="bg-gradient-to-r from-ng-green to-ng-green-dark rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+          <div class="relative z-10">
+            <h2 class="text-2xl font-serif font-bold mb-2">Welcome back, MediaReach OMD</h2>
+            <p class="text-green-100 max-w-xl text-sm">Your compliance status is good. You have 2 pending invoices and 5 active assets running in Lagos and Abuja.</p>
+            <div class="mt-6 flex gap-3">
+              <button onclick="switchTab('apply')" class="bg-white text-ng-green px-5 py-2.5 rounded-lg text-sm font-bold shadow hover:bg-gray-50 transition">Apply for License</button>
+              <button onclick="switchTab('my-assets')" class="bg-ng-green-dark/40 border border-white/20 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-ng-green-dark transition">View All Assets</button>
             </div>
+          </div>
+          <div class="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform translate-x-12"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph ph-hourglass-medium"></i></div>
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sponsor Name</label>
-              <input type="text" name="sponsor" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ng-green outline-none">
+              <p class="text-xs font-bold text-gray-400 uppercase">Pending Review</p>
+              <h3 class="text-2xl font-bold text-gray-800">2 Apps</h3>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-green-50 text-ng-green flex items-center justify-center text-xl"><i class="ph ph-check-circle"></i></div>
+            <div>
+              <p class="text-xs font-bold text-gray-400 uppercase">Active Assets</p>
+              <h3 class="text-2xl font-bold text-gray-800">14 Active</h3>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xl"><i class="ph ph-warning-circle"></i></div>
+            <div>
+              <p class="text-xs font-bold text-gray-400 uppercase">Action Required</p>
+              <h3 class="text-2xl font-bold text-gray-800">1 Query</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="font-bold text-gray-700">Recent Applications</h3>
+            <button onclick="switchTab('my-assets')" class="text-xs text-ng-green font-bold hover:underline">View All</button>
+          </div>
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+              <tr><th class="p-4">ID</th><th class="p-4">Sponsor</th><th class="p-4">Date</th><th class="p-4">Status</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr>
+                <td class="p-4 font-mono text-gray-600">APP-2025-092</td>
+                <td class="p-4 font-medium">Guinness Nigeria</td>
+                <td class="p-4 text-gray-500">Dec 12, 2025</td>
+                <td class="p-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Pending</span></td>
+              </tr>
+              <tr>
+                <td class="p-4 font-mono text-gray-600">APP-2025-081</td>
+                <td class="p-4 font-medium">First Bank</td>
+                <td class="p-4 text-gray-500">Dec 10, 2025</td>
+                <td class="p-4"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Approved</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="view-apply" class="fade-in hidden max-w-4xl mx-auto space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-serif font-bold text-gray-800">New License Application</h2>
+            <p class="text-sm text-gray-500">Fill in the details below to generate your invoice.</p>
+          </div>
+          <button onclick="document.getElementById('apply-form').reset(); calculateFee();" class="text-sm text-red-500 hover:text-red-700 font-medium">Reset Form</button>
+        </div>
+
+        <form id="apply-form" onsubmit="handleApplicationSubmit(event)" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          
+          <div class="p-6 md:p-8 space-y-6 border-b border-gray-100">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">1. Campaign Details</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Sponsor / Brand Name <span class="text-red-500">*</span></label>
+                <input type="text" name="sponsor" placeholder="e.g. Glo, Zenith Bank" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none transition">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Campaign Title <span class="text-red-500">*</span></label>
+                <input type="text" name="title" placeholder="e.g. 'Glo Unlimited' Christmas Promo" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none transition">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Industry Category</label>
+                <select name="industry" id="industry" onchange="calculateFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none cursor-pointer">
+                  <option value="Corporate">Corporate / Commercial (1.0x)</option>
+                  <option value="Political">Political Campaign (1.5x)</option>
+                  <option value="Product">New Product Launch (1.2x)</option>
+                  <option value="Religious">Religious / NGO (0.5x)</option>
+                  <option value="SME">SME / Small Business (0.8x)</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">State</label>
-              <select name="state" id="state" onchange="calculateFee()" class="w-full p-3 border rounded-lg outline-none">
-                <option value="">Select State</option>
-                <option value="Abuja FCT">Abuja FCT</option>
-                <option value="Lagos">Lagos</option>
-                <option value="Rivers">Rivers</option>
-                <option value="Kano">Kano</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Type</label>
-              <select name="type" class="w-full p-3 border rounded-lg outline-none">
-                <option value="Digital Billboard">Digital Billboard</option>
-                <option value="Static Billboard">Static Billboard</option>
-                <option value="Lamp Post">Lamp Post</option>
-              </select>
-            </div>
-            <div>
-               <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Duration (Months)</label>
-               <input type="number" id="duration" name="duration" value="1" min="1" onchange="calculateFee()" class="w-full p-3 border rounded-lg outline-none">
+          <div class="p-6 md:p-8 space-y-6 border-b border-gray-100 bg-gray-50/50">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">2. Asset Specifications & Location</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">State Jurisdiction <span class="text-red-500">*</span></label>
+                <select name="state" id="state" onchange="populateLGAs(); calculateFee();" required class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
+                  <option value="">Select State</option>
+                  <option value="Abuja FCT">Abuja FCT</option>
+                  <option value="Lagos">Lagos State</option>
+                  <option value="Rivers">Rivers State</option>
+                  <option value="Kano">Kano State</option>
+                  <option value="Oyo">Oyo State</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">LGA / Area</label>
+                <select name="lga" id="lga" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
+                  <option value="">Select State First</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Asset Type</label>
+                <select name="type" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
+                  <option value="Digital LED">Digital LED Board</option>
+                  <option value="Static Billboard">Static Billboard</option>
+                  <option value="Unipole">Unipole</option>
+                  <option value="Gantry">Gantry</option>
+                  <option value="Lamp Post">Street Lamp Post</option>
+                  <option value="Wall Drape">Wall Drape</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Size (Area in SQM)</label>
+                <select name="size" id="size" onchange="calculateFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
+                  <option value="1.5">4-Sheet (1.5 sqm)</option>
+                  <option value="12">32-Sheet (12 sqm)</option>
+                  <option value="18">48-Sheet (Standard 18 sqm)</option>
+                  <option value="36">96-Sheet (Superwide 36 sqm)</option>
+                  <option value="108">Unipole (108 sqm)</option>
+                  <option value="80">Gantry (80 sqm)</option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Duration</label>
+                <div class="flex gap-4">
+                  <input type="number" name="duration_val" id="duration_val" value="1" min="1" oninput="calculateFee()" class="w-24 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-center">
+                  <select name="duration_unit" id="duration_unit" onchange="calculateFee()" class="flex-grow p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
+                    <option value="Months">Months</option>
+                    <option value="Weeks">Weeks</option>
+                    <option value="Years">Years</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="flex justify-between items-center border-t pt-6">
-            <div>
-              <p class="text-sm text-gray-500">Estimated Total Fee</p>
-              <h3 id="fee-display" class="text-3xl font-bold text-ng-green">₦0.00</h3>
+          <div class="p-6 md:p-8 bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-center md:text-left">
+              <p class="text-xs font-bold text-gray-500 uppercase mb-1">Total Payable Fee</p>
+              <h3 id="fee-total" class="text-4xl font-black text-ng-green">₦0.00</h3>
+              <p id="fee-breakdown" class="text-xs text-gray-400 mt-1">Select state and duration to calculate.</p>
             </div>
-            <button type="submit" class="bg-gray-900 text-white px-8 py-3 rounded-lg font-bold hover:bg-black transition">Proceed to Payment</button>
+            <div class="flex gap-4 w-full md:w-auto">
+               <button type="button" onclick="switchTab('dashboard')" class="flex-1 md:flex-none px-6 py-3 border border-gray-300 rounded-lg font-bold text-gray-600 hover:bg-white transition">Cancel</button>
+               <button type="submit" class="flex-1 md:flex-none px-8 py-3 bg-ng-green text-white rounded-lg font-bold shadow-lg hover:bg-ng-green-dark hover:shadow-xl transition transform hover:-translate-y-0.5">Proceed to Payment</button>
+            </div>
           </div>
         </form>
-      </div>
-    </section>
+      </section>
 
-    <section id="status-view" class="hidden space-y-6">
-      <h2 class="text-2xl font-serif font-bold text-gray-800">My Applications</h2>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th class="p-4 font-bold text-gray-600">App ID</th>
-              <th class="p-4 font-bold text-gray-600">Type</th>
-              <th class="p-4 font-bold text-gray-600">Status</th>
-              <th class="p-4 font-bold text-gray-600 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody id="status-table" class="divide-y divide-gray-100">
-            <tr>
-              <td class="p-4 font-mono">APP-2025-001</td>
-              <td class="p-4">Digital Billboard (Lagos)</td>
-              <td class="p-4"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold">Pending Approval</span></td>
-              <td class="p-4 text-right"><button class="text-blue-600 hover:underline">View Invoice</button></td>
-            </tr>
-             <tr>
-              <td class="p-4 font-mono">APP-2025-002</td>
-              <td class="p-4">Lamp Post (Abuja)</td>
-              <td class="p-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">Approved</span></td>
-              <td class="p-4 text-right"><button class="text-ng-green font-bold hover:underline">Download Cert</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="verify-view" class="hidden max-w-xl mx-auto text-center pt-10">
-      <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <div class="w-16 h-16 bg-green-50 text-ng-green rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        </div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Public Verification Portal</h2>
-        <p class="text-sm text-gray-500 mb-6">Enter a Certificate Number or Scan QR Code to verify ARCON approval.</p>
-        
-        <input type="text" placeholder="Enter Certificate No. (e.g., APP-2025-001)" class="w-full p-4 border border-gray-300 rounded-lg mb-4 text-center text-lg font-mono uppercase focus:ring-2 focus:ring-ng-green outline-none">
-        <button onclick="alert('Verification System Active: Mock Valid.')" class="w-full bg-ng-green text-white py-3 rounded-lg font-bold hover:bg-ng-green-dark">Verify Now</button>
-      </div>
-    </section>
-
-  </main>
-
-  <div id="pay-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-fade-in">
-      <div class="bg-gray-900 p-4 text-white flex justify-between items-center">
-        <h3 class="font-bold">Payment Required</h3>
-        <button onclick="closePayModal()" class="hover:text-gray-300">&times;</button>
-      </div>
-      <div class="p-6 text-center">
-        <p class="text-sm text-gray-500 mb-2">Please pay the application fee of</p>
-        <h2 id="modal-amount" class="text-4xl font-black text-ng-green mb-6">₦0.00</h2>
-        
-        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-left">
-          <p class="text-xs font-bold text-gray-400 uppercase mb-1">Bank Name</p>
-          <p class="font-bold text-gray-800 mb-3">Stanbic IBTC Bank</p>
-          
-          <p class="text-xs font-bold text-gray-400 uppercase mb-1">Account Name</p>
-          <p class="font-bold text-gray-800 mb-3">ARCON ADs VETTING</p>
-          
-          <p class="text-xs font-bold text-gray-400 uppercase mb-1">Account Number</p>
-          <div class="flex justify-between items-center">
-            <p class="font-mono text-xl font-bold text-gray-800">5770242424</p>
-            <button onclick="navigator.clipboard.writeText('5770242424')" class="text-xs text-blue-600 hover:underline">Copy</button>
+      <section id="view-my-assets" class="fade-in hidden space-y-6">
+        <div class="flex justify-between items-end">
+          <h2 class="text-2xl font-serif font-bold text-gray-800">My Applications & Assets</h2>
+          <div class="relative">
+            <input type="text" placeholder="Search by ID or Sponsor..." class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-ng-green outline-none">
+            <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
           </div>
         </div>
 
-        <div class="flex gap-3">
-          <button onclick="downloadInvoice()" class="flex-1 py-3 border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50">Download Invoice</button>
-          <button onclick="confirmPayment()" class="flex-1 py-3 bg-ng-green text-white rounded-lg font-bold hover:bg-ng-green-dark">I Have Paid</button>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs font-bold">
+              <tr>
+                <th class="p-4">App ID</th>
+                <th class="p-4">Details</th>
+                <th class="p-4">Location</th>
+                <th class="p-4">Status</th>
+                <th class="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="assets-table-body" class="divide-y divide-gray-100">
+              <tr class="hover:bg-gray-50 transition">
+                <td class="p-4 font-mono text-gray-600 font-medium">APP-2025-004</td>
+                <td class="p-4">
+                  <p class="font-bold text-gray-800">Glo Unlimited</p>
+                  <p class="text-xs text-gray-500">Digital LED • 12 Months</p>
+                </td>
+                <td class="p-4">Lagos<br><span class="text-xs text-gray-400">Ikeja</span></td>
+                <td class="p-4"><span class="bg-yellow-100 text-yellow-700 border border-yellow-200 px-2 py-1 rounded-full text-xs font-bold flex w-fit items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span> Pending Payment</span></td>
+                <td class="p-4 text-right">
+                  <button onclick="reopenPayment('APP-2025-004', '2,500,000')" class="text-blue-600 hover:text-blue-800 text-xs font-bold border border-blue-200 bg-blue-50 px-3 py-1.5 rounded hover:bg-blue-100">Pay Now</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition">
+                <td class="p-4 font-mono text-gray-600 font-medium">APP-2025-001</td>
+                <td class="p-4">
+                  <p class="font-bold text-gray-800">Zenith Bank Promo</p>
+                  <p class="text-xs text-gray-500">Unipole • 6 Months</p>
+                </td>
+                <td class="p-4">Abuja FCT<br><span class="text-xs text-gray-400">Wuse II</span></td>
+                <td class="p-4"><span class="bg-green-100 text-green-700 border border-green-200 px-2 py-1 rounded-full text-xs font-bold flex w-fit items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-600"></span> Approved</span></td>
+                <td class="p-4 text-right space-x-2">
+                  <button onclick="alert('Downloading Certificate...')" class="text-gray-600 hover:text-ng-green transition"><i class="ph ph-certificate text-xl" title="Certificate"></i></button>
+                  <button onclick="viewQR('APP-2025-001')" class="text-gray-600 hover:text-ng-green transition"><i class="ph ph-qr-code text-xl" title="View QR"></i></button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition">
+                <td class="p-4 font-mono text-gray-600 font-medium">APP-2024-992</td>
+                <td class="p-4">
+                  <p class="font-bold text-gray-800">Dangote Cement</p>
+                  <p class="text-xs text-gray-500">Static Board • 3 Months</p>
+                </td>
+                <td class="p-4">Kano<br><span class="text-xs text-gray-400">Municipal</span></td>
+                <td class="p-4"><span class="bg-red-100 text-red-700 border border-red-200 px-2 py-1 rounded-full text-xs font-bold flex w-fit items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Queried</span></td>
+                <td class="p-4 text-right">
+                  <button class="text-red-600 text-xs font-bold hover:underline">View Query</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </section>
+
+      <section id="view-verify" class="fade-in hidden max-w-xl mx-auto pt-10">
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
+          <div class="w-16 h-16 bg-green-50 text-ng-green rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+             <i class="ph ph-shield-check text-3xl"></i>
+          </div>
+          <h2 class="text-2xl font-serif font-bold text-gray-800 mb-2">Public Asset Verification</h2>
+          <p class="text-sm text-gray-500 mb-8 leading-relaxed">Ensure regulatory compliance by verifying the ARCON approval status of any billboard or advertisement.</p>
+          
+          <div class="relative mb-4">
+            <input type="text" id="verify-input" placeholder="Enter Certificate No. (e.g. APP-2025-001)" class="w-full p-4 border border-gray-300 rounded-lg text-center font-mono uppercase text-lg focus:ring-2 focus:ring-ng-green outline-none">
+          </div>
+          
+          <button onclick="handleVerify()" class="w-full bg-gray-900 text-white py-3.5 rounded-lg font-bold hover:bg-black transition shadow-lg flex items-center justify-center gap-2">
+            <i class="ph ph-magnifying-glass font-bold"></i> Verify Status
+          </button>
+          
+          <div id="verify-result" class="mt-6 hidden animate-bounce-in">
+             </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="payment-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+    <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transform scale-100">
+      <div class="bg-gray-900 px-6 py-4 flex justify-between items-center text-white">
+        <h3 class="font-bold flex items-center gap-2"><i class="ph ph-receipt"></i> Invoice Generated</h3>
+        <button onclick="closeModal('payment-modal')" class="hover:text-gray-300"><i class="ph ph-x text-lg"></i></button>
+      </div>
+      
+      <div class="p-8">
+        <div class="text-center mb-6">
+          <p class="text-sm text-gray-500 uppercase tracking-wide font-bold mb-1">Amount Due</p>
+          <h2 id="modal-amount" class="text-4xl font-black text-ng-green">₦0.00</h2>
+        </div>
+
+        <div class="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-5 mb-6 space-y-4">
+          <div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase">Bank Name</p>
+            <p class="font-bold text-gray-800 text-lg">Stanbic IBTC Bank</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase">Account Name</p>
+            <p class="font-bold text-gray-800">ARCON ADs VETTING</p>
+          </div>
+          <div class="flex justify-between items-end">
+            <div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase">Account Number</p>
+              <p class="font-mono font-bold text-gray-800 text-2xl tracking-wider">5770242424</p>
+            </div>
+            <button onclick="navigator.clipboard.writeText('5770242424'); alert('Copied!');" class="text-blue-600 text-xs font-bold hover:underline mb-1">Copy</button>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <button onclick="downloadInvoiceText()" class="w-full py-3 border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2">
+            <i class="ph ph-download-simple"></i> Download Invoice
+          </button>
+          <button onclick="confirmPaymentAction()" class="w-full py-3 bg-ng-green text-white rounded-lg font-bold shadow hover:bg-ng-green-dark flex items-center justify-center gap-2">
+            <i class="ph ph-check-circle"></i> I Have Paid
+          </button>
+        </div>
+        <p class="text-xs text-center text-gray-400 mt-4">Payment confirmation typically takes 2-4 hours.</p>
       </div>
     </div>
   </div>
 
+  <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-6 text-center">
+      <h3 class="font-bold text-gray-800 text-lg mb-1">Asset QR Code</h3>
+      <p class="text-xs text-gray-500 mb-4">Scan to view regulatory details</p>
+      
+      <div id="qr-container" class="flex justify-center mb-4 bg-white p-2 border rounded-lg"></div>
+      <p id="qr-app-id" class="font-mono text-sm font-bold text-ng-green mb-6"></p>
+
+      <button onclick="closeModal('qr-modal')" class="w-full py-2 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200">Close</button>
+    </div>
+  </div>
+
   <script>
-    const RATES = {'Lagos': 150000, 'Abuja FCT': 120000, 'Rivers': 100000, 'Kano': 80000};
-    let currentFee = 0;
+    // --- Data & Rates ---
+    const RATES = { 'Lagos': 150000, 'Abuja FCT': 120000, 'Rivers': 100000, 'Kano': 80000, 'Oyo': 60000, 'default': 50000 };
+    const MULTIPLIERS = { 'Political': 1.5, 'Product': 1.2, 'Corporate': 1.0, 'SME': 0.8, 'Religious': 0.5 };
+    const LGAS = {
+      'Lagos': ['Ikeja', 'Eti-Osa', 'Lagos Island', 'Surulere'],
+      'Abuja FCT': ['AMAC', 'Bwari', 'Gwagwalada', 'Kuje'],
+      'Rivers': ['Port Harcourt', 'Obio-Akpor'],
+      'Kano': ['Kano Municipal', 'Fagge'],
+      'Oyo': ['Ibadan North', 'Ibadan SW']
+    };
 
-    function switchTab(id){
-      ['apply','status','verify'].forEach(t => document.getElementById(t+'-view').classList.add('hidden'));
-      document.getElementById(id+'-view').classList.remove('hidden');
+    let currentAppId = "";
+    let currentAmountStr = "";
+
+    // --- Navigation ---
+    function switchTab(tabId) {
+      document.querySelectorAll('section').forEach(el => el.classList.add('hidden'));
+      document.getElementById('view-' + tabId).classList.remove('hidden');
       
-      document.querySelectorAll('nav button').forEach(b => b.classList.replace('bg-ng-green','text-gray-600'));
-      document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-white','hover:text-ng-green'));
-      
-      const btn = document.getElementById('nav-'+id);
-      btn.classList.remove('text-gray-600','hover:text-ng-green');
-      btn.classList.add('bg-ng-green','text-white');
+      // Update Nav State
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-ng-green-light', 'text-ng-green');
+        btn.classList.add('text-gray-600', 'hover:bg-gray-50');
+      });
+      const activeBtn = document.getElementById('nav-' + tabId);
+      if(activeBtn) {
+        activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+        activeBtn.classList.add('bg-ng-green-light', 'text-ng-green');
+      }
     }
 
-    function calculateFee(){
+    // --- Form Logic ---
+    function populateLGAs() {
       const state = document.getElementById('state').value;
-      const duration = document.getElementById('duration').value || 1;
-      const base = RATES[state] || 50000;
-      currentFee = base * duration;
-      document.getElementById('fee-display').innerText = new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(currentFee);
-      document.getElementById('modal-amount').innerText = document.getElementById('fee-display').innerText;
+      const lgaSelect = document.getElementById('lga');
+      lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+      if (state && LGAS[state]) {
+        LGAS[state].forEach(lga => {
+          const opt = document.createElement('option');
+          opt.value = lga;
+          opt.innerText = lga;
+          lgaSelect.appendChild(opt);
+        });
+      }
     }
 
-    function handlePreSubmit(e){
+    function calculateFee() {
+      const state = document.getElementById('state').value;
+      const industry = document.getElementById('industry').value;
+      const size = parseFloat(document.getElementById('size').value) || 0;
+      const durationVal = parseFloat(document.getElementById('duration_val').value) || 1;
+      const durationUnit = document.getElementById('duration_unit').value;
+
+      if (!state) {
+        document.getElementById('fee-total').innerText = "₦0.00";
+        return;
+      }
+
+      // Logic: Rate per month per sqm? Simplified logic for demo:
+      // Base Rate (by state) + (Size * 1000) * Multiplier * DurationFactor
+      
+      let durationFactor = durationVal;
+      if (durationUnit === 'Weeks') durationFactor = durationVal / 4;
+      if (durationUnit === 'Years') durationFactor = durationVal * 12;
+
+      const baseRate = RATES[state] || RATES['default'];
+      const indMult = MULTIPLIERS[industry] || 1.0;
+      
+      // Formula: (Base + (Size * 500)) * Multiplier * Duration(Months)
+      const total = (baseRate + (size * 2000)) * indMult * durationFactor;
+      
+      const fmt = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' });
+      currentAmountStr = fmt.format(total);
+      
+      document.getElementById('fee-total').innerText = currentAmountStr;
+      document.getElementById('fee-breakdown').innerText = `${durationVal} ${durationUnit} • ${size}sqm • ${industry} Rate`;
+    }
+
+    function handleApplicationSubmit(e) {
       e.preventDefault();
-      if(currentFee === 0) { alert('Please select a state.'); return; }
-      document.getElementById('pay-modal').classList.remove('hidden');
+      const state = document.getElementById('state').value;
+      if(!state || document.getElementById('fee-total').innerText === "₦0.00") {
+        alert("Please complete the form details first.");
+        return;
+      }
+
+      // Generate ID
+      currentAppId = `APP-2025-${Math.floor(Math.random() * 900) + 100}`;
+      
+      // Show Payment Modal
+      document.getElementById('modal-amount').innerText = currentAmountStr;
+      document.getElementById('payment-modal').classList.remove('hidden');
     }
 
-    function closePayModal(){
-      document.getElementById('pay-modal').classList.add('hidden');
+    // --- Payment Logic ---
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
     }
 
-    function downloadInvoice(){
-      const text = `INVOICE - AWAITING PAYMENT\n\nPay To: ARCON ADs VETTING\nBank: Stanbic IBTC\nAcc: 5770242424\nAmount: ${document.getElementById('modal-amount').innerText}\nDate: ${new Date().toLocaleDateString()}`;
-      const blob = new Blob([text], {type:'text/plain'});
+    function downloadInvoiceText() {
+      const form = document.getElementById('apply-form');
+      const sponsor = form.sponsor.value;
+      const title = form.title.value;
+      const date = new Date().toLocaleDateString();
+
+      const content = `
+ARCON PAYMENT INVOICE
+--------------------------------
+Invoice ID: INV-${Math.floor(Math.random()*100000)}
+Date: ${date}
+Application ID: ${currentAppId}
+Sponsor: ${sponsor}
+Campaign: ${title}
+--------------------------------
+PAY TO:
+Bank: Stanbic IBTC Bank
+Account Name: ARCON ADs VETTING
+Account Number: 5770242424
+--------------------------------
+AMOUNT DUE: ${currentAmountStr}
+--------------------------------
+Please retain this invoice for your records.
+      `.trim();
+
+      const blob = new Blob([content], { type: 'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'ARCON_Invoice.txt';
+      a.download = `ARCON-Invoice-${currentAppId}.txt`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
     }
 
-    function confirmPayment(){
-      closePayModal();
-      alert('Application Submitted! Please allow 24-48 hours for payment confirmation.');
-      switchTab('status');
-      // Logic to add to table would go here
+    function confirmPaymentAction() {
+      // Add to table mock
+      const tbody = document.getElementById('assets-table-body');
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-gray-50 transition animate-pulse";
+      tr.innerHTML = `
+        <td class="p-4 font-mono text-gray-600 font-medium">${currentAppId}</td>
+        <td class="p-4"><p class="font-bold text-gray-800">${document.querySelector('input[name="title"]').value}</p><p class="text-xs text-gray-500">Processing Payment</p></td>
+        <td class="p-4">${document.getElementById('state').value}</td>
+        <td class="p-4"><span class="bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1 rounded-full text-xs font-bold">Verifying Payment</span></td>
+        <td class="p-4 text-right"><span class="text-xs text-gray-400">Processing...</span></td>
+      `;
+      tbody.prepend(tr);
+
+      closeModal('payment-modal');
+      switchTab('my-assets');
+      document.getElementById('apply-form').reset();
+      calculateFee();
+      
+      // Simulate confirmation
+      setTimeout(() => {
+        tr.classList.remove('animate-pulse');
+        alert(`Payment for ${currentAppId} submitted successfully!`);
+      }, 1000);
     }
+
+    function reopenPayment(id, amount) {
+      currentAppId = id;
+      currentAmountStr = "₦" + amount;
+      document.getElementById('modal-amount').innerText = currentAmountStr;
+      document.getElementById('payment-modal').classList.remove('hidden');
+    }
+
+    // --- QR & Asset Logic ---
+    function viewQR(id) {
+      document.getElementById('qr-modal').classList.remove('hidden');
+      document.getElementById('qr-app-id').innerText = id;
+      const container = document.getElementById('qr-container');
+      container.innerHTML = "";
+      new QRCode(container, {
+        text: `https://arcon.gov.ng/verify?id=${id}`,
+        width: 150,
+        height: 150,
+        colorDark : "#008751",
+        colorLight : "#ffffff",
+      });
+    }
+
+    // --- Verification Logic ---
+    function handleVerify() {
+      const input = document.getElementById('verify-input').value.trim().toUpperCase();
+      const resDiv = document.getElementById('verify-result');
+      
+      if(!input) return;
+
+      resDiv.classList.remove('hidden');
+      
+      // Mock Check
+      if(input === 'APP-2025-001') {
+        resDiv.innerHTML = `
+          <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3 text-left">
+             <i class="ph ph-check-circle text-2xl text-ng-green"></i>
+             <div>
+               <h4 class="font-bold text-green-800">Valid License Found</h4>
+               <p class="text-xs text-gray-600 mt-1"><strong>Sponsor:</strong> Zenith Bank<br><strong>Status:</strong> Approved & Active<br><strong>Expires:</strong> June 2026</p>
+             </div>
+          </div>
+        `;
+      } else {
+         resDiv.innerHTML = `
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 text-left">
+             <i class="ph ph-x-circle text-2xl text-red-600"></i>
+             <div>
+               <h4 class="font-bold text-red-800">No Record Found</h4>
+               <p class="text-xs text-gray-600 mt-1">This ID (${input}) does not exist in the national registry or has expired.</p>
+             </div>
+          </div>
+        `;
+      }
+    }
+
+    // Init
+    window.onload = () => {
+      calculateFee(); // reset calc
+    };
   </script>
 </body>
 </html>
