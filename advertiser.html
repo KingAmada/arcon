@@ -25,601 +25,672 @@
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
             serif: ['Merriweather', 'serif'],
+            script: ['Great Vibes', 'cursive'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {'0%': {opacity:'0'}, '100%': {opacity:'1'}},
+            slideUp: {'0%': {transform:'translateY(20px)', opacity:'0'}, '100%': {transform:'translateY(0)', opacity:'1'}},
           }
         }
       }
     }
   </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Great+Vibes&display=swap');
     body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
-    .fade-in { animation: fadeIn 0.3s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+    .auth-bg { background-image: url('https://images.unsplash.com/photo-1599839572628-98aa7123508f?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; }
+    .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    @media print { .no-print { display: none !important; } }
   </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
-  <nav class="bg-white border-b border-gray-200 z-30 flex-none shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex items-center gap-3">
-          <div class="bg-ng-green/10 p-2 rounded-lg border border-ng-green/20">
-            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-8 w-8 rounded object-cover" alt="ARCON">
-          </div>
-          <div class="hidden md:block">
-            <h1 class="font-serif font-bold text-ng-green-dark text-lg leading-tight">ARCON</h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Advertiser Services Portal</p>
-          </div>
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-ng-green-light text-ng-green">
-            <i class="ph ph-squares-four mr-1.5 text-lg align-middle"></i>Dashboard
-          </button>
-          <button onclick="switchTab('apply')" id="nav-apply" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-            <i class="ph ph-plus-circle mr-1.5 text-lg align-middle"></i>New Application
-          </button>
-          <button onclick="switchTab('my-assets')" id="nav-my-assets" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-            <i class="ph ph-files mr-1.5 text-lg align-middle"></i>My Applications
-          </button>
-          <button onclick="switchTab('verify')" id="nav-verify" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-            <i class="ph ph-seal-check mr-1.5 text-lg align-middle"></i>Verify Asset
-          </button>
-        </div>
-
-        <div class="flex items-center ml-4 pl-4 border-l border-gray-200">
-          <div class="text-right mr-3 hidden md:block">
-            <p class="text-xs font-bold text-gray-800">MediaReach OMD</p>
-            <p class="text-[10px] text-gray-500">Authorized Agent</p>
-          </div>
-          <div class="h-9 w-9 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md">
-            MO
-          </div>
-        </div>
+  <div id="auth-section" class="fixed inset-0 z-50 flex items-center justify-center auth-bg">
+    <div class="absolute inset-0 bg-green-900/60 backdrop-blur-sm"></div>
+    
+    <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+      <div class="bg-ng-green p-6 text-center text-white">
+        <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-16 w-16 rounded mx-auto mb-3 bg-white p-1" alt="ARCON">
+        <h1 class="font-serif font-bold text-2xl">ARCON Portal</h1>
+        <p class="text-green-100 text-sm">Advertiser Registration & Login</p>
       </div>
-    </div>
-  </nav>
 
-  <main class="flex-grow overflow-y-auto p-4 md:p-8 relative">
-    <div class="max-w-7xl mx-auto">
-      
-      <section id="view-dashboard" class="fade-in space-y-6">
-        <div class="bg-gradient-to-r from-ng-green to-ng-green-dark rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
-          <div class="relative z-10">
-            <h2 class="text-2xl font-serif font-bold mb-2">Welcome back, MediaReach OMD</h2>
-            <p class="text-green-100 max-w-xl text-sm">Your compliance status is good. You have 2 pending invoices and 5 active assets running in Lagos and Abuja.</p>
-            <div class="mt-6 flex gap-3">
-              <button onclick="switchTab('apply')" class="bg-white text-ng-green px-5 py-2.5 rounded-lg text-sm font-bold shadow hover:bg-gray-50 transition">Apply for License</button>
-              <button onclick="switchTab('my-assets')" class="bg-ng-green-dark/40 border border-white/20 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-ng-green-dark transition">View All Assets</button>
-            </div>
-          </div>
-          <div class="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform translate-x-12"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph ph-hourglass-medium"></i></div>
-            <div>
-              <p class="text-xs font-bold text-gray-400 uppercase">Pending Review</p>
-              <h3 class="text-2xl font-bold text-gray-800">2 Apps</h3>
-            </div>
-          </div>
-          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-green-50 text-ng-green flex items-center justify-center text-xl"><i class="ph ph-check-circle"></i></div>
-            <div>
-              <p class="text-xs font-bold text-gray-400 uppercase">Active Assets</p>
-              <h3 class="text-2xl font-bold text-gray-800">14 Active</h3>
-            </div>
-          </div>
-          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xl"><i class="ph ph-warning-circle"></i></div>
-            <div>
-              <p class="text-xs font-bold text-gray-400 uppercase">Action Required</p>
-              <h3 class="text-2xl font-bold text-gray-800">1 Query</h3>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div class="p-5 border-b border-gray-100 flex justify-between items-center">
-            <h3 class="font-bold text-gray-700">Recent Applications</h3>
-            <button onclick="switchTab('my-assets')" class="text-xs text-ng-green font-bold hover:underline">View All</button>
-          </div>
-          <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
-              <tr><th class="p-4">ID</th><th class="p-4">Sponsor</th><th class="p-4">Date</th><th class="p-4">Status</th></tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr>
-                <td class="p-4 font-mono text-gray-600">APP-2025-092</td>
-                <td class="p-4 font-medium">Guinness Nigeria</td>
-                <td class="p-4 text-gray-500">Dec 12, 2025</td>
-                <td class="p-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Pending</span></td>
-              </tr>
-              <tr>
-                <td class="p-4 font-mono text-gray-600">APP-2025-081</td>
-                <td class="p-4 font-medium">First Bank</td>
-                <td class="p-4 text-gray-500">Dec 10, 2025</td>
-                <td class="p-4"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Approved</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="view-apply" class="fade-in hidden max-w-4xl mx-auto space-y-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-2xl font-serif font-bold text-gray-800">New License Application</h2>
-            <p class="text-sm text-gray-500">Fill in the details below to generate your invoice.</p>
-          </div>
-          <button onclick="document.getElementById('apply-form').reset(); calculateFee();" class="text-sm text-red-500 hover:text-red-700 font-medium">Reset Form</button>
-        </div>
-
-        <form id="apply-form" onsubmit="handleApplicationSubmit(event)" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          
-          <div class="p-6 md:p-8 space-y-6 border-b border-gray-100">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">1. Campaign Details</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Sponsor / Brand Name <span class="text-red-500">*</span></label>
-                <input type="text" name="sponsor" placeholder="e.g. Glo, Zenith Bank" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none transition">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Campaign Title <span class="text-red-500">*</span></label>
-                <input type="text" name="title" placeholder="e.g. 'Glo Unlimited' Christmas Promo" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none transition">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Industry Category</label>
-                <select name="industry" id="industry" onchange="calculateFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none cursor-pointer">
-                  <option value="Corporate">Corporate / Commercial (1.0x)</option>
-                  <option value="Political">Political Campaign (1.5x)</option>
-                  <option value="Product">New Product Launch (1.2x)</option>
-                  <option value="Religious">Religious / NGO (0.5x)</option>
-                  <option value="SME">SME / Small Business (0.8x)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-6 md:p-8 space-y-6 border-b border-gray-100 bg-gray-50/50">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-4">2. Asset Specifications & Location</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">State Jurisdiction <span class="text-red-500">*</span></label>
-                <select name="state" id="state" onchange="populateLGAs(); calculateFee();" required class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
-                  <option value="">Select State</option>
-                  <option value="Abuja FCT">Abuja FCT</option>
-                  <option value="Lagos">Lagos State</option>
-                  <option value="Rivers">Rivers State</option>
-                  <option value="Kano">Kano State</option>
-                  <option value="Oyo">Oyo State</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">LGA / Area</label>
-                <select name="lga" id="lga" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
-                  <option value="">Select State First</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Asset Type</label>
-                <select name="type" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
-                  <option value="Digital LED">Digital LED Board</option>
-                  <option value="Static Billboard">Static Billboard</option>
-                  <option value="Unipole">Unipole</option>
-                  <option value="Gantry">Gantry</option>
-                  <option value="Lamp Post">Street Lamp Post</option>
-                  <option value="Wall Drape">Wall Drape</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Size (Area in SQM)</label>
-                <select name="size" id="size" onchange="calculateFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
-                  <option value="1.5">4-Sheet (1.5 sqm)</option>
-                  <option value="12">32-Sheet (12 sqm)</option>
-                  <option value="18">48-Sheet (Standard 18 sqm)</option>
-                  <option value="36">96-Sheet (Superwide 36 sqm)</option>
-                  <option value="108">Unipole (108 sqm)</option>
-                  <option value="80">Gantry (80 sqm)</option>
-                </select>
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Duration</label>
-                <div class="flex gap-4">
-                  <input type="number" name="duration_val" id="duration_val" value="1" min="1" oninput="calculateFee()" class="w-24 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-center">
-                  <select name="duration_unit" id="duration_unit" onchange="calculateFee()" class="flex-grow p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-ng-green outline-none">
-                    <option value="Months">Months</option>
-                    <option value="Weeks">Weeks</option>
-                    <option value="Years">Years</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-6 md:p-8 bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="text-center md:text-left">
-              <p class="text-xs font-bold text-gray-500 uppercase mb-1">Total Payable Fee</p>
-              <h3 id="fee-total" class="text-4xl font-black text-ng-green">₦0.00</h3>
-              <p id="fee-breakdown" class="text-xs text-gray-400 mt-1">Select state and duration to calculate.</p>
-            </div>
-            <div class="flex gap-4 w-full md:w-auto">
-               <button type="button" onclick="switchTab('dashboard')" class="flex-1 md:flex-none px-6 py-3 border border-gray-300 rounded-lg font-bold text-gray-600 hover:bg-white transition">Cancel</button>
-               <button type="submit" class="flex-1 md:flex-none px-8 py-3 bg-ng-green text-white rounded-lg font-bold shadow-lg hover:bg-ng-green-dark hover:shadow-xl transition transform hover:-translate-y-0.5">Proceed to Payment</button>
-            </div>
-          </div>
-        </form>
-      </section>
-
-      <section id="view-my-assets" class="fade-in hidden space-y-6">
-        <div class="flex justify-between items-end">
-          <h2 class="text-2xl font-serif font-bold text-gray-800">My Applications & Assets</h2>
-          <div class="relative">
-            <input type="text" placeholder="Search by ID or Sponsor..." class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-ng-green outline-none">
-            <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs font-bold">
-              <tr>
-                <th class="p-4">App ID</th>
-                <th class="p-4">Details</th>
-                <th class="p-4">Location</th>
-                <th class="p-4">Status</th>
-                <th class="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="assets-table-body" class="divide-y divide-gray-100">
-              <tr class="hover:bg-gray-50 transition">
-                <td class="p-4 font-mono text-gray-600 font-medium">APP-2025-004</td>
-                <td class="p-4">
-                  <p class="font-bold text-gray-800">Glo Unlimited</p>
-                  <p class="text-xs text-gray-500">Digital LED • 12 Months</p>
-                </td>
-                <td class="p-4">Lagos<br><span class="text-xs text-gray-400">Ikeja</span></td>
-                <td class="p-4"><span class="bg-yellow-100 text-yellow-700 border border-yellow-200 px-2 py-1 rounded-full text-xs font-bold flex w-fit items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span> Pending Payment</span></td>
-                <td class="p-4 text-right">
-                  <button onclick="reopenPayment('APP-2025-004', '2,500,000')" class="text-blue-600 hover:text-blue-800 text-xs font-bold border border-blue-200 bg-blue-50 px-3 py-1.5 rounded hover:bg-blue-100">Pay Now</button>
-                </td>
-              </tr>
-              <tr class="hover:bg-gray-50 transition">
-                <td class="p-4 font-mono text-gray-600 font-medium">APP-2025-001</td>
-                <td class="p-4">
-                  <p class="font-bold text-gray-800">Zenith Bank Promo</p>
-                  <p class="text-xs text-gray-500">Unipole • 6 Months</p>
-                </td>
-                <td class="p-4">Abuja FCT<br><span class="text-xs text-gray-400">Wuse II</span></td>
-                <td class="p-4"><span class="bg-green-100 text-green-700 border border-green-200 px-2 py-1 rounded-full text-xs font-bold flex w-fit items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-600"></span> Approved</span></td>
-                <td class="p-4 text-right space-x-2">
-                  <button onclick="alert('Downloading Certificate...')" class="text-gray-600 hover:text-ng-green transition"><i class="ph ph-certificate text-xl" title="Certificate"></i></button>
-                  <button onclick="viewQR('APP-2025-001')" class="text-gray-600 hover:text-ng-green transition"><i class="ph ph-qr-code text-xl" title="View QR"></i></button>
-                </td>
-              </tr>
-              <tr class="hover:bg-gray-50 transition">
-                <td class="p-4 font-mono text-gray-600 font-medium">APP-2024-992</td>
-                <td class="p-4">
-                  <p class="font-bold text-gray-800">Dangote Cement</p>
-                  <p class="text-xs text-gray-500">Static Board • 3 Months</p>
-                </td>
-                <td class="p-4">Kano<br><span class="text-xs text-gray-400">Municipal</span></td>
-                <td class="p-4"><span class="bg-red-100 text-red-700 border border-red-200 px-2 py-1 rounded-full text-xs font-bold flex w-fit items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Queried</span></td>
-                <td class="p-4 text-right">
-                  <button class="text-red-600 text-xs font-bold hover:underline">View Query</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="view-verify" class="fade-in hidden max-w-xl mx-auto pt-10">
-        <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
-          <div class="w-16 h-16 bg-green-50 text-ng-green rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-             <i class="ph ph-shield-check text-3xl"></i>
-          </div>
-          <h2 class="text-2xl font-serif font-bold text-gray-800 mb-2">Public Asset Verification</h2>
-          <p class="text-sm text-gray-500 mb-8 leading-relaxed">Ensure regulatory compliance by verifying the ARCON approval status of any billboard or advertisement.</p>
-          
-          <div class="relative mb-4">
-            <input type="text" id="verify-input" placeholder="Enter Certificate No. (e.g. APP-2025-001)" class="w-full p-4 border border-gray-300 rounded-lg text-center font-mono uppercase text-lg focus:ring-2 focus:ring-ng-green outline-none">
-          </div>
-          
-          <button onclick="handleVerify()" class="w-full bg-gray-900 text-white py-3.5 rounded-lg font-bold hover:bg-black transition shadow-lg flex items-center justify-center gap-2">
-            <i class="ph ph-magnifying-glass font-bold"></i> Verify Status
-          </button>
-          
-          <div id="verify-result" class="mt-6 hidden animate-bounce-in">
-             </div>
-        </div>
-      </section>
-
-    </div>
-  </main>
-
-  <div id="payment-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-    <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transform scale-100">
-      <div class="bg-gray-900 px-6 py-4 flex justify-between items-center text-white">
-        <h3 class="font-bold flex items-center gap-2"><i class="ph ph-receipt"></i> Invoice Generated</h3>
-        <button onclick="closeModal('payment-modal')" class="hover:text-gray-300"><i class="ph ph-x text-lg"></i></button>
+      <div class="flex border-b border-gray-200">
+        <button onclick="toggleAuth('signin')" id="tab-signin" class="flex-1 py-4 text-sm font-bold text-ng-green border-b-2 border-ng-green bg-green-50">Sign In</button>
+        <button onclick="toggleAuth('signup')" id="tab-signup" class="flex-1 py-4 text-sm font-bold text-gray-500 hover:text-gray-700">Create Account</button>
       </div>
-      
-      <div class="p-8">
-        <div class="text-center mb-6">
-          <p class="text-sm text-gray-500 uppercase tracking-wide font-bold mb-1">Amount Due</p>
-          <h2 id="modal-amount" class="text-4xl font-black text-ng-green">₦0.00</h2>
+
+      <div id="form-signin" class="p-8 space-y-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address / ID</label>
+          <input type="email" id="login-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none" placeholder="enter your email">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">PIN / Password</label>
+          <input type="password" id="login-pin" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none" placeholder="••••">
+        </div>
+        <button onclick="handleLogin()" class="w-full bg-ng-green text-white py-3 rounded-lg font-bold hover:bg-ng-green-dark transition shadow-lg">Sign In</button>
+        <p class="text-center text-xs text-gray-400">Forgot PIN? Contact Support.</p>
+      </div>
+
+      <div id="form-signup" class="hidden p-8 space-y-4 overflow-y-auto max-h-[60vh]">
+        <div class="flex gap-4 mb-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="regType" value="individual" checked onchange="toggleRegFields()" class="text-ng-green focus:ring-ng-green">
+            <span class="text-sm font-bold">Individual</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="regType" value="company" onchange="toggleRegFields()" class="text-ng-green focus:ring-ng-green">
+            <span class="text-sm font-bold">Company / Agency</span>
+          </label>
         </div>
 
-        <div class="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-5 mb-6 space-y-4">
-          <div>
-            <p class="text-[10px] font-bold text-gray-400 uppercase">Bank Name</p>
-            <p class="font-bold text-gray-800 text-lg">Stanbic IBTC Bank</p>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2">
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name / Company Name</label>
+            <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm">
           </div>
           <div>
-            <p class="text-[10px] font-bold text-gray-400 uppercase">Account Name</p>
-            <p class="font-bold text-gray-800">ARCON ADs VETTING</p>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phone</label>
+            <input type="tel" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm">
           </div>
-          <div class="flex justify-between items-end">
-            <div>
-              <p class="text-[10px] font-bold text-gray-400 uppercase">Account Number</p>
-              <p class="font-mono font-bold text-gray-800 text-2xl tracking-wider">5770242424</p>
-            </div>
-            <button onclick="navigator.clipboard.writeText('5770242424'); alert('Copied!');" class="text-blue-600 text-xs font-bold hover:underline mb-1">Copy</button>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+            <input type="email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">State</label>
+            <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm">
+              <option>Lagos</option><option>Abuja FCT</option><option>Rivers</option><option>Kano</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">City</label>
+            <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm">
           </div>
         </div>
 
-        <div class="space-y-3">
-          <button onclick="downloadInvoiceText()" class="w-full py-3 border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2">
-            <i class="ph ph-download-simple"></i> Download Invoice
-          </button>
-          <button onclick="confirmPaymentAction()" class="w-full py-3 bg-ng-green text-white rounded-lg font-bold shadow hover:bg-ng-green-dark flex items-center justify-center gap-2">
-            <i class="ph ph-check-circle"></i> I Have Paid
-          </button>
+        <div id="field-nin">
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">National ID (NIN)</label>
+          <input type="text" placeholder="11-digit NIN" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm">
         </div>
-        <p class="text-xs text-center text-gray-400 mt-4">Payment confirmation typically takes 2-4 hours.</p>
+        <div id="field-rc" class="hidden">
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">RC Number</label>
+          <input type="text" placeholder="RC123456" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm">
+        </div>
+
+        <div>
+           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Create PIN</label>
+           <input type="password" placeholder="4-digit PIN" maxlength="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ng-green outline-none text-sm text-center tracking-widest">
+        </div>
+
+        <button onclick="handleLogin()" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-black transition">Register & Login</button>
       </div>
     </div>
   </div>
 
-  <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-6 text-center">
-      <h3 class="font-bold text-gray-800 text-lg mb-1">Asset QR Code</h3>
-      <p class="text-xs text-gray-500 mb-4">Scan to view regulatory details</p>
-      
-      <div id="qr-container" class="flex justify-center mb-4 bg-white p-2 border rounded-lg"></div>
-      <p id="qr-app-id" class="font-mono text-sm font-bold text-ng-green mb-6"></p>
+  <div id="main-app" class="hidden h-screen flex flex-col bg-gray-50">
+    
+    <nav class="bg-white border-b border-gray-200 z-30 flex-none shadow-sm no-print">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center gap-3">
+            <div class="bg-ng-green/10 p-2 rounded-lg border border-ng-green/20">
+              <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-8 w-8 rounded object-cover" alt="ARCON">
+            </div>
+            <div class="hidden md:block">
+              <h1 class="font-serif font-bold text-ng-green-dark text-lg leading-tight">ARCON</h1>
+              <p class="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Advertiser Portal</p>
+            </div>
+          </div>
 
-      <button onclick="closeModal('qr-modal')" class="w-full py-2 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200">Close</button>
+          <div class="flex items-center space-x-2">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium bg-ng-green-light text-ng-green"><i class="ph ph-squares-four mr-1.5 text-lg align-middle"></i>Dashboard</button>
+            <button onclick="switchTab('apply')" id="nav-apply" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"><i class="ph ph-plus-circle mr-1.5 text-lg align-middle"></i>New Application</button>
+            <button onclick="switchTab('my-assets')" id="nav-my-assets" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"><i class="ph ph-files mr-1.5 text-lg align-middle"></i>My Applications</button>
+          </div>
+
+          <div class="flex items-center ml-4 pl-4 border-l border-gray-200">
+             <button onclick="location.reload()" class="text-xs text-red-500 font-bold hover:underline">Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-grow overflow-y-auto p-4 md:p-8 relative">
+      <div class="max-w-7xl mx-auto">
+        
+        <section id="view-dashboard" class="fade-in space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-green-50 text-ng-green flex items-center justify-center text-xl"><i class="ph ph-check-circle"></i></div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase">Active Assets</p>
+                <h3 class="text-3xl font-bold text-gray-800">8</h3>
+              </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-xl"><i class="ph ph-clock-countdown"></i></div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase">Expiring Soon</p>
+                <h3 class="text-3xl font-bold text-gray-800">2</h3>
+                <p class="text-[10px] text-red-500 font-bold">Renew within 14 days</p>
+              </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph ph-wallet"></i></div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase">Pending Invoices</p>
+                <h3 class="text-3xl font-bold text-gray-800">₦0.00</h3>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b bg-gray-50 font-bold text-gray-700 text-sm">Recent Activity</div>
+            <div class="p-8 text-center text-gray-400 text-sm italic">No recent activities to display.</div>
+          </div>
+        </section>
+
+        <section id="view-apply" class="fade-in hidden max-w-5xl mx-auto">
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-ng-green to-ng-green-dark p-6 text-white">
+              <h3 class="text-2xl font-serif font-bold">New Advertisement License Application</h3>
+              <p class="text-green-100 text-sm opacity-90">Complete the form below. Fees are calculated automatically.</p>
+            </div>
+
+            <form onsubmit="handleSubmitApplication(event)" class="p-8 space-y-8">
+              
+              <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <h4 class="text-sm font-bold text-gray-500 uppercase border-b border-gray-200 pb-2 mb-4 flex items-center">
+                  <span class="bg-ng-green text-white w-5 h-5 rounded-full flex items-center justify-center text-xs mr-2">1</span> Applicant Details
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Applicant / Company Name</label>
+                    <input type="text" name="applicant" placeholder="Enter full legal name" required class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Phone Number</label>
+                    <input type="tel" name="phone" placeholder="+234..." required class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Email Address</label>
+                    <input type="email" name="email" placeholder="official@company.com" required class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Board Owner</label>
+                    <div class="flex">
+                      <select id="owner-select" name="owner" onchange="toggleOwnerInput()" class="w-full p-3 border border-gray-300 rounded-l-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                        <option value="Self">Self / In-house</option>
+                        <option value="New">Register New Owner...</option>
+                        <option value="MediaReach OMD">MediaReach OMD</option>
+                        <option value="Insight Publicis">Insight Publicis</option>
+                      </select>
+                      <input type="text" id="new-owner-input" name="new_owner" placeholder="Enter Name" class="hidden w-full p-3 border border-gray-300 border-l-0 rounded-r-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <h4 class="text-sm font-bold text-gray-500 uppercase border-b border-gray-200 pb-2 mb-4 flex items-center">
+                  <span class="bg-ng-green text-white w-5 h-5 rounded-full flex items-center justify-center text-xs mr-2">2</span> Advert Content
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Advert Purpose / Category</label>
+                    <select name="industry" id="apply-industry" onchange="calculateFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                      <option value="">Select Category</option>
+                      <option value="Election Campaign">Election Campaign / Political</option>
+                      <option value="New Product Launch">New Product Launch</option>
+                      <option value="Corporate/Company">Corporate Branding</option>
+                      <option value="Religious">Religious Program / Crusade</option>
+                      <option value="SME/Small Business">SME / Small Business</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Sponsor Name</label>
+                    <input type="text" name="sponsor" placeholder="Who is paying for this ad?" required class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Advertisement Type</label>
+                    <select name="type" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                      <option value="Digital Billboard">Digital LED Billboard</option>
+                      <option value="Static Billboard">Static Billboard</option>
+                      <option value="Unipole">Unipole</option>
+                      <option value="Gantry">Gantry</option>
+                      <option value="Lamp Post">Street Lamp Post</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Asset Size</label>
+                    <select name="size" id="apply-size" onchange="toggleCustomSize(); calculateFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                      <option value="">Select Standard Size</option>
+                      <option value="A4 (0.06 sqm)">A4 Paper Size</option>
+                      <option value="48-Sheet (18 sqm)">48-Sheet (Standard 18 sqm)</option>
+                      <option value="Unipole (108 sqm)">Unipole (108 sqm)</option>
+                      <option value="Custom Size">Custom Size (Enter Dimensions)</option>
+                    </select>
+                    <div id="custom-size-container" class="hidden mt-3 grid grid-cols-2 gap-2 bg-white p-2 rounded border border-gray-200">
+                      <input id="custom-width" type="number" step="0.1" placeholder="Width (m)" class="w-full border-b border-gray-300 outline-none p-1" oninput="calculateFee()">
+                      <input id="custom-height" type="number" step="0.1" placeholder="Height (m)" class="w-full border-b border-gray-300 outline-none p-1" oninput="calculateFee()">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Duration</label>
+                    <div class="flex gap-2">
+                      <input type="number" name="duration_val" min="1" value="1" class="w-24 p-3 border border-gray-300 rounded-lg bg-white outline-none" oninput="calculateFee()">
+                      <select name="duration_unit" class="flex-grow p-3 border border-gray-300 rounded-lg bg-white outline-none" onchange="calculateFee()">
+                        <option value="Months">Months</option>
+                        <option value="Weeks">Weeks</option>
+                        <option value="Years">Years</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <h4 class="text-sm font-bold text-gray-500 uppercase border-b border-gray-200 pb-2 mb-4 flex items-center">
+                  <span class="bg-ng-green text-white w-5 h-5 rounded-full flex items-center justify-center text-xs mr-2">3</span> Location
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">State Jurisdiction</label>
+                    <select name="state" id="apply-state" onchange="handleStateChange()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green"></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">LGA</label>
+                    <select name="lga" id="apply-lga" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-ng-green">
+                      <option value="">Select State First</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white border-2 border-green-100 p-6 rounded-xl shadow-lg relative overflow-hidden">
+                <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">Cost Breakdown</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase">ARCON Vetting Fee</p>
+                    <p id="fee-arcon" class="text-lg font-bold text-gray-700">₦0.00</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase">State Advertisement Tax</p>
+                    <p id="fee-tax" class="text-lg font-bold text-gray-700">₦0.00</p>
+                  </div>
+                  <div class="border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
+                    <p class="text-xs text-ng-green font-bold uppercase">Total Payable</p>
+                    <p id="fee-total" class="text-3xl font-black text-ng-green">₦0.00</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-6 gap-4">
+                <button type="button" onclick="switchTab('dashboard')" class="text-gray-500 font-bold px-6 py-3 hover:text-gray-800">Cancel</button>
+                <button type="submit" class="bg-ng-green text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-green-700 flex items-center gap-2">
+                  <i class="ph ph-receipt"></i> Submit & Pay
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="view-my-assets" class="fade-in hidden space-y-6">
+          <h2 class="text-2xl font-serif font-bold text-gray-800">My Applications</h2>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="p-4">App ID</th>
+                  <th class="p-4">Details</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="assets-table-body" class="divide-y divide-gray-100">
+                </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="payment-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-slide-up">
+      <div class="bg-gray-900 p-4 text-white flex justify-between items-center">
+        <h3 class="font-bold flex items-center gap-2"><i class="ph ph-bank"></i> Payment Required</h3>
+        <button onclick="document.getElementById('payment-modal').classList.add('hidden')" class="hover:text-gray-300"><i class="ph ph-x text-lg"></i></button>
+      </div>
+      <div class="p-6 text-center">
+        <p class="text-sm text-gray-500 mb-1">Total Amount Due</p>
+        <h2 id="modal-amount" class="text-4xl font-black text-ng-green mb-6">₦0.00</h2>
+        
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-left space-y-3">
+          <div class="flex justify-between border-b pb-2">
+            <span class="text-xs font-bold text-gray-400 uppercase">Bank</span>
+            <span class="font-bold text-gray-800">Stanbic IBTC Bank</span>
+          </div>
+          <div class="flex justify-between border-b pb-2">
+            <span class="text-xs font-bold text-gray-400 uppercase">Account Name</span>
+            <span class="font-bold text-gray-800">ARCON ADs VETTING</span>
+          </div>
+          <div class="flex justify-between items-center pt-1">
+            <span class="text-xs font-bold text-gray-400 uppercase">Account Number</span>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xl font-bold text-gray-800">5770242424</span>
+              <button onclick="navigator.clipboard.writeText('5770242424')" class="text-blue-600 text-xs hover:underline">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="downloadInvoice()" class="flex-1 py-3 border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50">Download Invoice</button>
+          <button onclick="confirmPayment()" class="flex-1 py-3 bg-ng-green text-white rounded-lg font-bold hover:bg-ng-green-dark">I Have Paid</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cert-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto">
+    <div class="bg-white w-full max-w-3xl relative rounded shadow-2xl my-8">
+      <button onclick="closeCertModal()" class="absolute top-4 right-4 text-gray-500 hover:text-red-600 z-50 bg-white rounded-full p-2 shadow border no-print"><i class="ph ph-x"></i></button>
+      <div id="cert-content">
+        </div>
     </div>
   </div>
 
   <script>
-    // --- Data & Rates ---
-    const RATES = { 'Lagos': 150000, 'Abuja FCT': 120000, 'Rivers': 100000, 'Kano': 80000, 'Oyo': 60000, 'default': 50000 };
-    const MULTIPLIERS = { 'Political': 1.5, 'Product': 1.2, 'Corporate': 1.0, 'SME': 0.8, 'Religious': 0.5 };
-    const LGAS = {
-      'Lagos': ['Ikeja', 'Eti-Osa', 'Lagos Island', 'Surulere'],
-      'Abuja FCT': ['AMAC', 'Bwari', 'Gwagwalada', 'Kuje'],
-      'Rivers': ['Port Harcourt', 'Obio-Akpor'],
-      'Kano': ['Kano Municipal', 'Fagge'],
-      'Oyo': ['Ibadan North', 'Ibadan SW']
-    };
+    // --- AUTH LOGIC ---
+    function toggleAuth(mode) {
+      const signin = document.getElementById('form-signin');
+      const signup = document.getElementById('form-signup');
+      const tabIn = document.getElementById('tab-signin');
+      const tabUp = document.getElementById('tab-signup');
 
-    let currentAppId = "";
-    let currentAmountStr = "";
-
-    // --- Navigation ---
-    function switchTab(tabId) {
-      document.querySelectorAll('section').forEach(el => el.classList.add('hidden'));
-      document.getElementById('view-' + tabId).classList.remove('hidden');
-      
-      // Update Nav State
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-ng-green-light', 'text-ng-green');
-        btn.classList.add('text-gray-600', 'hover:bg-gray-50');
-      });
-      const activeBtn = document.getElementById('nav-' + tabId);
-      if(activeBtn) {
-        activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-50');
-        activeBtn.classList.add('bg-ng-green-light', 'text-ng-green');
+      if(mode === 'signin') {
+        signin.classList.remove('hidden');
+        signup.classList.add('hidden');
+        tabIn.className = "flex-1 py-4 text-sm font-bold text-ng-green border-b-2 border-ng-green bg-green-50";
+        tabUp.className = "flex-1 py-4 text-sm font-bold text-gray-500 hover:text-gray-700";
+      } else {
+        signin.classList.add('hidden');
+        signup.classList.remove('hidden');
+        tabIn.className = "flex-1 py-4 text-sm font-bold text-gray-500 hover:text-gray-700";
+        tabUp.className = "flex-1 py-4 text-sm font-bold text-ng-green border-b-2 border-ng-green bg-green-50";
       }
     }
 
-    // --- Form Logic ---
-    function populateLGAs() {
-      const state = document.getElementById('state').value;
-      const lgaSelect = document.getElementById('lga');
-      lgaSelect.innerHTML = '<option value="">Select LGA</option>';
-      if (state && LGAS[state]) {
-        LGAS[state].forEach(lga => {
-          const opt = document.createElement('option');
-          opt.value = lga;
-          opt.innerText = lga;
-          lgaSelect.appendChild(opt);
-        });
+    function toggleRegFields() {
+      const type = document.querySelector('input[name="regType"]:checked').value;
+      if(type === 'individual') {
+        document.getElementById('field-nin').classList.remove('hidden');
+        document.getElementById('field-rc').classList.add('hidden');
+      } else {
+        document.getElementById('field-nin').classList.add('hidden');
+        document.getElementById('field-rc').classList.remove('hidden');
       }
+    }
+
+    function handleLogin() {
+      // Simulation
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      switchTab('dashboard');
+    }
+
+
+    // --- APP & FORM LOGIC ---
+    const STATE_RATES = { 'Abuja FCT': 500, 'Lagos': 650, 'Rivers': 550, 'Kano': 450, 'default': 350 };
+    const STATE_TAXES = { 'Abuja FCT': 50000, 'Lagos': 100000, 'Rivers': 75000, 'default': 30000 };
+    const INDUSTRY_MULTIPLIERS = { 'Election Campaign': 1.5, 'New Product Launch': 1.2, 'Corporate/Company': 1.0, 'SME/Small Business': 0.8, 'Religious': 0.5 };
+    const STANDARD_SIZES = {
+      'A4 (0.06 sqm)': { area: 0.062 },
+      '48-Sheet (18 sqm)': { area: 18 },
+      'Unipole (108 sqm)': { area: 108 },
+      'Custom Size': null
+    };
+    const MOCK_LGAS = {
+      'Lagos': ['Ikeja', 'Eti-Osa', 'Lagos Island'],
+      'Abuja FCT': ['AMAC', 'Bwari', 'Gwagwalada'],
+      'Rivers': ['Port Harcourt', 'Obio-Akpor'],
+      'default': ['Central', 'North', 'South']
+    };
+
+    let currentAppData = null;
+    let myApplications = [
+      { id: 'APP-2025-001', sponsor: 'Zenith Bank', type: 'Unipole', status: 'Active', expiry: '2025-12-01', location: 'Lagos' },
+      { id: 'APP-2025-002', sponsor: 'Glo Mobile', type: 'Digital LED', status: 'Expiring', expiry: '2025-01-15', location: 'Abuja' }
+    ];
+
+    function switchTab(id) {
+      ['dashboard','apply','my-assets'].forEach(vid => document.getElementById('view-'+vid).classList.add('hidden'));
+      document.getElementById('view-'+id).classList.remove('hidden');
+      
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50");
+      document.getElementById('nav-'+id).className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium bg-ng-green-light text-ng-green";
+
+      if(id === 'my-assets') renderMyAssets();
+      if(id === 'apply') populateStates();
+    }
+
+    function populateStates() {
+      const select = document.getElementById('apply-state');
+      if(select.options.length > 1) return;
+      select.innerHTML = '<option value="">Select State</option>';
+      ['Lagos','Abuja FCT','Rivers','Kano','Oyo'].forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.innerText = s;
+        select.appendChild(opt);
+      });
+    }
+
+    function handleStateChange() {
+      const state = document.getElementById('apply-state').value;
+      const lga = document.getElementById('apply-lga');
+      lga.innerHTML = '<option value="">Select LGA</option>';
+      const list = MOCK_LGAS[state] || MOCK_LGAS.default;
+      list.forEach(l => {
+        const opt = document.createElement('option'); opt.value = l; opt.innerText = l; lga.appendChild(opt);
+      });
+      calculateFee();
+    }
+
+    function toggleCustomSize() {
+      const val = document.getElementById('apply-size').value;
+      const box = document.getElementById('custom-size-container');
+      if(val === 'Custom Size') box.classList.remove('hidden'); else box.classList.add('hidden');
+    }
+
+    function toggleOwnerInput() {
+      const val = document.getElementById('owner-select').value;
+      const inp = document.getElementById('new-owner-input');
+      if(val === 'New') inp.classList.remove('hidden'); else inp.classList.add('hidden');
+    }
+
+    function durationToMonths(val, unit) {
+      if(unit === 'Years') return val * 12;
+      if(unit === 'Weeks') return val / 4;
+      return val;
     }
 
     function calculateFee() {
-      const state = document.getElementById('state').value;
-      const industry = document.getElementById('industry').value;
-      const size = parseFloat(document.getElementById('size').value) || 0;
-      const durationVal = parseFloat(document.getElementById('duration_val').value) || 1;
-      const durationUnit = document.getElementById('duration_unit').value;
+      const state = document.getElementById('apply-state').value;
+      const industry = document.getElementById('apply-industry').value;
+      const sizeVal = document.getElementById('apply-size').value;
+      const durVal = document.querySelector('[name="duration_val"]').value;
+      const durUnit = document.querySelector('[name="duration_unit"]').value;
 
-      if (!state) {
-        document.getElementById('fee-total').innerText = "₦0.00";
+      if(!state || !industry || !sizeVal) {
+        document.getElementById('fee-total').innerText = '₦0.00';
         return;
       }
 
-      // Logic: Rate per month per sqm? Simplified logic for demo:
-      // Base Rate (by state) + (Size * 1000) * Multiplier * DurationFactor
-      
-      let durationFactor = durationVal;
-      if (durationUnit === 'Weeks') durationFactor = durationVal / 4;
-      if (durationUnit === 'Years') durationFactor = durationVal * 12;
+      let area = 0;
+      if(sizeVal === 'Custom Size') {
+        area = (document.getElementById('custom-width').value || 0) * (document.getElementById('custom-height').value || 0);
+      } else {
+        area = STANDARD_SIZES[sizeVal]?.area || 0;
+      }
 
-      const baseRate = RATES[state] || RATES['default'];
-      const indMult = MULTIPLIERS[industry] || 1.0;
+      const rate = STATE_RATES[state] || 350;
+      const tax = STATE_TAXES[state] || 30000;
+      const mult = INDUSTRY_MULTIPLIERS[industry] || 1;
+      const months = durationToMonths(durVal, durUnit);
+
+      const arconFee = (rate * area * 1000 * mult) * months;
+      const total = arconFee + tax;
+
+      const fmt = new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'});
+      document.getElementById('fee-arcon').innerText = fmt.format(arconFee);
+      document.getElementById('fee-tax').innerText = fmt.format(tax);
+      document.getElementById('fee-total').innerText = fmt.format(total);
       
-      // Formula: (Base + (Size * 500)) * Multiplier * Duration(Months)
-      const total = (baseRate + (size * 2000)) * indMult * durationFactor;
-      
-      const fmt = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' });
-      currentAmountStr = fmt.format(total);
-      
-      document.getElementById('fee-total').innerText = currentAmountStr;
-      document.getElementById('fee-breakdown').innerText = `${durationVal} ${durationUnit} • ${size}sqm • ${industry} Rate`;
+      return total; // Return numeric for logic
     }
 
-    function handleApplicationSubmit(e) {
+    function handleSubmitApplication(e) {
       e.preventDefault();
-      const state = document.getElementById('state').value;
-      if(!state || document.getElementById('fee-total').innerText === "₦0.00") {
-        alert("Please complete the form details first.");
-        return;
-      }
-
-      // Generate ID
-      currentAppId = `APP-2025-${Math.floor(Math.random() * 900) + 100}`;
+      const fee = calculateFee();
+      if(fee <= 0) return alert("Please complete form details.");
       
-      // Show Payment Modal
-      document.getElementById('modal-amount').innerText = currentAmountStr;
+      // Store temp data
+      const form = e.target;
+      currentAppData = {
+        id: 'APP-' + Math.floor(Math.random()*10000),
+        sponsor: form.sponsor.value,
+        type: form.type.value,
+        state: form.state.value,
+        lga: form.lga.value,
+        amount: document.getElementById('fee-total').innerText
+      };
+      
+      // Show payment
+      document.getElementById('modal-amount').innerText = currentAppData.amount;
       document.getElementById('payment-modal').classList.remove('hidden');
     }
 
-    // --- Payment Logic ---
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
+    function downloadInvoice() {
+      alert("Invoice downloaded (stub).");
     }
 
-    function downloadInvoiceText() {
-      const form = document.getElementById('apply-form');
-      const sponsor = form.sponsor.value;
-      const title = form.title.value;
-      const date = new Date().toLocaleDateString();
+    function confirmPayment() {
+      document.getElementById('payment-modal').classList.add('hidden');
+      
+      // Add to list as "Active" (Mocking instant approval for demo)
+      myApplications.unshift({
+        id: currentAppData.id,
+        sponsor: currentAppData.sponsor,
+        type: currentAppData.type,
+        status: 'Active',
+        expiry: '2026-12-14',
+        location: currentAppData.state
+      });
 
-      const content = `
-ARCON PAYMENT INVOICE
---------------------------------
-Invoice ID: INV-${Math.floor(Math.random()*100000)}
-Date: ${date}
-Application ID: ${currentAppId}
-Sponsor: ${sponsor}
-Campaign: ${title}
---------------------------------
-PAY TO:
-Bank: Stanbic IBTC Bank
-Account Name: ARCON ADs VETTING
-Account Number: 5770242424
---------------------------------
-AMOUNT DUE: ${currentAmountStr}
---------------------------------
-Please retain this invoice for your records.
-      `.trim();
-
-      const blob = new Blob([content], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `ARCON-Invoice-${currentAppId}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-    function confirmPaymentAction() {
-      // Add to table mock
-      const tbody = document.getElementById('assets-table-body');
-      const tr = document.createElement('tr');
-      tr.className = "hover:bg-gray-50 transition animate-pulse";
-      tr.innerHTML = `
-        <td class="p-4 font-mono text-gray-600 font-medium">${currentAppId}</td>
-        <td class="p-4"><p class="font-bold text-gray-800">${document.querySelector('input[name="title"]').value}</p><p class="text-xs text-gray-500">Processing Payment</p></td>
-        <td class="p-4">${document.getElementById('state').value}</td>
-        <td class="p-4"><span class="bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1 rounded-full text-xs font-bold">Verifying Payment</span></td>
-        <td class="p-4 text-right"><span class="text-xs text-gray-400">Processing...</span></td>
-      `;
-      tbody.prepend(tr);
-
-      closeModal('payment-modal');
+      alert("Payment Confirmed! Asset Active. QR Generated.");
+      document.querySelector('form').reset();
       switchTab('my-assets');
-      document.getElementById('apply-form').reset();
-      calculateFee();
+    }
+
+    // --- RENDER ASSETS ---
+    function renderMyAssets() {
+      const tbody = document.getElementById('assets-table-body');
+      tbody.innerHTML = '';
       
-      // Simulate confirmation
-      setTimeout(() => {
-        tr.classList.remove('animate-pulse');
-        alert(`Payment for ${currentAppId} submitted successfully!`);
-      }, 1000);
-    }
-
-    function reopenPayment(id, amount) {
-      currentAppId = id;
-      currentAmountStr = "₦" + amount;
-      document.getElementById('modal-amount').innerText = currentAmountStr;
-      document.getElementById('payment-modal').classList.remove('hidden');
-    }
-
-    // --- QR & Asset Logic ---
-    function viewQR(id) {
-      document.getElementById('qr-modal').classList.remove('hidden');
-      document.getElementById('qr-app-id').innerText = id;
-      const container = document.getElementById('qr-container');
-      container.innerHTML = "";
-      new QRCode(container, {
-        text: `https://arcon.gov.ng/verify?id=${id}`,
-        width: 150,
-        height: 150,
-        colorDark : "#008751",
-        colorLight : "#ffffff",
+      myApplications.forEach(app => {
+        const isExpiring = app.status === 'Expiring';
+        const statusClass = isExpiring ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-4 font-mono font-bold text-gray-600">${app.id}</td>
+          <td class="p-4">
+            <div class="font-bold text-gray-800">${app.sponsor}</div>
+            <div class="text-xs text-gray-500">${app.type} • ${app.location}</div>
+          </td>
+          <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${statusClass}">${app.status}</span></td>
+          <td class="p-4 text-right">
+            ${app.status === 'Active' ? `<button onclick="showCertificate('${app.id}')" class="text-xs bg-gray-900 text-white px-3 py-1.5 rounded hover:bg-black">View Cert & QR</button>` : ''}
+            ${isExpiring ? `<button class="text-xs bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700">Renew Now</button>` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
       });
     }
 
-    // --- Verification Logic ---
-    function handleVerify() {
-      const input = document.getElementById('verify-input').value.trim().toUpperCase();
-      const resDiv = document.getElementById('verify-result');
+    // --- CERTIFICATE & QR ---
+    function showCertificate(id) {
+      const app = myApplications.find(a => a.id === id);
+      const modal = document.getElementById('cert-modal');
+      const content = document.getElementById('cert-content');
       
-      if(!input) return;
+      // Generate certificate HTML
+      content.innerHTML = `
+        <div class="border-8 border-double border-ng-green p-10 bg-white relative shadow-2xl">
+          <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none"><div class="text-[200px] font-bold text-gray-400">ARCON</div></div>
+          
+          <div class="text-center relative z-10">
+            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-20 mx-auto mb-2">
+            <h2 class="text-3xl font-serif font-bold text-ng-green">FEDERAL REPUBLIC OF NIGERIA</h2>
+            <p class="text-sm font-bold uppercase tracking-widest text-gray-600">Advertising Regulatory Council of Nigeria</p>
+            <div class="my-4 border-t border-b border-gold py-1"><h1 class="text-4xl font-serif font-black text-gray-800">CERTIFICATE OF APPROVAL</h1></div>
+          </div>
 
-      resDiv.classList.remove('hidden');
-      
-      // Mock Check
-      if(input === 'APP-2025-001') {
-        resDiv.innerHTML = `
-          <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3 text-left">
-             <i class="ph ph-check-circle text-2xl text-ng-green"></i>
-             <div>
-               <h4 class="font-bold text-green-800">Valid License Found</h4>
-               <p class="text-xs text-gray-600 mt-1"><strong>Sponsor:</strong> Zenith Bank<br><strong>Status:</strong> Approved & Active<br><strong>Expires:</strong> June 2026</p>
+          <div class="grid grid-cols-2 gap-6 mt-6 relative z-10 text-sm">
+             <div><span class="block font-bold text-gray-500 uppercase text-xs">License Number</span><span class="text-lg font-mono font-bold">${app.id}</span></div>
+             <div><span class="block font-bold text-gray-500 uppercase text-xs">Sponsor</span><span class="text-lg font-bold">${app.sponsor}</span></div>
+             <div><span class="block font-bold text-gray-500 uppercase text-xs">Asset Type</span><span class="text-lg font-bold">${app.type}</span></div>
+             <div><span class="block font-bold text-gray-500 uppercase text-xs">Location</span><span class="text-lg font-bold">${app.location}</span></div>
+             <div class="col-span-2 bg-green-50 p-4 rounded text-center border border-green-100">
+               <span class="text-ng-green font-bold uppercase tracking-widest">This Asset is Fully Compliant</span>
              </div>
           </div>
-        `;
-      } else {
-         resDiv.innerHTML = `
-          <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 text-left">
-             <i class="ph ph-x-circle text-2xl text-red-600"></i>
-             <div>
-               <h4 class="font-bold text-red-800">No Record Found</h4>
-               <p class="text-xs text-gray-600 mt-1">This ID (${input}) does not exist in the national registry or has expired.</p>
-             </div>
+
+          <div class="mt-8 flex justify-between items-end relative z-10">
+            <div class="text-center">
+              <div id="cert-qr-${app.id}" class="bg-white p-1 border border-gray-300"></div>
+              <p class="text-[10px] uppercase mt-1">Scan to Verify</p>
+            </div>
+            <div class="text-center">
+              <div class="h-px w-48 bg-gray-800 mb-2"></div>
+              <p class="font-bold text-xs uppercase">Director General, ARCON</p>
+            </div>
           </div>
-        `;
-      }
+
+          <div class="mt-6 text-center no-print">
+            <button onclick="window.print()" class="bg-ng-green text-white px-6 py-2 rounded font-bold hover:bg-green-700">Print / Save PDF</button>
+          </div>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+
+      // Generate QR
+      setTimeout(() => {
+        const container = document.getElementById(`cert-qr-${app.id}`);
+        container.innerHTML = "";
+        new QRCode(container, {
+          text: `https://arcon.gov.ng/verify?id=${app.id}&status=valid`,
+          width: 100,
+          height: 100,
+          colorDark : "#008751",
+          colorLight : "#ffffff",
+        });
+      }, 100);
     }
 
-    // Init
-    window.onload = () => {
-      calculateFee(); // reset calc
-    };
+    function closeCertModal() {
+      document.getElementById('cert-modal').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
