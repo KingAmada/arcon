@@ -4,10 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ARCON | Advertiser Services & Verification</title>
-  
+
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
+  <!-- QR generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- QR scanning -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
+
+  <!-- Charts (for overview insights) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -29,12 +36,23 @@
       }
     }
   </script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@400;700;900&family=Fira+Code&display=swap');
-    
+
     body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-    .hero-bg { background-image: linear-gradient(rgba(0, 50, 30, 0.85), rgba(0, 50, 30, 0.9)), url('https://images.unsplash.com/photo-1572061486895-3c8e76c27f31?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; }
-    
+    .hero-bg {
+      background-image:
+        linear-gradient(rgba(0, 50, 30, 0.85), rgba(0, 50, 30, 0.9)),
+        url('https://images.unsplash.com/photo-1572061486895-3c8e76c27f31?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover; background-position: center;
+    }
+
+    .chip { @apply inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold border; }
+    .chip-green { @apply bg-green-50 border-green-200 text-green-700; }
+    .chip-gray { @apply bg-gray-50 border-gray-200 text-gray-700; }
+    .chip-red { @apply bg-red-50 border-red-200 text-red-700; }
+
     @media print {
       .no-print { display: none !important; }
       body { background: white; }
@@ -43,6 +61,7 @@
     }
   </style>
 </head>
+
 <body class="flex flex-col min-h-screen">
 
   <header class="bg-white border-b border-gray-200 sticky top-0 z-40 no-print">
@@ -60,7 +79,7 @@
           <button onclick="openVerifyModal()" class="hidden md:flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-ng-green transition">
             <i class="ph ph-scan text-lg"></i> Verify Asset
           </button>
-          
+
           <div class="h-6 w-px bg-gray-200 hidden md:block"></div>
 
           <div id="auth-buttons" class="flex items-center gap-3">
@@ -81,6 +100,7 @@
     </div>
   </header>
 
+  <!-- LANDING -->
   <main id="view-landing" class="flex-grow flex flex-col">
     <section class="hero-bg flex-grow flex items-center justify-center text-center px-4 py-20">
       <div class="max-w-3xl mx-auto text-white space-y-6">
@@ -93,7 +113,7 @@
         <p class="text-lg text-green-50 max-w-2xl mx-auto leading-relaxed drop-shadow">
           Apply for advertisement licenses, verify compliance, and manage your regulatory assets in one secure platform.
         </p>
-        
+
         <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <button onclick="openAuthModal('signup')" class="bg-ng-green hover:bg-green-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
             Get Started <i class="ph ph-arrow-right-bold"></i>
@@ -106,8 +126,9 @@
     </section>
   </main>
 
+  <!-- DASHBOARD -->
   <main id="view-dashboard" class="hidden flex-grow bg-gray-50 flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden">
-    
+
     <aside class="w-full md:w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col no-print z-30">
       <nav class="p-4 space-y-2 flex-grow">
         <button onclick="dashSwitch('overview')" id="nav-overview" class="w-full text-left px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-3 bg-green-50 text-ng-green border-l-4 border-ng-green">
@@ -129,17 +150,24 @@
     </aside>
 
     <div class="flex-grow overflow-y-auto p-6 md:p-10 relative">
-      
+
+      <!-- OVERVIEW -->
       <div id="dash-overview" class="space-y-8">
         <div class="flex justify-between items-end">
           <div>
             <h2 class="text-2xl font-serif font-bold text-gray-800">Dashboard</h2>
             <p class="text-sm text-gray-500">Real-time status of your regulatory compliance.</p>
           </div>
-          <button onclick="dashSwitch('apply')" class="bg-ng-green text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-ng-green-dark">Apply Now</button>
+          <div class="flex gap-3">
+            <button onclick="openVerifyModal()" class="border border-gray-200 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 flex items-center gap-2">
+              <i class="ph ph-scan"></i> Verify Asset
+            </button>
+            <button onclick="dashSwitch('apply')" class="bg-ng-green text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-ng-green-dark">Apply Now</button>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- KPI CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
             <div class="w-12 h-12 bg-green-100 text-ng-green rounded-full flex items-center justify-center text-2xl"><i class="ph ph-check-circle"></i></div>
             <div>
@@ -147,6 +175,7 @@
               <h3 class="text-2xl font-bold text-gray-900" id="stat-active">0</h3>
             </div>
           </div>
+
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
             <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-2xl"><i class="ph ph-clock"></i></div>
             <div>
@@ -155,16 +184,69 @@
               <p class="text-[10px] text-red-500 font-bold">Renew in 30 days</p>
             </div>
           </div>
+
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
-            <div class="w-12 h-12 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-2xl"><i class="ph ph-receipt"></i></div>
+            <div class="w-12 h-12 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-2xl"><i class="ph ph-files"></i></div>
             <div>
-              <p class="text-xs font-bold text-gray-400 uppercase">Total Applications</p>
+              <p class="text-xs font-bold text-gray-400 uppercase">Total Assets</p>
               <h3 class="text-2xl font-bold text-gray-900" id="stat-total">0</h3>
+              <p class="text-[10px] text-gray-400 font-bold" id="stat-topstate">Top State: —</p>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-2">Compliance Score</p>
+            <div class="flex items-end justify-between">
+              <div>
+                <h3 class="text-3xl font-black text-ng-green" id="stat-score">—%</h3>
+                <p class="text-xs text-gray-500 mt-1">Based on active vs expiring assets</p>
+              </div>
+              <div class="text-3xl text-ng-green-dark"><i class="ph ph-shield-check"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INSIGHTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Alerts / Renewals -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4 lg:col-span-1">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-gray-800 flex items-center gap-2"><i class="ph ph-warning-circle text-yellow-600"></i> Renewals & Alerts</h3>
+              <span class="text-xs font-bold text-gray-400 uppercase" id="renewals-count">0 due</span>
+            </div>
+
+            <div id="renewals-list" class="space-y-3"></div>
+
+            <button onclick="dashSwitch('assets')" class="w-full mt-2 bg-gray-900 text-white py-2.5 rounded-lg font-bold hover:bg-black flex items-center justify-center gap-2">
+              View Assets <i class="ph ph-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- Distribution Chart -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-gray-800 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Assets by State</h3>
+                <p class="text-xs text-gray-500">Top 8 states by asset count</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="chip chip-green"><i class="ph ph-check-circle"></i> Active</span>
+                <span class="chip chip-red"><i class="ph ph-timer"></i> Expiring</span>
+              </div>
+            </div>
+            <div class="h-64">
+              <canvas id="stateChart"></canvas>
+            </div>
+
+            <div class="mt-5 border-t pt-4">
+              <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Recent Activity</h4>
+              <div id="activity-feed" class="space-y-2"></div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- APPLY -->
       <div id="dash-apply" class="hidden max-w-4xl mx-auto">
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           <div class="bg-gray-900 text-white p-6 flex justify-between items-center">
@@ -176,7 +258,6 @@
           </div>
 
           <form id="application-form" onsubmit="handleFormSubmit(event)" class="p-8 space-y-8">
-            
             <div class="space-y-4">
               <h4 class="text-sm font-bold text-ng-green uppercase border-b pb-2">1. Applicant & Ownership</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -187,13 +268,13 @@
                 <div>
                   <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Board Owner</label>
                   <div class="flex">
-                     <select id="owner-select" onchange="toggleOwnerInput()" class="input-style w-full p-3 border border-gray-300 rounded-l-lg outline-none bg-white">
-                       <option value="Self">Self / In-house</option>
-                       <option value="New">Register New...</option>
-                       <option value="MediaReach">MediaReach OMD</option>
-                       <option value="Insight">Insight Publicis</option>
-                     </select>
-                     <input type="text" id="new-owner-input" placeholder="Enter Name" class="hidden w-full p-3 border border-gray-300 rounded-r-lg outline-none">
+                    <select id="owner-select" onchange="toggleOwnerInput()" class="input-style w-full p-3 border border-gray-300 rounded-l-lg outline-none bg-white">
+                      <option value="Self">Self / In-house</option>
+                      <option value="New">Register New...</option>
+                      <option value="MediaReach">MediaReach OMD</option>
+                      <option value="Insight">Insight Publicis</option>
+                    </select>
+                    <input type="text" id="new-owner-input" placeholder="Enter Name" class="hidden w-full p-3 border border-gray-300 rounded-r-lg outline-none">
                   </div>
                 </div>
               </div>
@@ -218,28 +299,28 @@
                   <input type="text" name="sponsor" placeholder="Who is paying?" required class="w-full p-3 border border-gray-300 rounded-lg outline-none">
                 </div>
                 <div>
-                   <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Asset Size</label>
-                   <select id="size" onchange="toggleSize(); calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
-                     <option value="18">48-Sheet (18 sqm)</option>
-                     <option value="36">96-Sheet (36 sqm)</option>
-                     <option value="108">Unipole (108 sqm)</option>
-                     <option value="custom">Custom Size</option>
-                   </select>
-                   <div id="custom-dims" class="hidden grid grid-cols-2 gap-2 mt-2">
-                     <input type="number" id="w" placeholder="W (m)" class="p-2 border rounded" oninput="calcFee()">
-                     <input type="number" id="h" placeholder="H (m)" class="p-2 border rounded" oninput="calcFee()">
-                   </div>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Asset Size</label>
+                  <select id="size" onchange="toggleSize(); calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                    <option value="18">48-Sheet (18 sqm)</option>
+                    <option value="36">96-Sheet (36 sqm)</option>
+                    <option value="108">Unipole (108 sqm)</option>
+                    <option value="custom">Custom Size</option>
+                  </select>
+                  <div id="custom-dims" class="hidden grid grid-cols-2 gap-2 mt-2">
+                    <input type="number" id="w" placeholder="W (m)" class="p-2 border rounded" oninput="calcFee()">
+                    <input type="number" id="h" placeholder="H (m)" class="p-2 border rounded" oninput="calcFee()">
+                  </div>
                 </div>
                 <div>
-                   <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Duration</label>
-                   <div class="flex gap-2">
-                     <input type="number" id="dur-val" value="1" min="1" class="w-20 p-3 border rounded-lg" oninput="calcFee()">
-                     <select id="dur-unit" class="flex-grow p-3 border rounded-lg bg-white" onchange="calcFee()">
-                       <option value="Months">Months</option>
-                       <option value="Weeks">Weeks</option>
-                       <option value="Years">Years</option>
-                     </select>
-                   </div>
+                  <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Duration</label>
+                  <div class="flex gap-2">
+                    <input type="number" id="dur-val" value="1" min="1" class="w-20 p-3 border rounded-lg" oninput="calcFee()">
+                    <select id="dur-unit" class="flex-grow p-3 border rounded-lg bg-white" onchange="calcFee()">
+                      <option value="Months">Months</option>
+                      <option value="Weeks">Weeks</option>
+                      <option value="Years">Years</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -250,67 +331,135 @@
                 <div>
                   <label class="block text-xs font-bold text-gray-500 uppercase mb-1">State Jurisdiction</label>
                   <select id="state" onchange="popLGA(); calcFee()" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none" required>
-                    <option value="">Select State</option>
-                    <option value="Lagos">Lagos</option>
-                    <option value="Abuja FCT">Abuja FCT</option>
-                    <option value="Rivers">Rivers</option>
-                    <option value="Kano">Kano</option>
+                    <option value="">Loading states...</option>
                   </select>
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Local Govt (LGA)</label>
-                  <select id="lga" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none"><option>Select State First</option></select>
+                  <select id="lga" class="w-full p-3 border border-gray-300 rounded-lg bg-white outline-none">
+                    <option>Select State First</option>
+                  </select>
                 </div>
               </div>
             </div>
 
             <div class="bg-green-50 border border-green-200 p-6 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
-               <div class="text-center md:text-left">
-                 <p class="text-xs text-gray-500 uppercase font-bold">Estimated Total Fee</p>
-                 <h3 id="fee-display" class="text-3xl font-black text-ng-green">₦0.00</h3>
-                 <p id="fee-breakdown" class="text-xs text-gray-400 mt-1">Includes ARCON Vetting + State Tax</p>
-               </div>
-               <div class="flex gap-4">
-                 <button type="button" onclick="dashSwitch('overview')" class="px-6 py-3 rounded-lg border border-gray-300 font-bold text-gray-600 hover:bg-white">Cancel</button>
-                 <button type="submit" class="px-8 py-3 rounded-lg bg-ng-green text-white font-bold shadow hover:bg-ng-green-dark flex items-center gap-2">
-                   <i class="ph ph-receipt"></i> Generate Invoice
-                 </button>
-               </div>
+              <div class="text-center md:text-left">
+                <p class="text-xs text-gray-500 uppercase font-bold">Estimated Total Fee</p>
+                <h3 id="fee-display" class="text-3xl font-black text-ng-green">₦0.00</h3>
+                <p id="fee-breakdown" class="text-xs text-gray-400 mt-1">Includes ARCON Vetting + State Tax</p>
+              </div>
+              <div class="flex gap-4">
+                <button type="button" onclick="dashSwitch('overview')" class="px-6 py-3 rounded-lg border border-gray-300 font-bold text-gray-600 hover:bg-white">Cancel</button>
+                <button type="submit" class="px-8 py-3 rounded-lg bg-ng-green text-white font-bold shadow hover:bg-ng-green-dark flex items-center gap-2">
+                  <i class="ph ph-receipt"></i> Generate Invoice
+                </button>
+              </div>
             </div>
 
           </form>
         </div>
       </div>
 
+      <!-- ASSETS -->
       <div id="dash-assets" class="hidden space-y-6">
-        <div class="flex justify-between items-center">
-          <h2 class="text-2xl font-serif font-bold text-gray-800">My Assets</h2>
-          <div class="relative">
-             <input type="text" placeholder="Search ID..." class="pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-green-500 outline-none">
-             <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-serif font-bold text-gray-800">My Assets</h2>
+            <p class="text-xs text-gray-500">Search, sort, filter, and switch between list and grid view.</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="setAssetsView('list')" id="btn-view-list" class="px-3 py-2 rounded-lg text-sm font-bold border bg-white hover:bg-gray-50 flex items-center gap-2">
+              <i class="ph ph-list"></i> List
+            </button>
+            <button onclick="setAssetsView('grid')" id="btn-view-grid" class="px-3 py-2 rounded-lg text-sm font-bold border bg-white hover:bg-gray-50 flex items-center gap-2">
+              <i class="ph ph-squares-four"></i> Grid
+            </button>
           </div>
         </div>
-        
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+        <!-- Controls -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <div class="grid grid-cols-1 lg:grid-cols-6 gap-3">
+            <div class="lg:col-span-2 relative">
+              <input id="assets-search" type="text" placeholder="Search by ID, sponsor, state..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-1 focus:ring-green-500 outline-none">
+              <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+            </div>
+
+            <div>
+              <select id="filter-status" class="w-full py-2 px-3 border rounded-lg text-sm bg-white outline-none">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Expiring">Expiring</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+
+            <div>
+              <select id="filter-state" class="w-full py-2 px-3 border rounded-lg text-sm bg-white outline-none">
+                <option value="">All States</option>
+              </select>
+            </div>
+
+            <div>
+              <select id="filter-type" class="w-full py-2 px-3 border rounded-lg text-sm bg-white outline-none">
+                <option value="">All Types</option>
+                <option value="Unipole">Unipole</option>
+                <option value="Digital LED">Digital LED</option>
+                <option value="48-Sheet">48-Sheet</option>
+                <option value="96-Sheet">96-Sheet</option>
+                <option value="Custom Billboard">Custom Billboard</option>
+              </select>
+            </div>
+
+            <div class="flex gap-2">
+              <select id="sort-assets" class="flex-1 py-2 px-3 border rounded-lg text-sm bg-white outline-none">
+                <option value="newest">Sort: Newest</option>
+                <option value="expiry_asc">Sort: Expiry (Soonest)</option>
+                <option value="expiry_desc">Sort: Expiry (Latest)</option>
+                <option value="state_asc">Sort: State (A-Z)</option>
+                <option value="sponsor_asc">Sort: Sponsor (A-Z)</option>
+                <option value="status">Sort: Status</option>
+              </select>
+              <button onclick="clearAssetFilters()" class="px-3 py-2 border rounded-lg text-sm font-bold hover:bg-gray-50">Clear</button>
+            </div>
+          </div>
+
+          <div class="mt-3 text-xs text-gray-500 flex items-center justify-between">
+            <div id="assets-result-meta">0 assets</div>
+            <div class="flex items-center gap-2">
+              <span class="chip chip-green"><i class="ph ph-check-circle"></i> Active</span>
+              <span class="chip chip-red"><i class="ph ph-timer"></i> Expiring</span>
+              <span class="chip chip-gray"><i class="ph ph-hourglass"></i> Pending</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIST VIEW -->
+        <div id="assets-view-list" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
               <tr>
                 <th class="p-4">License ID</th>
                 <th class="p-4">Details</th>
                 <th class="p-4">Status</th>
+                <th class="p-4">Expiry</th>
                 <th class="p-4 text-right">Certificate</th>
               </tr>
             </thead>
-            <tbody id="assets-table" class="divide-y divide-gray-100">
-               </tbody>
+            <tbody id="assets-table" class="divide-y divide-gray-100"></tbody>
           </table>
         </div>
+
+        <!-- GRID VIEW -->
+        <div id="assets-view-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
       </div>
 
     </div>
   </main>
 
-
+  <!-- AUTH MODAL -->
   <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
       <div class="flex text-center border-b font-bold text-sm">
@@ -327,7 +476,7 @@
 
       <div id="form-signup" class="hidden p-8 space-y-4 max-h-[70vh] overflow-y-auto">
         <h3 class="text-xl font-bold text-gray-800">Create Account</h3>
-        
+
         <div class="flex gap-4 p-1 bg-gray-100 rounded-lg">
           <button onclick="setRegType('ind')" id="btn-ind" class="flex-1 py-1 rounded bg-white shadow-sm text-xs font-bold">Individual</button>
           <button onclick="setRegType('corp')" id="btn-corp" class="flex-1 py-1 rounded text-gray-500 text-xs font-bold">Company</button>
@@ -337,15 +486,13 @@
         <input type="text" id="reg-name" placeholder="Full Name / Company Name" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
         <input type="tel" placeholder="Phone Number" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
         <div class="grid grid-cols-2 gap-4">
-           <input type="text" placeholder="State" class="w-full p-3 border rounded-lg outline-none">
-           <input type="text" placeholder="City" class="w-full p-3 border rounded-lg outline-none">
+          <input type="text" placeholder="State" class="w-full p-3 border rounded-lg outline-none">
+          <input type="text" placeholder="City" class="w-full p-3 border rounded-lg outline-none">
         </div>
         <input type="email" id="reg-email" placeholder="Email Address" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
-        
         <input type="text" id="reg-id" placeholder="NIN Number" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
-        
         <input type="password" placeholder="Create 4-digit PIN" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-ng-green">
-        
+
         <button onclick="doLogin()" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold shadow hover:bg-black">Complete Registration</button>
       </div>
 
@@ -353,130 +500,199 @@
     </div>
   </div>
 
+  <!-- PAYMENT MODAL -->
   <div id="payment-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
       <div class="bg-gray-900 p-4 text-white flex justify-between">
-         <h3 class="font-bold flex items-center gap-2"><i class="ph ph-cardholder"></i> Payment Gateway</h3>
-         <button onclick="closeModal('payment-modal')" class="hover:text-gray-300"><i class="ph ph-x text-lg"></i></button>
+        <h3 class="font-bold flex items-center gap-2"><i class="ph ph-cardholder"></i> Payment Gateway</h3>
+        <button onclick="closeModal('payment-modal')" class="hover:text-gray-300"><i class="ph ph-x text-lg"></i></button>
       </div>
       <div class="p-6 text-center space-y-6">
-         <div>
-           <p class="text-xs font-bold text-gray-400 uppercase">Amount Due</p>
-           <h2 id="pay-amount" class="text-4xl font-black text-ng-green">₦0.00</h2>
-         </div>
-         
-         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-left space-y-2">
-            <div class="flex justify-between"><span class="text-xs font-bold text-gray-500 uppercase">Bank</span><span class="font-bold">Stanbic IBTC Bank</span></div>
-            <div class="flex justify-between"><span class="text-xs font-bold text-gray-500 uppercase">Acct Name</span><span class="font-bold">ARCON ADs VETTING</span></div>
-            <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-100 mt-2">
-               <span class="font-mono text-xl font-bold tracking-widest">5770242424</span>
-               <button onclick="navigator.clipboard.writeText('5770242424')" class="text-xs text-blue-600 font-bold hover:underline">Copy</button>
-            </div>
-         </div>
+        <div>
+          <p class="text-xs font-bold text-gray-400 uppercase">Amount Due</p>
+          <h2 id="pay-amount" class="text-4xl font-black text-ng-green">₦0.00</h2>
+          <p class="text-xs text-gray-500 mt-1">Invoice Ref: <span class="font-mono font-bold" id="invoice-ref">—</span></p>
+        </div>
 
-         <div class="flex gap-3">
-            <button onclick="alert('Invoice Downloaded')" class="flex-1 py-3 border rounded-lg font-bold text-gray-600 hover:bg-gray-50">Invoice</button>
-            <button onclick="processPayment()" class="flex-1 py-3 bg-ng-green text-white rounded-lg font-bold hover:bg-ng-green-dark shadow-lg">Confirm Payment</button>
-         </div>
+        <!-- Invoice QR generated on application submit -->
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+          <p class="text-xs font-bold text-gray-500 uppercase mb-2">Invoice QR (Scan to confirm reference)</p>
+          <div class="flex justify-center">
+            <div id="invoice-qr" class="bg-white p-2 border border-gray-200 rounded-lg shadow-sm"></div>
+          </div>
+          <p class="text-[11px] text-gray-500 mt-2">Encodes invoice + applicant + amount</p>
+        </div>
+
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-left space-y-2">
+          <div class="flex justify-between"><span class="text-xs font-bold text-gray-500 uppercase">Bank</span><span class="font-bold">Stanbic IBTC Bank</span></div>
+          <div class="flex justify-between"><span class="text-xs font-bold text-gray-500 uppercase">Acct Name</span><span class="font-bold">ARCON ADs VETTING</span></div>
+          <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-100 mt-2">
+            <span class="font-mono text-xl font-bold tracking-widest">5770242424</span>
+            <button onclick="navigator.clipboard.writeText('5770242424')" class="text-xs text-blue-600 font-bold hover:underline">Copy</button>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="alert('Invoice Downloaded')" class="flex-1 py-3 border rounded-lg font-bold text-gray-600 hover:bg-gray-50">Invoice</button>
+          <button onclick="processPayment()" class="flex-1 py-3 bg-ng-green text-white rounded-lg font-bold hover:bg-ng-green-dark shadow-lg">Confirm Payment</button>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- CERTIFICATE MODAL -->
   <div id="certificate-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto">
-     <div id="certificate-container" class="bg-white w-full max-w-3xl relative shadow-2xl my-auto print:shadow-none">
-        
-        <button onclick="closeModal('certificate-modal')" class="absolute -top-10 right-0 text-white hover:text-red-400 no-print font-bold flex items-center gap-1">
-          Close <i class="ph ph-x-circle text-2xl"></i>
-        </button>
+    <div id="certificate-container" class="bg-white w-full max-w-3xl relative shadow-2xl my-auto print:shadow-none">
+      <button onclick="closeModal('certificate-modal')" class="absolute -top-10 right-0 text-white hover:text-red-400 no-print font-bold flex items-center gap-1">
+        Close <i class="ph ph-x-circle text-2xl"></i>
+      </button>
 
-        <div class="p-10 border-[12px] border-double border-ng-green relative overflow-hidden bg-white">
-           <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-             <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-96 grayscale">
-           </div>
-           
-           <div class="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-gold m-2"></div>
-           <div class="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-gold m-2"></div>
-
-           <div class="text-center relative z-10">
-             <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-20 mx-auto mb-2">
-             <h2 class="text-3xl font-serif font-black text-ng-green">FEDERAL REPUBLIC OF NIGERIA</h2>
-             <p class="text-xs font-bold uppercase tracking-[0.3em] text-gray-600 mb-6">Advertising Regulatory Council of Nigeria</p>
-             
-             <div class="border-t border-b border-gold py-2 my-6">
-                <h1 class="text-4xl md:text-5xl font-serif font-bold text-gray-900">CERTIFICATE OF APPROVAL</h1>
-             </div>
-           </div>
-
-           <div class="grid grid-cols-2 gap-x-8 gap-y-6 mt-8 relative z-10 text-sm font-serif">
-              <div class="border-b border-gray-200 pb-1">
-                 <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">License Number</span>
-                 <span id="cert-id" class="text-lg font-bold text-gray-900 font-mono">APP-0000-000</span>
-              </div>
-              <div class="border-b border-gray-200 pb-1">
-                 <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">Sponsor / Brand</span>
-                 <span id="cert-sponsor" class="text-lg font-bold text-gray-900">Brand Name</span>
-              </div>
-              <div class="border-b border-gray-200 pb-1">
-                 <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">Asset Type</span>
-                 <span id="cert-type" class="text-lg font-bold text-gray-900">Digital LED</span>
-              </div>
-              <div class="border-b border-gray-200 pb-1">
-                 <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">Location</span>
-                 <span id="cert-loc" class="text-lg font-bold text-gray-900">Lagos, Nigeria</span>
-              </div>
-              <div class="col-span-2 mt-2">
-                 <div class="bg-green-50 border border-green-100 p-3 text-center rounded">
-                    <p class="text-ng-green font-bold uppercase tracking-widest text-xs font-sans">This asset is fully compliant with ARCON regulations</p>
-                 </div>
-              </div>
-           </div>
-
-           <div class="mt-10 flex justify-between items-end relative z-10">
-              <div class="text-center">
-                 <div id="cert-qrcode" class="bg-white p-1 border border-gray-200 shadow-sm inline-block"></div>
-                 <p class="text-[9px] uppercase font-bold mt-1 text-gray-400 font-sans">Scan to Authenticate</p>
-              </div>
-
-              <div class="text-center">
-                 <div class="w-40 border-b-2 border-gray-900 mb-2">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Signature_sample.svg/1200px-Signature_sample.svg.png" class="h-8 mx-auto opacity-80">
-                 </div>
-                 <p class="font-bold text-xs uppercase font-sans">Director General</p>
-                 <p class="text-[10px] text-gray-400 font-sans">ARCON</p>
-              </div>
-           </div>
+      <div class="p-10 border-[12px] border-double border-ng-green relative overflow-hidden bg-white">
+        <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+          <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-96 grayscale">
         </div>
-        
-        <div class="bg-gray-100 p-4 flex justify-center gap-4 no-print">
-           <button onclick="window.print()" class="bg-gray-900 text-white px-6 py-2 rounded font-bold hover:bg-black">Print Certificate</button>
-        </div>
-     </div>
-  </div>
 
-  <div id="verify-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl relative">
-      <button onclick="closeModal('verify-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="ph ph-x text-lg"></i></button>
-      
-      <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto text-ng-green text-3xl mb-3"><i class="ph ph-scan"></i></div>
-        <h3 class="text-xl font-bold text-gray-800">Verify Asset Compliance</h3>
-        <p class="text-xs text-gray-500 mt-1">Enter the License ID found on the billboard or certificate.</p>
+        <div class="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-gold m-2"></div>
+        <div class="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-gold m-2"></div>
+
+        <div class="text-center relative z-10">
+          <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-20 mx-auto mb-2">
+          <h2 class="text-3xl font-serif font-black text-ng-green">FEDERAL REPUBLIC OF NIGERIA</h2>
+          <p class="text-xs font-bold uppercase tracking-[0.3em] text-gray-600 mb-6">Advertising Regulatory Council of Nigeria</p>
+
+          <div class="border-t border-b border-gold py-2 my-6">
+            <h1 class="text-4xl md:text-5xl font-serif font-bold text-gray-900">CERTIFICATE OF APPROVAL</h1>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-x-8 gap-y-6 mt-8 relative z-10 text-sm font-serif">
+          <div class="border-b border-gray-200 pb-1">
+            <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">License Number</span>
+            <span id="cert-id" class="text-lg font-bold text-gray-900 font-mono">APP-0000-000</span>
+          </div>
+          <div class="border-b border-gray-200 pb-1">
+            <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">Sponsor / Brand</span>
+            <span id="cert-sponsor" class="text-lg font-bold text-gray-900">Brand Name</span>
+          </div>
+          <div class="border-b border-gray-200 pb-1">
+            <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">Asset Type</span>
+            <span id="cert-type" class="text-lg font-bold text-gray-900">Digital LED</span>
+          </div>
+          <div class="border-b border-gray-200 pb-1">
+            <span class="block text-[10px] text-gray-500 uppercase font-sans font-bold">Location</span>
+            <span id="cert-loc" class="text-lg font-bold text-gray-900">Lagos, Nigeria</span>
+          </div>
+          <div class="col-span-2 mt-2">
+            <div class="bg-green-50 border border-green-100 p-3 text-center rounded">
+              <p class="text-ng-green font-bold uppercase tracking-widest text-xs font-sans">This asset is fully compliant with ARCON regulations</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 flex justify-between items-end relative z-10">
+          <div class="text-center">
+            <div id="cert-qrcode" class="bg-white p-1 border border-gray-200 shadow-sm inline-block"></div>
+            <p class="text-[9px] uppercase font-bold mt-1 text-gray-400 font-sans">Scan to Authenticate</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-40 border-b-2 border-gray-900 mb-2">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Signature_sample.svg/1200px-Signature_sample.svg.png" class="h-8 mx-auto opacity-80">
+            </div>
+            <p class="font-bold text-xs uppercase font-sans">Director General</p>
+            <p class="text-[10px] text-gray-400 font-sans">ARCON</p>
+          </div>
+        </div>
       </div>
 
-      <input type="text" id="verify-input" placeholder="e.g. APP-2025-001" class="w-full p-3 border rounded-lg text-center font-mono uppercase text-lg tracking-widest mb-4">
-      <button onclick="performVerify()" class="w-full bg-ng-green text-white py-3 rounded-lg font-bold shadow hover:bg-ng-green-dark">Check Status</button>
+      <div class="bg-gray-100 p-4 flex justify-center gap-4 no-print">
+        <button onclick="window.print()" class="bg-gray-900 text-white px-6 py-2 rounded font-bold hover:bg-black">Print Certificate</button>
+      </div>
+    </div>
+  </div>
 
-      <div id="verify-result" class="mt-6 hidden"></div>
+  <!-- VERIFY MODAL (Scanner + Manual Input) -->
+  <div id="verify-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white w-full max-w-xl rounded-2xl p-6 md:p-8 shadow-2xl relative">
+      <button onclick="closeModal('verify-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="ph ph-x text-lg"></i></button>
+
+      <div class="text-center mb-5">
+        <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto text-ng-green text-3xl mb-3">
+          <i class="ph ph-scan"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800">Verify Asset Compliance</h3>
+        <p class="text-xs text-gray-500 mt-1">Scan QR code or enter the License ID manually.</p>
+      </div>
+
+      <!-- Scanner -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-3">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-gray-500 uppercase">QR Scanner</p>
+            <span id="scan-status" class="text-[11px] font-bold text-gray-400">Idle</span>
+          </div>
+
+          <div id="qr-reader" class="w-full rounded-lg overflow-hidden bg-black/90"></div>
+
+          <div class="flex gap-2 mt-3">
+            <button onclick="startQrScan()" class="flex-1 bg-ng-green text-white py-2 rounded-lg font-bold hover:bg-ng-green-dark flex items-center justify-center gap-2">
+              <i class="ph ph-camera"></i> Start
+            </button>
+            <button onclick="stopQrScan()" class="flex-1 border border-gray-200 py-2 rounded-lg font-bold text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2">
+              <i class="ph ph-stop"></i> Stop
+            </button>
+          </div>
+
+          <p class="text-[11px] text-gray-500 mt-2 leading-snug">
+            Tip: Ensure you’re on <span class="font-bold">HTTPS</span> and allow camera permission.
+          </p>
+        </div>
+
+        <!-- Manual Entry -->
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <p class="text-xs font-bold text-gray-500 uppercase mb-2">Manual License ID</p>
+
+          <input type="text" id="verify-input" placeholder="e.g. APP-2025-001"
+            class="w-full p-3 border rounded-lg text-center font-mono uppercase text-lg tracking-widest mb-3">
+
+          <button onclick="performVerify()" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold shadow hover:bg-black flex items-center justify-center gap-2">
+            <i class="ph ph-seal-check"></i> Check Status
+          </button>
+
+          <div id="verify-result" class="mt-4 hidden"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    // --- UTILITIES ---
+    // ---------------------------
+    // UTILITIES
+    // ---------------------------
     const getEl = (id) => document.getElementById(id);
-    const closeModal = (id) => getEl(id).classList.add('hidden');
-    const openModal = (id) => getEl(id).classList.remove('hidden');
 
-    // --- 1. AUTH LOGIC ---
+    function openModal(id){ getEl(id).classList.remove('hidden'); }
+    function closeModal(id){
+      getEl(id).classList.add('hidden');
+      if(id === 'verify-modal') stopQrScan();
+    }
+
+    function fmtNGN(n){
+      return new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(Number(n||0));
+    }
+
+    // Normalize: JSON often uses "Federal Capital Territory"
+    function normalizeStateName(name){
+      if(!name) return '';
+      const s = String(name).trim();
+      if(/federal\s+capital\s+territory/i.test(s)) return 'Abuja FCT';
+      if(/^fct$/i.test(s)) return 'Abuja FCT';
+      return s;
+    }
+
+    // ---------------------------
+    // AUTH LOGIC
+    // ---------------------------
     let currentUser = null;
 
     function openAuthModal(tab) {
@@ -521,7 +737,6 @@
     }
 
     function doLogin() {
-      const email = getEl('login-email').value || getEl('reg-email').value || "user@demo.com";
       const name = getEl('reg-name').value || "Sarki Amada";
       currentUser = { name: name, type: getEl('reg-type').value === 'corp' ? 'Corporate' : 'Individual' };
 
@@ -535,212 +750,693 @@
       getEl('view-landing').classList.add('hidden');
       getEl('view-dashboard').classList.remove('hidden');
       getEl('view-dashboard').classList.add('flex');
-      
+
       updateDashStats();
+      initOverviewInsights();
     }
 
-    function doLogout() {
-      location.reload();
+    function doLogout() { location.reload(); }
+    function goHome() { if(currentUser) return; location.reload(); }
+
+    // ---------------------------
+    // DATA: STATES + LGAs from JSON
+    // ---------------------------
+    const NIG_JSON_URL = "https://gist.githubusercontent.com/devhammed/0bb9eeac9ff22c895100d072f489dc98/raw/a7b19911407a89947c452339fee59f9335dc8225/nigeria-state-and-lgas.json";
+
+    let STATES = [];
+    let LGAS = {};
+    let dataLoaded = false;
+
+    async function loadStatesLgas(){
+      try{
+        const res = await fetch(NIG_JSON_URL, { cache: "force-cache" });
+        const json = await res.json();
+
+        const tmpStates = [];
+        const tmpLGAS = {};
+
+        json.forEach(entry => {
+          const st = normalizeStateName(entry.state);
+          tmpStates.push(st);
+          tmpLGAS[st] = (entry.lgas || []).slice().sort((a,b)=>a.localeCompare(b));
+        });
+
+        // Ensure Abuja FCT exists even if named differently
+        if(!tmpLGAS['Abuja FCT']){
+          const fct = json.find(e => /federal\s+capital\s+territory/i.test(e.state || ''));
+          if(fct) tmpLGAS['Abuja FCT'] = (fct.lgas||[]).slice().sort((a,b)=>a.localeCompare(b));
+        }
+
+        STATES = [...new Set(tmpStates)].sort((a,b)=>a.localeCompare(b));
+        LGAS = tmpLGAS;
+        dataLoaded = true;
+
+        populateStateDropdowns();
+      }catch(err){
+        console.warn("Failed to load state/LGA JSON. Falling back to minimal list.", err);
+        // fallback minimal
+        STATES = ["Abuja FCT","Lagos","Rivers","Kano"];
+        LGAS = {
+          "Lagos": ["Ikeja","Eti-Osa","Surulere"],
+          "Abuja FCT": ["AMAC","Bwari","Gwagwalada"],
+          "Rivers": ["Port Harcourt","Obio-Akpor"],
+          "Kano": ["Kano Municipal","Fagge"]
+        };
+        dataLoaded = true;
+        populateStateDropdowns();
+      }
     }
 
-    function goHome() {
-      if(currentUser) return; 
-      location.reload();
+    function populateStateDropdowns(){
+      // Apply form state
+      const stateSel = getEl('state');
+      stateSel.innerHTML = '<option value="">Select State</option>';
+      STATES.forEach(s=>{
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.innerText = s;
+        stateSel.appendChild(opt);
+      });
+
+      // Assets filter state
+      const filterState = getEl('filter-state');
+      filterState.innerHTML = '<option value="">All States</option>';
+      STATES.forEach(s=>{
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.innerText = s;
+        filterState.appendChild(opt);
+      });
     }
 
-    // --- 2. DASHBOARD LOGIC ---
+    // ---------------------------
+    // DASHBOARD LOGIC
+    // ---------------------------
     let myAssets = [
-      { id: 'APP-2025-001', sponsor: 'Zenith Bank', type: 'Unipole', state: 'Lagos', status: 'Active', expiry: '2025-12-15' },
-      { id: 'APP-2025-002', sponsor: 'Glo Mobile', type: 'Digital LED', state: 'Abuja FCT', status: 'Expiring', expiry: '2025-01-20' }
+      { id: 'APP-2025-001', sponsor: 'Zenith Bank', type: 'Unipole', state: 'Lagos', lga: 'Ikeja', status: 'Active', expiry: '2025-12-15', createdAt: '2025-10-02', feePaid: 250000 },
+      { id: 'APP-2025-002', sponsor: 'Glo Mobile', type: 'Digital LED', state: 'Abuja FCT', lga: 'AMAC', status: 'Expiring', expiry: '2025-12-28', createdAt: '2025-09-14', feePaid: 180000 },
+      { id: 'APP-2025-003', sponsor: 'Kwara Foods', type: '48-Sheet', state: 'Kwara', lga: 'Ilorin West', status: 'Pending', expiry: '2026-05-10', createdAt: '2025-12-05', feePaid: 0 }
     ];
 
     function dashSwitch(tab) {
       ['overview','apply','assets'].forEach(t => getEl('dash-'+t).classList.add('hidden'));
       getEl('dash-'+tab).classList.remove('hidden');
-      
+
       ['overview','apply','assets'].forEach(t => {
         const btn = getEl('nav-'+t);
         if(t === tab) btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-3 bg-green-50 text-ng-green border-l-4 border-ng-green transition";
         else btn.className = "w-full text-left px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent transition";
       });
 
-      if(tab === 'assets') renderAssetsTable();
+      if(tab === 'assets') renderAssets();
+      if(tab === 'overview') initOverviewInsights();
+    }
+
+    function daysUntil(dateStr){
+      const d = new Date(dateStr + "T00:00:00");
+      const now = new Date();
+      return Math.ceil((d - now) / (1000*60*60*24));
     }
 
     function updateDashStats() {
-      getEl('stat-active').innerText = myAssets.filter(a => a.status === 'Active').length;
-      getEl('stat-expiring').innerText = myAssets.filter(a => a.status === 'Expiring').length;
+      const activeCount = myAssets.filter(a => a.status === 'Active').length;
+      const expiringCount = myAssets.filter(a => a.status === 'Expiring').length;
+
+      getEl('stat-active').innerText = activeCount;
+      getEl('stat-expiring').innerText = expiringCount;
       getEl('stat-total').innerText = myAssets.length;
+
+      // Top state
+      const stateCounts = {};
+      myAssets.forEach(a => stateCounts[a.state] = (stateCounts[a.state]||0) + 1);
+      const top = Object.entries(stateCounts).sort((a,b)=>b[1]-a[1])[0];
+      getEl('stat-topstate').innerText = top ? `Top State: ${top[0]}` : 'Top State: —';
+
+      // Compliance score (simple)
+      const score = myAssets.length ? Math.round((activeCount / myAssets.length) * 100) : 0;
+      getEl('stat-score').innerText = `${score}%`;
     }
 
-    function renderAssetsTable() {
+    let stateChart = null;
+
+    function initOverviewInsights(){
+      updateDashStats();
+
+      // Renewals list (within 30 days OR expiring status)
+      const renewals = myAssets
+        .map(a => ({...a, dueIn: daysUntil(a.expiry)}))
+        .filter(a => a.status === 'Expiring' || a.dueIn <= 30)
+        .sort((a,b)=>a.dueIn - b.dueIn)
+        .slice(0, 6);
+
+      getEl('renewals-count').innerText = `${renewals.length} due`;
+
+      const renewalsWrap = getEl('renewals-list');
+      renewalsWrap.innerHTML = renewals.length ? "" : `<div class="text-sm text-gray-500">No renewals due soon.</div>`;
+      renewals.forEach(a=>{
+        const urgent = a.dueIn <= 7 ? "chip-red" : (a.dueIn <= 30 ? "chip-gray" : "chip-green");
+        renewalsWrap.innerHTML += `
+          <div class="border border-gray-200 rounded-lg p-3 flex items-start justify-between gap-3">
+            <div>
+              <div class="font-bold text-gray-800">${a.sponsor}</div>
+              <div class="text-xs text-gray-500 font-mono">${a.id}</div>
+              <div class="text-xs text-gray-500">${a.type} • ${a.state}${a.lga ? ` • ${a.lga}` : ''}</div>
+            </div>
+            <div class="text-right">
+              <span class="chip ${urgent}">${a.dueIn}d</span>
+              <div class="text-[11px] text-gray-400 mt-1">Expiry: ${a.expiry}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Activity feed
+      const activity = [...myAssets]
+        .sort((a,b)=>new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 6)
+        .map(a => ({
+          text: `${a.sponsor} • ${a.type} • ${a.state}`,
+          meta: `Created ${a.createdAt} • ${a.status}`
+        }));
+
+      const feed = getEl('activity-feed');
+      feed.innerHTML = activity.map(item => `
+        <div class="flex items-start gap-3">
+          <div class="mt-1 text-ng-green"><i class="ph ph-dot-outline-fill"></i></div>
+          <div>
+            <div class="text-sm font-bold text-gray-800">${item.text}</div>
+            <div class="text-[11px] text-gray-500">${item.meta}</div>
+          </div>
+        </div>
+      `).join("");
+
+      // Chart: top 8 states
+      const counts = {};
+      const expCounts = {};
+      myAssets.forEach(a=>{
+        counts[a.state] = (counts[a.state]||0) + 1;
+        if(a.status === 'Expiring') expCounts[a.state] = (expCounts[a.state]||0) + 1;
+      });
+
+      const topStates = Object.entries(counts)
+        .sort((a,b)=>b[1]-a[1])
+        .slice(0, 8);
+
+      const labels = topStates.map(x=>x[0]);
+      const totalData = topStates.map(x=>x[1]);
+      const expData = labels.map(s=>expCounts[s]||0);
+
+      const ctx = getEl('stateChart');
+      if(stateChart) stateChart.destroy();
+      stateChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Total', data: totalData },
+            { label: 'Expiring', data: expData }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+
+    // ---------------------------
+    // ASSETS: VIEW / SORT / FILTER
+    // ---------------------------
+    let assetsView = 'list';
+
+    function setAssetsView(view){
+      assetsView = view;
+      const listWrap = getEl('assets-view-list');
+      const gridWrap = getEl('assets-view-grid');
+      const btnList = getEl('btn-view-list');
+      const btnGrid = getEl('btn-view-grid');
+
+      if(view === 'grid'){
+        listWrap.classList.add('hidden');
+        gridWrap.classList.remove('hidden');
+        btnGrid.className = "px-3 py-2 rounded-lg text-sm font-bold border bg-green-50 text-ng-green border-green-200 flex items-center gap-2";
+        btnList.className = "px-3 py-2 rounded-lg text-sm font-bold border bg-white hover:bg-gray-50 flex items-center gap-2";
+      }else{
+        gridWrap.classList.add('hidden');
+        listWrap.classList.remove('hidden');
+        btnList.className = "px-3 py-2 rounded-lg text-sm font-bold border bg-green-50 text-ng-green border-green-200 flex items-center gap-2";
+        btnGrid.className = "px-3 py-2 rounded-lg text-sm font-bold border bg-white hover:bg-gray-50 flex items-center gap-2";
+      }
+      renderAssets();
+    }
+
+    function clearAssetFilters(){
+      getEl('assets-search').value = '';
+      getEl('filter-status').value = '';
+      getEl('filter-state').value = '';
+      getEl('filter-type').value = '';
+      getEl('sort-assets').value = 'newest';
+      renderAssets();
+    }
+
+    function getFilteredAssets(){
+      const q = (getEl('assets-search').value || '').trim().toLowerCase();
+      const fStatus = getEl('filter-status').value;
+      const fState = getEl('filter-state').value;
+      const fType = getEl('filter-type').value;
+      const sortBy = getEl('sort-assets').value;
+
+      let items = [...myAssets];
+
+      if(q){
+        items = items.filter(a =>
+          (a.id||'').toLowerCase().includes(q) ||
+          (a.sponsor||'').toLowerCase().includes(q) ||
+          (a.state||'').toLowerCase().includes(q) ||
+          (a.lga||'').toLowerCase().includes(q) ||
+          (a.type||'').toLowerCase().includes(q)
+        );
+      }
+      if(fStatus) items = items.filter(a => a.status === fStatus);
+      if(fState) items = items.filter(a => a.state === fState);
+      if(fType) items = items.filter(a => a.type === fType);
+
+      const byStr = (k) => (x) => String(x[k]||'').toLowerCase();
+
+      if(sortBy === 'newest'){
+        items.sort((a,b)=>new Date(b.createdAt||'1970-01-01') - new Date(a.createdAt||'1970-01-01'));
+      }else if(sortBy === 'expiry_asc'){
+        items.sort((a,b)=>new Date(a.expiry||'2999-01-01') - new Date(b.expiry||'2999-01-01'));
+      }else if(sortBy === 'expiry_desc'){
+        items.sort((a,b)=>new Date(b.expiry||'1970-01-01') - new Date(a.expiry||'1970-01-01'));
+      }else if(sortBy === 'state_asc'){
+        items.sort((a,b)=>byStr('state')(a).localeCompare(byStr('state')(b)));
+      }else if(sortBy === 'sponsor_asc'){
+        items.sort((a,b)=>byStr('sponsor')(a).localeCompare(byStr('sponsor')(b)));
+      }else if(sortBy === 'status'){
+        const order = { Active: 1, Expiring: 2, Pending: 3 };
+        items.sort((a,b)=>(order[a.status]||9)-(order[b.status]||9));
+      }
+
+      return items;
+    }
+
+    function renderAssets(){
+      const items = getFilteredAssets();
+      getEl('assets-result-meta').innerText = `${items.length} assets`;
+
+      if(assetsView === 'grid'){
+        renderAssetsGrid(items);
+      }else{
+        renderAssetsTable(items);
+      }
+    }
+
+    function statusPill(status){
+      if(status === 'Active') return `<span class="px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700">Active</span>`;
+      if(status === 'Expiring') return `<span class="px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700">Expiring</span>`;
+      return `<span class="px-2 py-1 rounded text-xs font-bold bg-gray-100 text-gray-700">Pending</span>`;
+    }
+
+    function renderAssetsTable(items){
       const tbody = getEl('assets-table');
       tbody.innerHTML = '';
-      myAssets.forEach(asset => {
+      items.forEach(asset => {
         const tr = document.createElement('tr');
-        const statusClass = asset.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
         tr.innerHTML = `
-          <td class="p-4 font-mono font-bold text-gray-600">${asset.id}</td>
+          <td class="p-4 font-mono font-bold text-gray-700">${asset.id}</td>
           <td class="p-4">
-             <div class="font-bold text-gray-800">${asset.sponsor}</div>
-             <div class="text-xs text-gray-500">${asset.type} • ${asset.state}</div>
+            <div class="font-bold text-gray-900">${asset.sponsor}</div>
+            <div class="text-xs text-gray-500">${asset.type} • ${asset.state}${asset.lga ? ` • ${asset.lga}` : ''}</div>
           </td>
-          <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${statusClass}">${asset.status}</span></td>
+          <td class="p-4">${statusPill(asset.status)}</td>
+          <td class="p-4 text-xs text-gray-600 font-bold">${asset.expiry || '—'}</td>
           <td class="p-4 text-right">
-             <button onclick="generateCertificate('${asset.id}')" class="bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-black">View Cert</button>
+            <button onclick="generateCertificate('${asset.id}')" class="bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-black">View Cert</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+
+      // keep grid in sync too (optional)
+      getEl('assets-view-grid').innerHTML = '';
     }
 
-    // --- 3. APPLICATION & FEES ---
+    function renderAssetsGrid(items){
+      const wrap = getEl('assets-view-grid');
+      wrap.innerHTML = '';
+      items.forEach(asset=>{
+        const dueIn = asset.expiry ? daysUntil(asset.expiry) : null;
+        const dueTag = dueIn != null ? (dueIn <= 7 ? 'chip-red' : (dueIn <= 30 ? 'chip-gray' : 'chip-green')) : 'chip-gray';
+
+        wrap.innerHTML += `
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-mono text-xs text-gray-500 font-bold">${asset.id}</div>
+                <div class="text-lg font-bold text-gray-900 mt-1">${asset.sponsor}</div>
+                <div class="text-xs text-gray-500 mt-1">${asset.type} • ${asset.state}${asset.lga ? ` • ${asset.lga}` : ''}</div>
+              </div>
+              <div class="text-right">
+                ${statusPill(asset.status)}
+                ${asset.expiry ? `<div class="mt-2"><span class="chip ${dueTag}">${dueIn}d</span></div>` : ''}
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <div class="text-[10px] font-bold uppercase text-gray-400">Created</div>
+                <div class="font-bold text-gray-800">${asset.createdAt || '—'}</div>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <div class="text-[10px] font-bold uppercase text-gray-400">Expiry</div>
+                <div class="font-bold text-gray-800">${asset.expiry || '—'}</div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <button onclick="generateCertificate('${asset.id}')" class="flex-1 bg-gray-900 text-white py-2 rounded-lg font-bold hover:bg-black text-sm flex items-center justify-center gap-2">
+                <i class="ph ph-certificate"></i> Certificate
+              </button>
+              <button onclick="openVerifyModal(); prefillVerify('${asset.id}')" class="flex-1 border border-gray-200 py-2 rounded-lg font-bold text-gray-700 hover:bg-gray-50 text-sm flex items-center justify-center gap-2">
+                <i class="ph ph-scan"></i> Verify
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      // keep list in sync too (optional)
+      getEl('assets-table').innerHTML = '';
+    }
+
+    function prefillVerify(id){
+      getEl('verify-input').value = id;
+      getEl('verify-result').classList.add('hidden');
+    }
+
+    // Bind controls
+    ['assets-search','filter-status','filter-state','filter-type','sort-assets'].forEach(id=>{
+      document.addEventListener('DOMContentLoaded', ()=>{
+        const el = getEl(id);
+        if(!el) return;
+        el.addEventListener('input', renderAssets);
+        el.addEventListener('change', renderAssets);
+      });
+    });
+
+    // ---------------------------
+    // APPLICATION & FEES
+    // ---------------------------
     const RATES = { 'Lagos': 100000, 'Abuja FCT': 85000, 'Rivers': 75000, 'Kano': 60000 };
-    const LGAS = { 
-      'Lagos': ['Ikeja','Eti-Osa','Surulere'], 'Abuja FCT':['AMAC','Bwari','Gwagwalada'], 
-      'Rivers':['Port Harcourt','Obio-Akpor'], 'Kano':['Kano Municipal','Fagge'] 
-    };
-    
+
     function toggleOwnerInput() {
       const val = getEl('owner-select').value;
       const inp = getEl('new-owner-input');
-      if(val === 'New') { inp.classList.remove('hidden'); inp.focus(); } else inp.classList.add('hidden');
+      if(val === 'New') { inp.classList.remove('hidden'); inp.focus(); }
+      else inp.classList.add('hidden');
     }
 
     function toggleSize() {
       const val = getEl('size').value;
       const box = getEl('custom-dims');
-      if(val === 'custom') box.classList.remove('hidden'); else box.classList.add('hidden');
+      if(val === 'custom') box.classList.remove('hidden');
+      else box.classList.add('hidden');
     }
 
     function popLGA() {
       const st = getEl('state').value;
       const lga = getEl('lga');
       lga.innerHTML = '<option>Select LGA</option>';
-      if(LGAS[st]) LGAS[st].forEach(l => {
-         const opt = document.createElement('option'); opt.value=l; opt.innerText=l; lga.appendChild(opt);
-      });
+
+      const list = LGAS[st] || [];
+      if(list.length){
+        list.forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l;
+          opt.innerText = l;
+          lga.appendChild(opt);
+        });
+      }else{
+        lga.innerHTML = '<option>No LGAs loaded</option>';
+      }
     }
 
     function calcFee() {
-       const state = getEl('state').value;
-       const ind = getEl('industry').value;
-       if(!state || !ind) { getEl('fee-display').innerText = '₦0.00'; return; }
+      const state = getEl('state').value;
+      const ind = getEl('industry').value;
+      if(!state || !ind) { getEl('fee-display').innerText = '₦0.00'; return 0; }
 
-       let base = RATES[state] || 50000;
-       
-       if(ind === 'Political') base *= 1.5;
-       if(ind === 'Religious' || ind === 'SME') base *= 0.7;
+      const rateKey = normalizeStateName(state);
+      let base = RATES[rateKey] || 50000;
 
-       let sizeMod = 1;
-       const sz = getEl('size').value;
-       if(sz === 'custom') {
-          const w = getEl('w').value || 0;
-          const h = getEl('h').value || 0;
-          sizeMod = (w * h) / 10;
-       } else {
-          sizeMod = parseInt(sz) / 18; 
-       }
-       if(sizeMod < 1) sizeMod = 1;
+      if(ind === 'Political') base *= 1.5;
+      if(ind === 'Religious' || ind === 'SME') base *= 0.7;
 
-       const dVal = parseInt(getEl('dur-val').value) || 1;
-       const dUnit = getEl('dur-unit').value;
-       let months = dVal;
-       if(dUnit === 'Weeks') months = dVal / 4;
-       if(dUnit === 'Years') months = dVal * 12;
+      let sizeMod = 1;
+      const sz = getEl('size').value;
+      if(sz === 'custom') {
+        const w = getEl('w').value || 0;
+        const h = getEl('h').value || 0;
+        sizeMod = (w * h) / 10;
+      } else {
+        sizeMod = parseInt(sz) / 18;
+      }
+      if(sizeMod < 1) sizeMod = 1;
 
-       const total = Math.round(base * sizeMod * months);
-       getEl('fee-display').innerText = new Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'}).format(total);
-       return total;
+      const dVal = parseInt(getEl('dur-val').value) || 1;
+      const dUnit = getEl('dur-unit').value;
+      let months = dVal;
+      if(dUnit === 'Weeks') months = dVal / 4;
+      if(dUnit === 'Years') months = dVal * 12;
+
+      const total = Math.round(base * sizeMod * months);
+      getEl('fee-display').innerText = fmtNGN(total);
+      return total;
     }
 
-    // --- 4. PAYMENT & QR ---
+    // ---------------------------
+    // PAYMENT + INVOICE QR ON SUBMIT
+    // ---------------------------
     let pendingApp = null;
 
+    function safeMakeQR(containerEl, text, size=120){
+      containerEl.innerHTML = '';
+      if(!window.QRCode){
+        containerEl.innerHTML = `<div class="text-xs text-red-600 font-bold">QR library not loaded.</div>`;
+        return;
+      }
+      new QRCode(containerEl, {
+        text,
+        width: size,
+        height: size,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+    }
+
     function handleFormSubmit(e) {
-       e.preventDefault();
-       const fee = calcFee();
-       if(fee <= 0) return alert("Please check your inputs.");
+      e.preventDefault();
+      const fee = calcFee();
+      if(fee <= 0) return alert("Please check your inputs.");
 
-       pendingApp = {
-          id: `APP-2025-${Math.floor(Math.random() * 900) + 100}`,
-          sponsor: document.querySelector('[name="sponsor"]').value,
-          type: getEl('size').value === 'custom' ? 'Custom Billboard' : 'Standard Billboard',
-          state: getEl('state').value,
-          status: 'Active',
-          expiry: '2026-12-14'
-       };
+      const appId = `APP-${new Date().getFullYear()}-${Math.floor(Math.random() * 900) + 100}`;
 
-       getEl('pay-amount').innerText = getEl('fee-display').innerText;
-       openModal('payment-modal');
+      pendingApp = {
+        id: appId,
+        sponsor: document.querySelector('[name="sponsor"]').value,
+        type: getEl('size').value === 'custom' ? 'Custom Billboard' : (getEl('size').value === '108' ? 'Unipole' : (getEl('size').value === '36' ? '96-Sheet' : '48-Sheet')),
+        state: getEl('state').value,
+        lga: getEl('lga').value || '',
+        status: 'Pending',
+        expiry: '2026-12-14',
+        createdAt: new Date().toISOString().slice(0,10),
+        feePaid: 0,
+        feeDue: fee
+      };
+
+      getEl('pay-amount').innerText = fmtNGN(fee);
+      getEl('invoice-ref').innerText = pendingApp.id;
+
+      // Generate invoice QR immediately on submit (as requested)
+      const invQR = getEl('invoice-qr');
+      const applicant = document.querySelector('[name="applicant"]').value || 'Applicant';
+      const qrText = `ARCON-INVOICE:${pendingApp.id}|AMOUNT:${fee}|APPLICANT:${applicant}|STATE:${pendingApp.state}|LGA:${pendingApp.lga}`;
+      safeMakeQR(invQR, qrText, 120);
+
+      openModal('payment-modal');
     }
 
     function processPayment() {
-       closeModal('payment-modal');
-       myAssets.unshift(pendingApp);
-       updateDashStats();
-       dashSwitch('assets');
-       
-       setTimeout(() => {
-          alert(`Payment Successful!\nLicense ${pendingApp.id} is now ACTIVE.`);
-          generateCertificate(pendingApp.id);
-       }, 500);
+      closeModal('payment-modal');
+
+      // mark paid + activate for demo
+      pendingApp.status = 'Active';
+      pendingApp.feePaid = pendingApp.feeDue || 0;
+
+      myAssets.unshift(pendingApp);
+      pendingApp = null;
+
+      updateDashStats();
+      dashSwitch('assets');
+
+      setTimeout(() => {
+        alert(`Payment Successful!\nLicense is now ACTIVE.`);
+        renderAssets();
+        initOverviewInsights();
+      }, 300);
     }
 
-    // --- 5. CERTIFICATE GENERATION ---
+    // ---------------------------
+    // CERTIFICATE GENERATION
+    // ---------------------------
     function generateCertificate(id) {
-       const asset = myAssets.find(a => a.id === id);
-       if(!asset) return;
+      const asset = myAssets.find(a => a.id === id);
+      if(!asset) return;
 
-       getEl('cert-id').innerText = asset.id;
-       getEl('cert-sponsor').innerText = asset.sponsor;
-       getEl('cert-type').innerText = asset.type;
-       getEl('cert-loc').innerText = asset.state;
+      getEl('cert-id').innerText = asset.id;
+      getEl('cert-sponsor').innerText = asset.sponsor;
+      getEl('cert-type').innerText = asset.type;
+      getEl('cert-loc').innerText = `${asset.state}${asset.lga ? ` • ${asset.lga}` : ''}`;
 
-       const qrContainer = getEl('cert-qrcode');
-       qrContainer.innerHTML = ''; 
-       new QRCode(qrContainer, {
-          text: `ARCON-VERIFY:${asset.id}|${asset.status}`,
-          width: 90,
-          height: 90,
-          colorDark : "#000000",
-          colorLight : "#ffffff",
-          correctLevel : QRCode.CorrectLevel.H
-       });
+      const qrContainer = getEl('cert-qrcode');
+      const text = `ARCON-VERIFY:${asset.id}|STATUS:${asset.status}|STATE:${asset.state}|LGA:${asset.lga || ''}`;
 
-       openModal('certificate-modal');
+      safeMakeQR(qrContainer, text, 90);
+      openModal('certificate-modal');
     }
 
-    // --- 6. PUBLIC VERIFY ---
-    function openVerifyModal() { openModal('verify-modal'); }
+    // ---------------------------
+    // PUBLIC VERIFY (Manual / Scan)
+    // ---------------------------
+    function openVerifyModal() {
+      openModal('verify-modal');
+      getEl('verify-result').classList.add('hidden');
+      getEl('scan-status').innerText = 'Idle';
+    }
 
     function performVerify() {
-       const input = getEl('verify-input').value.trim().toUpperCase();
-       const resDiv = getEl('verify-result');
-       resDiv.classList.remove('hidden');
+      const input = getEl('verify-input').value.trim().toUpperCase();
+      const resDiv = getEl('verify-result');
+      resDiv.classList.remove('hidden');
 
-       const found = myAssets.find(a => a.id === input) || (input === 'APP-2025-001' ? {sponsor:'Zenith Bank', status:'Active'} : null);
+      const found = myAssets.find(a => a.id === input);
 
-       if(found) {
-          resDiv.innerHTML = `
-            <div class="bg-green-50 border border-green-200 p-4 rounded-lg flex gap-3 text-left">
-               <div class="text-green-600 text-2xl"><i class="ph ph-check-circle-fill"></i></div>
-               <div>
-                  <h4 class="font-bold text-green-800">Valid License</h4>
-                  <p class="text-xs text-gray-600">ID: ${input}<br>Sponsor: ${found.sponsor}<br>Status: ${found.status}</p>
-               </div>
-            </div>`;
-       } else {
-          resDiv.innerHTML = `
-            <div class="bg-red-50 border border-red-200 p-4 rounded-lg flex gap-3 text-left">
-               <div class="text-red-600 text-2xl"><i class="ph ph-x-circle-fill"></i></div>
-               <div>
-                  <h4 class="font-bold text-red-800">Invalid / Not Found</h4>
-                  <p class="text-xs text-gray-600">This license ID does not exist in the registry.</p>
-               </div>
-            </div>`;
-       }
+      if(found) {
+        const ok = found.status === 'Active';
+        resDiv.innerHTML = `
+          <div class="${ok ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'} border p-4 rounded-lg flex gap-3 text-left">
+            <div class="${ok ? 'text-green-600' : 'text-yellow-600'} text-2xl">
+              <i class="ph ${ok ? 'ph-check-circle-fill' : 'ph-warning-circle-fill'}"></i>
+            </div>
+            <div>
+              <h4 class="font-bold ${ok ? 'text-green-800' : 'text-yellow-800'}">${ok ? 'Valid License' : 'License Found (Action Needed)'}</h4>
+              <p class="text-xs text-gray-700 mt-1">
+                ID: <span class="font-mono font-bold">${found.id}</span><br>
+                Sponsor: ${found.sponsor}<br>
+                Type: ${found.type}<br>
+                Location: ${found.state}${found.lga ? ` • ${found.lga}` : ''}<br>
+                Status: <span class="font-bold">${found.status}</span><br>
+                Expiry: <span class="font-bold">${found.expiry || '—'}</span>
+              </p>
+            </div>
+          </div>`;
+      } else {
+        resDiv.innerHTML = `
+          <div class="bg-red-50 border border-red-200 p-4 rounded-lg flex gap-3 text-left">
+            <div class="text-red-600 text-2xl"><i class="ph ph-x-circle-fill"></i></div>
+            <div>
+              <h4 class="font-bold text-red-800">Invalid / Not Found</h4>
+              <p class="text-xs text-gray-700 mt-1">This license ID does not exist in the registry.</p>
+            </div>
+          </div>`;
+      }
     }
+
+    // ---------------------------
+    // QR SCANNER (html5-qrcode)
+    // ---------------------------
+    let html5Qr = null;
+    let scanning = false;
+
+    async function startQrScan(){
+      if(scanning) return;
+      if(!window.Html5Qrcode){
+        getEl('scan-status').innerText = 'Scanner lib missing';
+        return;
+      }
+
+      const regionId = "qr-reader";
+      getEl('scan-status').innerText = 'Starting...';
+
+      try{
+        html5Qr = html5Qr || new Html5Qrcode(regionId);
+        scanning = true;
+
+        const cameras = await Html5Qrcode.getCameras();
+        if(!cameras || !cameras.length){
+          getEl('scan-status').innerText = 'No camera found';
+          scanning = false;
+          return;
+        }
+
+        const camId = cameras[cameras.length - 1].id; // prefer back camera if available
+
+        await html5Qr.start(
+          camId,
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          (decodedText) => {
+            // Accept formats like "ARCON-VERIFY:APP-2025-001|STATUS:Active..."
+            // or direct "APP-2025-001"
+            const match = decodedText.match(/APP-\d{4}-\d+/i);
+            const id = (match ? match[0] : decodedText).trim().toUpperCase();
+
+            getEl('verify-input').value = id;
+            getEl('scan-status').innerText = 'Detected ✓';
+            performVerify();
+            stopQrScan(); // auto-stop after successful scan
+          },
+          (err) => {
+            // keep silent (too noisy)
+          }
+        );
+
+        getEl('scan-status').innerText = 'Scanning...';
+      }catch(e){
+        console.warn(e);
+        getEl('scan-status').innerText = 'Camera blocked';
+        scanning = false;
+      }
+    }
+
+    async function stopQrScan(){
+      if(!html5Qr || !scanning) return;
+      try{
+        await html5Qr.stop();
+        await html5Qr.clear();
+      }catch(e){
+        // ignore
+      }
+      scanning = false;
+      getEl('scan-status').innerText = 'Stopped';
+    }
+
+    // ---------------------------
+    // INIT
+    // ---------------------------
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadStatesLgas();
+      // default assets view
+      setAssetsView('list');
+      updateDashStats();
+      renderAssets();
+    });
   </script>
 </body>
 </html>
