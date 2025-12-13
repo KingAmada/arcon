@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ARCON - DG Executive Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { 'ng-green': '#008751' } } } }</script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+
+  <header class="bg-ng-green text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-10 w-10 rounded bg-white p-1">
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Director General</h1>
+          <p class="text-[10px] text-green-200 uppercase tracking-widest">Executive Dashboard</p>
+        </div>
+      </div>
+      <nav class="flex gap-1">
+        <button onclick="setTab('overview')" class="px-4 py-2 bg-white/20 rounded hover:bg-white/30 font-medium text-sm transition">Overview</button>
+        <button onclick="setTab('verification')" class="px-4 py-2 hover:bg-white/10 rounded font-medium text-sm transition">Live Map</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-6 space-y-6">
+
+    <div id="tab-overview" class="space-y-6 animate-fade-in">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <p class="text-xs font-bold text-gray-400 uppercase">YTD Revenue</p>
+          <h3 class="text-3xl font-bold text-gray-800 mt-2">₦45.2M</h3>
+          <span class="text-green-600 text-xs font-bold">+12% vs Last Month</span>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <p class="text-xs font-bold text-gray-400 uppercase">Compliance Rate</p>
+          <h3 class="text-3xl font-bold text-gray-800 mt-2">68%</h3>
+          <span class="text-red-500 text-xs font-bold">Needs Enforcement in Rivers</span>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <p class="text-xs font-bold text-gray-400 uppercase">Pending Approvals</p>
+          <h3 class="text-3xl font-bold text-gray-800 mt-2">12</h3>
+          <span class="text-gray-500 text-xs">Staff processing time: 4h avg</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h4 class="font-bold text-gray-700 mb-4">Revenue Trend</h4>
+          <div class="h-64"><canvas id="revChart"></canvas></div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h4 class="font-bold text-gray-700 mb-4">Asset Distribution</h4>
+          <div class="h-64"><canvas id="distChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-verification" class="hidden h-[75vh] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+      <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+        <h3 class="font-bold text-gray-700">National Asset Map</h3>
+        <div class="flex gap-2">
+          <span class="flex items-center text-xs"><span class="w-2 h-2 rounded-full bg-green-600 mr-1"></span>Compliant</span>
+          <span class="flex items-center text-xs"><span class="w-2 h-2 rounded-full bg-red-600 mr-1"></span>Illegal</span>
+        </div>
+      </div>
+      <div id="map-dg" class="flex-grow w-full"></div>
+    </div>
+
+  </main>
+
+  <script>
+    let mapInstance = null;
+
+    function setTab(id){
+      document.getElementById('tab-overview').classList.add('hidden');
+      document.getElementById('tab-verification').classList.add('hidden');
+      document.getElementById('tab-'+id).classList.remove('hidden');
+
+      if(id === 'verification' && !mapInstance){
+        setTimeout(() => {
+          mapInstance = L.map('map-dg').setView([9.0820, 8.6753], 6);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+          
+          // Mock Data points
+          L.circleMarker([9.0765, 7.3986], {color: '#008751', fillOpacity: 0.8, radius: 10}).addTo(mapInstance).bindPopup("<b>FCT-001</b><br>Compliant");
+          L.circleMarker([6.5244, 3.3792], {color: '#008751', fillOpacity: 0.8, radius: 10}).addTo(mapInstance).bindPopup("<b>LAG-004</b><br>Compliant");
+          L.circleMarker([4.8156, 7.0498], {color: '#EF4444', fillOpacity: 0.8, radius: 10}).addTo(mapInstance).bindPopup("<b>RIV-099</b><br>Illegal/Expired");
+        }, 100);
+      }
+    }
+
+    // Init Charts
+    new Chart(document.getElementById('revChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+        datasets: [{ label: 'Revenue (M)', data: [12, 19, 15, 25, 22, 30], backgroundColor: '#008751' }]
+      },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('distChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['LED', 'Static', 'Lamp Post'],
+        datasets: [{ data: [30, 50, 20], backgroundColor: ['#008751', '#10B981', '#6EE7B7'] }]
+      },
+      options: { maintainAspectRatio: false }
+    });
+  </script>
+</body>
+</html>
