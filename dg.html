@@ -25,6 +25,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- HTML2PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -78,6 +81,58 @@
     
     .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+
+    /* Report Template Specific Styles (Hidden until PDF generation) */
+    #report-staging-area {
+        position: fixed;
+        left: -9999px;
+        top: 0;
+        width: 800px; /* Standard A4 width approx */
+        background: white;
+        z-index: -1;
+    }
+    
+    .report-paper {
+        padding: 40px;
+        background: white;
+        font-family: 'Times New Roman', Times, serif; /* Official look */
+        color: #000;
+    }
+
+    .report-header {
+        text-align: center;
+        border-bottom: 2px solid #008751;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 12px;
+    }
+    .report-table th {
+        background-color: #f0fdf4;
+        color: #008751;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 8px;
+        border: 1px solid #e5e7eb;
+        text-align: left;
+    }
+    .report-table td {
+        padding: 8px;
+        border: 1px solid #e5e7eb;
+    }
+    .report-footer {
+        margin-top: 50px;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+        font-size: 10px;
+        text-align: center;
+        color: #666;
+    }
   </style>
 </head>
 
@@ -342,7 +397,7 @@
            </div>
         </div>
 
-        <!-- VIEW: REPORTS (NEW) -->
+        <!-- VIEW: REPORTS -->
         <div id="view-reports" class="hidden space-y-6 animate-fade-in pb-8">
           <!-- Header & Filters -->
           <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-20 md:relative">
@@ -360,33 +415,33 @@
           <!-- Report Types Grid -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
              <!-- Executive Summary -->
-             <div class="bg-green-gradient text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10" onclick="generateReport('Executive Summary')">
+             <div class="bg-green-gradient text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10" onclick="generatePDF('executive')">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
                 <div class="relative z-10">
                    <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl mb-4 border border-white/20"><i class="ph ph-presentation-chart"></i></div>
                    <h3 class="text-lg font-bold">Executive Summary</h3>
                    <p class="text-xs text-green-100 mt-1 mb-6 opacity-80">High-level overview of all KPIs including revenue, compliance, and agency metrics.</p>
                    <button class="w-full py-3 bg-white text-arconGreen rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
-                     <i class="ph ph-printer text-lg"></i> Generate PDF
+                     <i class="ph ph-download-simple text-lg"></i> Download PDF
                    </button>
                 </div>
              </div>
              <!-- Financial -->
-             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all" onclick="generateReport('Financial Report')">
+             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all" onclick="generatePDF('financial')">
                 <div class="w-12 h-12 bg-green-50 text-arconGreen rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-file-text"></i></div>
                 <h3 class="text-lg font-bold text-gray-800">Financial Report</h3>
                 <p class="text-xs text-gray-400 mt-1 mb-6">Detailed revenue breakdown, collections, and future projections.</p>
                 <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
-                   <i class="ph ph-download-simple text-lg"></i> Download
+                   <i class="ph ph-download-simple text-lg"></i> Download PDF
                 </button>
              </div>
              <!-- Compliance -->
-             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-red-500 hover:shadow-md transition-all" onclick="generateReport('Enforcement Log')">
+             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-red-500 hover:shadow-md transition-all" onclick="generatePDF('enforcement')">
                 <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-warning-octagon"></i></div>
                 <h3 class="text-lg font-bold text-gray-800">Enforcement Log</h3>
                 <p class="text-xs text-gray-400 mt-1 mb-6">List of violations, pending actions, and resolved compliance cases.</p>
                 <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
-                   <i class="ph ph-download-simple text-lg"></i> Download
+                   <i class="ph ph-download-simple text-lg"></i> Download PDF
                 </button>
              </div>
           </div>
@@ -438,10 +493,13 @@
     <div id="toast-loading" class="fixed bottom-24 right-6 bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 hidden animate-slide-up">
        <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
        <div>
-         <p class="font-bold text-sm">Generating Report...</p>
-         <p class="text-xs text-gray-400">Please wait while we compile data.</p>
+         <p class="font-bold text-sm">Generating PDF...</p>
+         <p class="text-xs text-gray-400">Compiling data and layouts.</p>
        </div>
     </div>
+
+    <!-- REPORT STAGING AREA (Hidden) -->
+    <div id="report-staging-area"></div>
 
     <!-- AGENCY DETAIL MODAL -->
     <div id="agency-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -646,25 +704,189 @@
        currentReportPeriod = period;
     }
 
-    function generateReport(type) {
+    // Generate HTML for specific reports
+    function getReportHTML(type) {
+        const date = new Date().toLocaleDateString();
+        const ref = 'REF-' + Math.floor(Math.random() * 100000);
+        
+        let content = '';
+
+        const header = `
+            <div class="report-header">
+                <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" style="height: 60px; margin-bottom: 10px;">
+                <h2 style="margin: 0; font-size: 18px; font-weight: bold; text-transform: uppercase;">Federal Republic of Nigeria</h2>
+                <h1 style="margin: 5px 0; font-size: 24px; font-weight: 900; color: #008751;">ADVERTISING REGULATORY COUNCIL OF NIGERIA</h1>
+                <p style="margin: 0; font-size: 10px;">Plot 12, Augustus Aikhomu Way, Utako District, Abuja.</p>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <div><strong>REPORT:</strong> ${type.toUpperCase()}</div>
+                <div><strong>PERIOD:</strong> ${currentReportPeriod.toUpperCase()}</div>
+                <div><strong>DATE:</strong> ${date}</div>
+                <div><strong>REF:</strong> ${ref}</div>
+            </div>
+        `;
+
+        if (type === 'executive') {
+            content = `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="background: #008751; color: white; padding: 5px 10px; font-size: 14px; margin-bottom: 15px;">EXECUTIVE SUMMARY</h3>
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                        <div style="flex: 1; border: 1px solid #ddd; padding: 15px; text-align: center;">
+                            <div style="font-size: 10px; color: #666; text-transform: uppercase;">Total Revenue</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #008751;">₦45.2M</div>
+                        </div>
+                        <div style="flex: 1; border: 1px solid #ddd; padding: 15px; text-align: center;">
+                            <div style="font-size: 10px; color: #666; text-transform: uppercase;">Compliance Rate</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #D4AF37;">68%</div>
+                        </div>
+                        <div style="flex: 1; border: 1px solid #ddd; padding: 15px; text-align: center;">
+                            <div style="font-size: 10px; color: #666; text-transform: uppercase;">Enforcements</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #ef4444;">85</div>
+                        </div>
+                    </div>
+                    <p style="font-size: 12px; line-height: 1.6; text-align: justify;">
+                        The period under review indicates a robust performance in revenue generation, exceeding projected targets by 12%. Compliance across the Lagos and Abuja zones remains high, while the Rivers axis requires targeted enforcement actions. The agency registry has expanded with 15 new practitioners licensed this month.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="background: #eee; padding: 5px 10px; font-size: 14px; margin-bottom: 15px; border-left: 4px solid #008751;">KEY PERFORMANCE INDICATORS</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Target</th>
+                                <th>Actual</th>
+                                <th>Variance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>License Revenue</td><td>₦40.0M</td><td>₦45.2M</td><td>+13%</td></tr>
+                            <tr><td>Agency Registration</td><td>1,200</td><td>1,240</td><td>+3.3%</td></tr>
+                            <tr><td>Ad Vetting Volume</td><td>500</td><td>485</td><td>-3%</td></tr>
+                            <tr><td>Litigation Cases</td><td>5</td><td>2</td><td>-60%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else if (type === 'financial') {
+            content = `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="background: #008751; color: white; padding: 5px 10px; font-size: 14px; margin-bottom: 15px;">FINANCIAL OVERVIEW</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Revenue Stream</th>
+                                <th>Transaction Count</th>
+                                <th>Gross Amount (NGN)</th>
+                                <th>Net Amount (NGN)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Vetting Fees</td><td>450</td><td>25,000,000</td><td>25,000,000</td></tr>
+                            <tr><td>Practitioner Licenses</td><td>120</td><td>12,000,000</td><td>12,000,000</td></tr>
+                            <tr><td>Fines & Penalties</td><td>45</td><td>5,200,000</td><td>5,200,000</td></tr>
+                            <tr><td>Corporate Registration</td><td>30</td><td>3,000,000</td><td>3,000,000</td></tr>
+                            <tr style="font-weight: bold; background: #f9f9f9;">
+                                <td>TOTAL</td><td>645</td><td>45,200,000</td><td>45,200,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-bottom: 30px;">
+                     <h3 style="background: #eee; padding: 5px 10px; font-size: 14px; margin-bottom: 15px; border-left: 4px solid #008751;">REGIONAL PERFORMANCE</h3>
+                     <table class="report-table">
+                        <thead><tr><th>Region</th><th>Revenue</th><th>Contribution</th></tr></thead>
+                        <tbody>
+                            <tr><td>Lagos Zone</td><td>₦28,500,000</td><td>63%</td></tr>
+                            <tr><td>Abuja HQ</td><td>₦10,200,000</td><td>22%</td></tr>
+                            <tr><td>Kano Zone</td><td>₦4,100,000</td><td>9%</td></tr>
+                            <tr><td>Port Harcourt</td><td>₦2,400,000</td><td>6%</td></tr>
+                        </tbody>
+                     </table>
+                </div>
+            `;
+        } else if (type === 'enforcement') {
+             content = `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="background: #ef4444; color: white; padding: 5px 10px; font-size: 14px; margin-bottom: 15px;">ENFORCEMENT ACTIONS LOG</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Entity / Agency</th>
+                                <th>Violation Type</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>2025-10-12</td><td>Globus Marketing</td><td>Illegal Siting</td><td>Ikeja, Lagos</td><td>Sanctioned</td></tr>
+                            <tr><td>2025-10-11</td><td>Prime Media Ltd</td><td>Unapproved Creative</td><td>Wuse II, Abuja</td><td>Pending</td></tr>
+                            <tr><td>2025-10-09</td><td>City Wall Ads</td><td>Expired License</td><td>GRA, Port Harcourt</td><td>Removal Notice</td></tr>
+                            <tr><td>2025-10-08</td><td>NextGen Promo</td><td>Indecent Exposure</td><td>Kano Municipal</td><td>Litigation</td></tr>
+                            <tr><td>2025-10-05</td><td>Alpha Outdoor</td><td>Non-payment</td><td>Lekki, Lagos</td><td>Sealed</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        const footer = `
+            <div class="report-footer">
+                <div style="margin-bottom: 30px; display: flex; justify-content: flex-end; padding-right: 50px;">
+                    <div style="text-align: center;">
+                        <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" style="height: 40px; opacity: 0.5;">
+                        <div style="border-top: 1px solid #000; width: 150px; margin-top: 5px; padding-top: 5px; font-weight: bold;">Director General</div>
+                        <div style="font-size: 9px;">Signed Electronically</div>
+                    </div>
+                </div>
+                <p>Generated via ARCON Integrated Regulatory Management System (IRMS) on ${new Date().toLocaleString()}</p>
+                <p>This document is official and confidential.</p>
+            </div>
+        `;
+
+        return `
+            <div class="report-paper">
+                ${header}
+                ${content}
+                ${footer}
+            </div>
+        `;
+    }
+
+    function generatePDF(type) {
        const toast = document.getElementById('toast-loading');
+       const staging = document.getElementById('report-staging-area');
+       
        toast.classList.remove('hidden');
        
-       setTimeout(() => {
+       // Inject HTML
+       staging.innerHTML = getReportHTML(type);
+
+       // Generate
+       const opt = {
+          margin: 0,
+          filename: `ARCON_${type.toUpperCase()}_REPORT_${new Date().toISOString().slice(0,10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+       };
+
+       html2pdf().set(opt).from(staging).save().then(() => {
           toast.classList.add('hidden');
-          const today = new Date().toISOString().slice(0,10);
-          MOCK_REPORTS.push({ 
-             name: `${type} - ${currentReportPeriod} (${today})`, 
+          // Add to history
+           const today = new Date().toISOString().slice(0,10);
+           const typeLabel = type === 'executive' ? 'Executive Summary' : (type === 'financial' ? 'Financial Report' : 'Enforcement Log');
+           
+           MOCK_REPORTS.unshift({ 
+             name: `${typeLabel} - ${currentReportPeriod}`, 
              date: today, 
-             type: type 
+             type: typeLabel 
           });
           renderReportHistory();
-          if(type === 'Executive Summary') {
-             window.print(); // Simple print trigger for demo
-          } else {
-             alert(`${type} generated successfully! Added to history.`);
-          }
-       }, 2000);
+       });
     }
 
     // --- Visuals ---
