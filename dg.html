@@ -42,6 +42,7 @@
           animation: {
             'fade-in': 'fadeIn 0.5s ease-out',
             'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
           },
           keyframes: {
             fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
@@ -77,12 +78,6 @@
     
     .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-    
-    .glass-panel {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-    }
   </style>
 </head>
 
@@ -120,9 +115,9 @@
         </div>
         
         <div class="px-3 py-2 mt-4">
-           <p class="text-[10px] font-black uppercase tracking-widest text-green-200/60 mb-3">Reports</p>
-           <button class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
-            <i class="ph ph-file-pdf text-xl"></i> Monthly Digest
+           <p class="text-[10px] font-black uppercase tracking-widest text-green-200/60 mb-3">Intelligence</p>
+           <button onclick="setView('reports')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
+            <i class="ph ph-file-pdf text-xl"></i> Reports Center
           </button>
         </div>
       </nav>
@@ -156,6 +151,12 @@
           <i class="ph ph-buildings text-2xl mb-0.5"></i>
         </div>
         <span class="text-[10px] font-bold">Agencies</span>
+      </button>
+      <button onclick="setView('reports')" id="mob-nav-reports" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
+          <i class="ph ph-file-pdf text-2xl mb-0.5"></i>
+        </div>
+        <span class="text-[10px] font-bold">Reports</span>
       </button>
       <button onclick="setView('map')" id="mob-nav-map" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
         <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
@@ -192,8 +193,7 @@
 
         <!-- VIEW: OVERVIEW -->
         <div id="view-overview" class="space-y-6 animate-fade-in pb-8">
-          
-          <!-- Command Center Filters -->
+          <!-- Filters (Existing) -->
           <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between sticky top-0 z-20 md:relative">
              <div class="flex items-center gap-2 w-full md:w-auto text-gray-500 text-sm font-bold">
                <i class="ph ph-funnel text-arconGreen"></i> Drill Down:
@@ -307,7 +307,7 @@
           </div>
         </div>
 
-        <!-- VIEW: AGENCIES (New Module) -->
+        <!-- VIEW: AGENCIES -->
         <div id="view-agencies" class="hidden space-y-6 animate-fade-in pb-8">
            <!-- Header -->
            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
@@ -342,6 +342,79 @@
            </div>
         </div>
 
+        <!-- VIEW: REPORTS (NEW) -->
+        <div id="view-reports" class="hidden space-y-6 animate-fade-in pb-8">
+          <!-- Header & Filters -->
+          <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-20 md:relative">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800">Reports Center</h2>
+              <p class="text-sm text-gray-500">Generate and export official regulatory documents.</p>
+            </div>
+            <div class="flex gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+               <button onclick="setReportPeriod(this, 'Daily')" class="report-period-btn active px-4 py-2 bg-white text-arconGreen font-bold rounded-lg shadow-sm text-xs transition-all">Daily</button>
+               <button onclick="setReportPeriod(this, 'Monthly')" class="report-period-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-bold rounded-lg text-xs transition-all">Monthly</button>
+               <button onclick="setReportPeriod(this, 'Yearly')" class="report-period-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-bold rounded-lg text-xs transition-all">Yearly</button>
+            </div>
+          </div>
+
+          <!-- Report Types Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <!-- Executive Summary -->
+             <div class="bg-green-gradient text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10" onclick="generateReport('Executive Summary')">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
+                <div class="relative z-10">
+                   <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl mb-4 border border-white/20"><i class="ph ph-presentation-chart"></i></div>
+                   <h3 class="text-lg font-bold">Executive Summary</h3>
+                   <p class="text-xs text-green-100 mt-1 mb-6 opacity-80">High-level overview of all KPIs including revenue, compliance, and agency metrics.</p>
+                   <button class="w-full py-3 bg-white text-arconGreen rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                     <i class="ph ph-printer text-lg"></i> Generate PDF
+                   </button>
+                </div>
+             </div>
+             <!-- Financial -->
+             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all" onclick="generateReport('Financial Report')">
+                <div class="w-12 h-12 bg-green-50 text-arconGreen rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-file-text"></i></div>
+                <h3 class="text-lg font-bold text-gray-800">Financial Report</h3>
+                <p class="text-xs text-gray-400 mt-1 mb-6">Detailed revenue breakdown, collections, and future projections.</p>
+                <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
+                   <i class="ph ph-download-simple text-lg"></i> Download
+                </button>
+             </div>
+             <!-- Compliance -->
+             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-red-500 hover:shadow-md transition-all" onclick="generateReport('Enforcement Log')">
+                <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-warning-octagon"></i></div>
+                <h3 class="text-lg font-bold text-gray-800">Enforcement Log</h3>
+                <p class="text-xs text-gray-400 mt-1 mb-6">List of violations, pending actions, and resolved compliance cases.</p>
+                <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
+                   <i class="ph ph-download-simple text-lg"></i> Download
+                </button>
+             </div>
+          </div>
+
+          <!-- Recent Reports Table -->
+          <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="font-bold text-gray-800 text-sm md:text-base">Recent Activity</h3>
+                <span class="text-xs text-gray-400 font-medium">Auto-archived for 90 days</span>
+             </div>
+             <div class="overflow-x-auto">
+               <table class="w-full text-left text-sm">
+                  <thead class="bg-gray-50 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
+                     <tr>
+                        <th class="px-6 py-4">Report Name</th>
+                        <th class="px-6 py-4">Date Generated</th>
+                        <th class="px-6 py-4">Type</th>
+                        <th class="px-6 py-4 text-right">Action</th>
+                     </tr>
+                  </thead>
+                  <tbody id="report-history-body" class="divide-y divide-gray-100">
+                     <!-- Populated by JS -->
+                  </tbody>
+               </table>
+             </div>
+          </div>
+        </div>
+
         <!-- VIEW: MAP -->
         <div id="view-map" class="hidden h-[75vh] md:h-full flex flex-col bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative animate-fade-in">
            <!-- Map Header Overlay -->
@@ -360,6 +433,15 @@
 
       </div>
     </main>
+
+    <!-- LOADING TOAST -->
+    <div id="toast-loading" class="fixed bottom-24 right-6 bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 hidden animate-slide-up">
+       <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+       <div>
+         <p class="font-bold text-sm">Generating Report...</p>
+         <p class="text-xs text-gray-400">Please wait while we compile data.</p>
+       </div>
+    </div>
 
     <!-- AGENCY DETAIL MODAL -->
     <div id="agency-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -412,6 +494,7 @@
 
     let mapInstance = null;
     let revChart = null;
+    let currentReportPeriod = 'Daily';
 
     // --- Core Logic ---
     function init() {
@@ -419,10 +502,11 @@
       setView('overview');
       initCharts();
       renderAgencies();
+      renderReportHistory();
     }
 
     function setView(viewId) {
-      ['overview', 'agencies', 'map'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
+      ['overview', 'agencies', 'reports', 'map'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
       document.getElementById('view-'+viewId).classList.remove('hidden');
       
       // Update Nav States
@@ -445,7 +529,7 @@
          mBtn.classList.add('text-arconGreen');
       }
 
-      document.getElementById('page-title').innerText = viewId.charAt(0).toUpperCase() + viewId.slice(1);
+      document.getElementById('page-title').innerText = viewId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
       if(viewId === 'map') setTimeout(initMap, 200);
     }
 
@@ -475,10 +559,8 @@
     }
 
     function applyFilters() {
-       // Simulate data refresh
        const state = document.getElementById('filter-state').value;
        alert(`Refreshing Dashboard Data for ${state === 'all' ? 'National View' : state}...`);
-       // In a real app, this would fetch new JSON data and re-render charts
     }
 
     // --- Agencies Module ---
@@ -526,6 +608,63 @@
        `).join('');
 
        document.getElementById('agency-modal').classList.remove('hidden');
+    }
+
+    // --- Reports Module ---
+    const MOCK_REPORTS = [
+       { name: "Executive Summary - Q3", date: "2025-10-01", type: "Executive Summary" },
+       { name: "Financial Audit Oct", date: "2025-10-05", type: "Financial Report" }
+    ];
+
+    function renderReportHistory() {
+       const tbody = document.getElementById('report-history-body');
+       tbody.innerHTML = '';
+       MOCK_REPORTS.forEach(r => {
+          const row = `
+             <tr class="hover:bg-slate-50 border-b border-gray-50 transition">
+                <td class="px-6 py-4 font-bold text-gray-800 flex items-center gap-2">
+                   <i class="ph ph-file-pdf text-red-500 text-lg"></i> ${r.name}
+                </td>
+                <td class="px-6 py-4 text-gray-500 text-xs">${r.date}</td>
+                <td class="px-6 py-4"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${r.type}</span></td>
+                <td class="px-6 py-4 text-right">
+                   <button onclick="alert('Downloading ${r.name}...')" class="text-arconGreen font-bold text-xs hover:underline">Download</button>
+                </td>
+             </tr>
+          `;
+          tbody.insertAdjacentHTML('afterbegin', row);
+       });
+    }
+
+    function setReportPeriod(btn, period) {
+       document.querySelectorAll('.report-period-btn').forEach(b => {
+          b.classList.remove('bg-white', 'text-arconGreen', 'shadow-sm');
+          b.classList.add('text-gray-500');
+       });
+       btn.classList.add('bg-white', 'text-arconGreen', 'shadow-sm');
+       btn.classList.remove('text-gray-500');
+       currentReportPeriod = period;
+    }
+
+    function generateReport(type) {
+       const toast = document.getElementById('toast-loading');
+       toast.classList.remove('hidden');
+       
+       setTimeout(() => {
+          toast.classList.add('hidden');
+          const today = new Date().toISOString().slice(0,10);
+          MOCK_REPORTS.push({ 
+             name: `${type} - ${currentReportPeriod} (${today})`, 
+             date: today, 
+             type: type 
+          });
+          renderReportHistory();
+          if(type === 'Executive Summary') {
+             window.print(); // Simple print trigger for demo
+          } else {
+             alert(`${type} generated successfully! Added to history.`);
+          }
+       }, 2000);
     }
 
     // --- Visuals ---
