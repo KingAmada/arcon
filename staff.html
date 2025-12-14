@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#008751">
+  
+  <!-- iOS PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ARCON Staff">
+  
   <title>ARCON | Staff Operations Portal</title>
   
   <!-- Tailwind -->
@@ -35,11 +42,11 @@
           },
           animation: {
             'fade-in': 'fadeIn 0.3s ease-out',
-            'slide-up': 'slideUp 0.4s ease-out',
+            'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           },
           keyframes: {
             fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-            slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+            slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } }
           }
         }
       }
@@ -48,8 +55,25 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Merriweather:wght@400;700;900&family=Fira+Code:wght@400;600&display=swap');
-    body { font-family: Inter, sans-serif; background: #f3f4f6; }
     
+    body { 
+      font-family: Inter, sans-serif; 
+      background: #f3f4f6; 
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none; /* Prevents pull-to-refresh bounce */
+    }
+    
+    /* Native App Safe Areas */
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    .pt-safe { padding-top: env(safe-area-inset-top); }
+    .mb-safe { margin-bottom: env(safe-area-inset-bottom); }
+    .bottom-nav-safe { padding-bottom: max(env(safe-area-inset-bottom), 10px); }
+
+    /* Prevent iOS Zoom on Inputs */
+    @media screen and (max-width: 768px) {
+      input, select, textarea { font-size: 16px !important; }
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -58,7 +82,6 @@
     
     .status-chip { @apply px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider; }
     
-    /* Certificate Styles within Modal */
     .cert-watermark {
       background-image: url('https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg');
       background-position: center;
@@ -70,13 +93,43 @@
     .tab-btn.active {
       @apply border-arconGreen text-arconGreen bg-green-50;
     }
+
+    /* Mobile Card Table */
+    @media (max-width: 768px) {
+      .mobile-card-table thead { display: none; }
+      .mobile-card-table tr { 
+        display: block; 
+        margin-bottom: 1rem; 
+        background: white; 
+        border: 1px solid #e5e7eb; 
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+      }
+      .mobile-card-table td { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .mobile-card-table td:last-child { border-bottom: none; }
+      .mobile-card-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #9ca3af;
+        margin-right: 1rem;
+      }
+    }
   </style>
 </head>
 
-<body class="flex h-screen overflow-hidden text-gray-800">
+<body class="flex h-screen overflow-hidden text-gray-800 bg-gray-50 pb-[calc(60px+env(safe-area-inset-bottom))] md:pb-0">
 
   <!-- LOGIN VIEW -->
-  <div id="view-login" class="fixed inset-0 z-50 bg-ink flex items-center justify-center p-4">
+  <div id="view-login" class="fixed inset-0 z-[1000] bg-ink flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up">
       <div class="bg-arconGreen p-8 text-center relative overflow-hidden">
         <div class="absolute inset-0 bg-black/10"></div>
@@ -93,17 +146,17 @@
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Officer ID</label>
           <div class="relative">
             <i class="ph ph-identification-card absolute left-3 top-3 text-gray-400 text-lg"></i>
-            <input type="text" id="login-id" value="ARCON-8842" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-arconGreen outline-none font-mono text-sm">
+            <input type="text" id="login-id" value="ARCON-8842" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-arconGreen outline-none font-mono text-base">
           </div>
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Passcode</label>
           <div class="relative">
             <i class="ph ph-lock-key absolute left-3 top-3 text-gray-400 text-lg"></i>
-            <input type="password" id="login-pass" value="admin123" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-arconGreen outline-none">
+            <input type="password" id="login-pass" value="admin123" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-arconGreen outline-none text-base">
           </div>
         </div>
-        <button onclick="doLogin()" class="w-full bg-ink text-white py-4 rounded-xl font-bold shadow-lg hover:bg-black transition flex items-center justify-center gap-2">
+        <button onclick="doLogin()" class="w-full bg-ink text-white py-4 rounded-xl font-bold shadow-lg hover:bg-black transition flex items-center justify-center gap-2 active:scale-95 transform transition">
           Secure Login <i class="ph ph-arrow-right"></i>
         </button>
         <p class="text-xs text-center text-gray-400 mt-4">Restricted Access. Unauthorized entry is prohibited.</p>
@@ -114,9 +167,8 @@
   <!-- APP CONTAINER (Hidden until login) -->
   <div id="app-container" class="flex h-full w-full hidden">
     
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-ink text-gray-400 flex flex-col flex-shrink-0 shadow-xl z-20 transition-all duration-300 relative" id="sidebar">
-      <!-- Brand -->
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden md:flex w-64 bg-ink text-gray-400 flex-col flex-shrink-0 shadow-xl z-20 relative">
       <div class="h-16 flex items-center px-6 border-b border-gray-800 bg-black/20">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 bg-arconGreen rounded flex items-center justify-center text-white font-black text-lg">A</div>
@@ -126,32 +178,23 @@
           </div>
         </div>
       </div>
-
-      <!-- Nav -->
       <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
         <p class="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-2 px-2">Console</p>
-        
-        <button onclick="setView('dashboard')" id="nav-dashboard" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold bg-arconGreen text-white shadow-lg shadow-green-900/20">
+        <button onclick="setView('dashboard')" class="desktop-nav-btn active w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold bg-arconGreen text-white">
           <i class="ph ph-squares-four text-lg"></i> Dashboard
         </button>
-        
-        <button onclick="setView('reviews')" id="nav-reviews" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold hover:bg-white/5 hover:text-white transition">
+        <button onclick="setView('reviews')" class="desktop-nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold hover:bg-white/5 hover:text-white transition">
           <i class="ph ph-check-square-offset text-lg"></i> Applications
-          <span id="badge-pending" class="hidden ml-auto bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">0</span>
+          <span id="badge-pending-desktop" class="hidden ml-auto bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">0</span>
         </button>
-
-        <button onclick="setView('map')" id="nav-map" class="nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold hover:bg-white/5 hover:text-white transition">
+        <button onclick="setView('map')" class="desktop-nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold hover:bg-white/5 hover:text-white transition">
           <i class="ph ph-map-trifold text-lg"></i> Asset Map
         </button>
-
         <p class="text-[10px] font-black uppercase tracking-widest text-gray-600 mt-6 mb-2 px-2">System</p>
-
         <button onclick="resetData()" class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold text-red-400 hover:bg-red-500/10 transition">
           <i class="ph ph-trash text-lg"></i> Reset Database
         </button>
       </nav>
-
-      <!-- User Footer -->
       <div class="p-4 border-t border-gray-800 bg-black/20">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -159,7 +202,7 @@
               <i class="ph ph-user"></i>
             </div>
             <div>
-              <div class="text-xs font-bold text-white" id="officer-id-display">ID: 8842</div>
+              <div class="text-xs font-bold text-white officer-id-display">ID: 8842</div>
               <div class="text-[10px] text-green-500 font-semibold flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Online
               </div>
@@ -172,73 +215,89 @@
       </div>
     </aside>
 
+    <!-- MOBILE BOTTOM NAV (With Safe Area) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] bottom-nav-safe h-[calc(60px+env(safe-area-inset-bottom))]">
+      <button onclick="setView('dashboard')" id="mob-nav-dashboard" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 active text-arconGreen pt-2">
+        <i class="ph ph-squares-four text-2xl mb-0.5"></i>
+        <span class="text-[10px] font-bold">Home</span>
+      </button>
+      <button onclick="setView('reviews')" id="mob-nav-reviews" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 relative pt-2">
+        <i class="ph ph-check-square-offset text-2xl mb-0.5"></i>
+        <span class="text-[10px] font-bold">Apps</span>
+        <span id="badge-pending-mobile" class="hidden absolute top-2 right-6 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+      </button>
+      <button onclick="setView('map')" id="mob-nav-map" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 pt-2">
+        <i class="ph ph-map-trifold text-2xl mb-0.5"></i>
+        <span class="text-[10px] font-bold">Map</span>
+      </button>
+      <button onclick="openMobileMenu()" class="flex flex-col items-center justify-center w-full h-full text-gray-400 pt-2">
+        <i class="ph ph-list text-2xl mb-0.5"></i>
+        <span class="text-[10px] font-bold">Menu</span>
+      </button>
+    </nav>
+
     <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col min-w-0 bg-gray-50">
+    <main class="flex-1 flex flex-col min-w-0 bg-gray-50 pt-safe">
       
       <!-- Header -->
-      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-8 shadow-sm z-10">
-        <div class="flex items-center gap-4">
-          <button onclick="toggleSidebar()" class="md:hidden text-gray-500"><i class="ph ph-list text-2xl"></i></button>
-          <h2 class="font-bold text-gray-800 text-lg" id="page-title">Dashboard Overview</h2>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="hidden md:flex items-center gap-2 text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
-            <i class="ph ph-database"></i> Source: arcon_assets_demo_v3
-          </div>
-          <button onclick="location.reload()" class="p-2 text-gray-400 hover:text-arconGreen transition" title="Refresh Data">
-            <i class="ph ph-arrows-clockwise text-xl"></i>
-          </button>
-        </div>
+      <header class="h-14 md:h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 shadow-sm z-10 sticky top-0 md:relative">
+        <h2 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+          <span class="md:hidden text-arconGreen"><i class="ph ph-shield-check-fill"></i></span>
+          <span id="page-title">Dashboard</span>
+        </h2>
+        <button onclick="location.reload()" class="p-2 text-gray-400 hover:text-arconGreen transition bg-gray-50 rounded-full active:bg-gray-200" title="Refresh Data">
+          <i class="ph ph-arrows-clockwise text-lg"></i>
+        </button>
       </header>
 
       <!-- Content Area -->
       <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
 
         <!-- DASHBOARD VIEW -->
-        <div id="view-dashboard" class="space-y-6 animate-fade-in">
+        <div id="view-dashboard" class="space-y-6 animate-fade-in pb-8">
           <!-- Stats -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-2xl"><i class="ph ph-files"></i></div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph ph-files"></i></div>
               <div>
-                <p class="text-xs font-bold text-gray-400 uppercase">Total Apps</p>
-                <h3 class="text-2xl font-black text-gray-800" id="stat-total">0</h3>
+                <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase">Total</p>
+                <h3 class="text-xl md:text-2xl font-black text-gray-800" id="stat-total">0</h3>
               </div>
             </div>
             
-            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-yellow-50 text-arconYellow flex items-center justify-center text-2xl"><i class="ph ph-clock"></i></div>
+            <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-yellow-50 text-arconYellow flex items-center justify-center text-xl"><i class="ph ph-clock"></i></div>
               <div>
-                <p class="text-xs font-bold text-gray-400 uppercase">Pending Review</p>
-                <h3 class="text-2xl font-black text-gray-800" id="stat-pending">0</h3>
+                <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase">Pending</p>
+                <h3 class="text-xl md:text-2xl font-black text-gray-800" id="stat-pending">0</h3>
               </div>
             </div>
 
-            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-green-50 text-arconGreen flex items-center justify-center text-2xl"><i class="ph ph-check-circle"></i></div>
+            <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-green-50 text-arconGreen flex items-center justify-center text-xl"><i class="ph ph-check-circle"></i></div>
               <div>
-                <p class="text-xs font-bold text-gray-400 uppercase">Active Licenses</p>
-                <h3 class="text-2xl font-black text-gray-800" id="stat-active">0</h3>
+                <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase">Active</p>
+                <h3 class="text-xl md:text-2xl font-black text-gray-800" id="stat-active">0</h3>
               </div>
             </div>
 
-            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-2xl"><i class="ph ph-warning-octagon"></i></div>
+            <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-xl"><i class="ph ph-warning-octagon"></i></div>
               <div>
-                <p class="text-xs font-bold text-gray-400 uppercase">Flagged/Expired</p>
-                <h3 class="text-2xl font-black text-gray-800" id="stat-issues">0</h3>
+                <p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase">Issues</p>
+                <h3 class="text-xl md:text-2xl font-black text-gray-800" id="stat-issues">0</h3>
               </div>
             </div>
           </div>
 
-          <!-- Recent Activity Table -->
+          <!-- Recent Activity -->
           <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-              <h3 class="font-bold text-gray-800">Recent Applications</h3>
-              <button onclick="setView('reviews')" class="text-xs font-bold text-arconGreen hover:underline">View All</button>
+            <div class="px-4 py-4 md:px-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 class="font-bold text-gray-800 text-sm md:text-base">Recent Applications</h3>
+              <button onclick="setView('reviews')" class="text-xs font-bold text-arconGreen hover:underline bg-green-50 px-2 py-1 rounded">View All</button>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm text-left">
+            <div class="md:overflow-x-auto p-4 md:p-0">
+              <table class="w-full text-sm text-left mobile-card-table">
                 <thead class="bg-gray-50 text-gray-500 font-bold text-xs uppercase">
                   <tr>
                     <th class="px-6 py-3">ID</th>
@@ -257,29 +316,39 @@
         </div>
 
         <!-- REVIEWS VIEW -->
-        <div id="view-reviews" class="hidden space-y-6 h-full flex flex-col">
-          <!-- Toolbar -->
-          <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            
+        <div id="view-reviews" class="hidden space-y-4 h-full flex flex-col pb-8">
+          <!-- Mobile Filters Collapsible -->
+          <details class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 md:hidden group">
+            <summary class="font-bold text-sm text-gray-800 flex justify-between items-center cursor-pointer list-none">
+              <span>Search & Filter</span>
+              <i class="ph ph-caret-down group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <div class="mt-4 space-y-3">
+              <input type="text" id="review-search-mob" oninput="syncSearch(this); renderReviews()" placeholder="Search ID, Sponsor..." class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 outline-none text-base">
+              <select id="review-state-mob" onchange="syncState(this); populateReviewLgas(); renderReviews()" class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 outline-none text-base">
+                <option value="all">All States</option>
+                <!-- JS populated -->
+              </select>
+               <select id="review-filter-mob" onchange="syncFilter(this); renderReviews()" class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 outline-none text-base">
+                  <option value="all">All Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Active">Active</option>
+                  <option value="Suspended">Suspended</option>
+                  <option value="Expired">Expired</option>
+               </select>
+            </div>
+          </details>
+
+          <!-- Desktop Toolbar -->
+          <div class="hidden md:flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <div class="flex flex-col md:flex-row gap-2 w-full xl:w-auto">
-              <!-- Search -->
               <div class="relative w-full md:w-64">
                 <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
                 <input type="text" id="review-search" oninput="renderReviews()" placeholder="Search ID, Sponsor..." class="w-full pl-10 pr-4 py-2 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-arconGreen outline-none">
               </div>
-              
-              <!-- Filters -->
-              <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-                <select id="review-state" onchange="populateReviewLgas(); renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium min-w-[140px]">
-                  <option value="all">All States</option>
-                  <!-- Populated via JS -->
-                </select>
-                
-                <select id="review-lga" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium min-w-[140px]">
-                  <option value="all">All LGAs</option>
-                  <!-- Populated via JS -->
-                </select>
-
+              <div class="flex gap-2">
+                <select id="review-state" onchange="populateReviewLgas(); renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium min-w-[140px]"><option value="all">All States</option></select>
+                <select id="review-lga" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium min-w-[140px]"><option value="all">All LGAs</option></select>
                 <select id="review-filter" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium">
                   <option value="all">All Status</option>
                   <option value="Pending">Pending</option>
@@ -289,7 +358,6 @@
                 </select>
               </div>
             </div>
-            
             <div class="flex items-center gap-4 w-full xl:w-auto justify-between xl:justify-end">
               <select id="review-sort" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium">
                 <option value="newest">Newest First</option>
@@ -297,14 +365,14 @@
                 <option value="sponsor">Sponsor Name</option>
               </select>
               <div class="text-xs text-gray-500 font-medium whitespace-nowrap">
-                Showing <span class="font-bold text-gray-800" id="review-count">0</span> records
+                Showing <span class="font-bold text-gray-800" id="review-count">0</span>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex-1 overflow-hidden flex flex-col">
-            <div class="overflow-auto flex-1">
-              <table class="w-full text-sm text-left">
+          <div class="md:bg-white md:rounded-xl md:border md:border-gray-200 md:shadow-sm flex-1 md:overflow-hidden flex flex-col">
+            <div class="md:overflow-auto flex-1">
+              <table class="w-full text-sm text-left mobile-card-table">
                 <thead class="bg-gray-50 text-gray-500 font-bold text-xs uppercase sticky top-0 z-10 border-b border-gray-200">
                   <tr>
                     <th class="px-6 py-4">App ID</th>
@@ -326,26 +394,30 @@
         <!-- MAP VIEW -->
         <div id="view-map" class="hidden h-full flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden relative">
           <!-- Floating Map Controls -->
-          <div class="absolute top-4 left-4 z-[400] bg-white rounded-lg shadow-lg border border-gray-200 p-3 flex flex-col gap-3 w-64">
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-wide">Map Tools</div>
-            <input type="text" id="map-search" oninput="filterMapMarkers()" placeholder="Search assets..." class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-arconGreen outline-none">
+          <div class="absolute top-4 left-4 z-[400] bg-white rounded-lg shadow-lg border border-gray-200 p-3 flex flex-col gap-3 w-[calc(100%-2rem)] md:w-64">
+            <div class="flex justify-between items-center cursor-pointer md:cursor-default" onclick="toggleMapControls()">
+               <div class="text-xs font-bold text-gray-400 uppercase tracking-wide">Map Tools</div>
+               <i class="ph ph-caret-down md:hidden text-gray-400" id="map-controls-icon"></i>
+            </div>
             
-            <select id="map-filter" onchange="filterMapMarkers()" class="w-full px-3 py-2 border border-gray-200 rounded text-sm outline-none bg-gray-50">
-              <option value="all">All Statuses</option>
-              <option value="Active">Active Only</option>
-              <option value="Pending">Pending Only</option>
-              <option value="Suspended">Suspended</option>
-            </select>
-
-            <div class="flex gap-2 border-t pt-2">
-               <button onclick="centerMap()" class="flex-1 py-1 bg-gray-100 hover:bg-gray-200 text-xs font-bold rounded text-gray-600">Reset View</button>
+            <div id="map-controls-body" class="hidden md:flex flex-col gap-3">
+              <input type="text" id="map-search" oninput="filterMapMarkers()" placeholder="Search assets..." class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-arconGreen outline-none">
+              <select id="map-filter" onchange="filterMapMarkers()" class="w-full px-3 py-2 border border-gray-200 rounded text-sm outline-none bg-gray-50">
+                <option value="all">All Statuses</option>
+                <option value="Active">Active Only</option>
+                <option value="Pending">Pending Only</option>
+                <option value="Suspended">Suspended</option>
+              </select>
+              <div class="flex gap-2 border-t pt-2">
+                 <button onclick="centerMap()" class="flex-1 py-1 bg-gray-100 hover:bg-gray-200 text-xs font-bold rounded text-gray-600">Reset View</button>
+              </div>
             </div>
           </div>
           
           <div class="absolute bottom-4 right-4 z-[400] bg-white/90 backdrop-blur rounded-full px-4 py-2 shadow-lg border border-gray-200 text-xs font-bold flex gap-3">
-             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> Active</span>
-             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500"></span> Pending</span>
-             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Issue</span>
+             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="hidden md:inline">Active</span></span>
+             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500"></span><span class="hidden md:inline">Pending</span></span>
+             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span><span class="hidden md:inline">Issue</span></span>
           </div>
 
           <div id="map-container" class="flex-1 w-full bg-gray-100 relative z-0"></div>
@@ -355,57 +427,89 @@
     </main>
   </div>
 
-  <!-- DETAILS / ACTION MODAL -->
-  <div id="action-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden animate-scale-in">
+  <!-- MOBILE MENU (Slide Up Sheet) -->
+  <div id="mobile-menu" class="fixed inset-0 z-[60] bg-black/50 hidden flex items-end">
+    <div class="bg-white w-full rounded-t-2xl p-6 pb-[calc(24px+env(safe-area-inset-bottom))] animate-slide-up">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="font-bold text-lg">Menu</h3>
+        <button onclick="closeMobileMenu()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"><i class="ph ph-x"></i></button>
+      </div>
+      
+      <div class="flex items-center gap-4 mb-8 bg-gray-50 p-4 rounded-xl">
+        <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xl">
+          <i class="ph ph-user"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-gray-900 officer-id-display">ID: 8842</div>
+          <div class="text-xs text-green-600 font-bold">Officer Access</div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <button onclick="resetData()" class="w-full flex items-center gap-4 p-4 bg-red-50 text-red-600 rounded-xl font-bold active:bg-red-100 transition">
+          <i class="ph ph-trash text-xl"></i> Reset Database
+        </button>
+        <button onclick="doLogout()" class="w-full flex items-center gap-4 p-4 bg-gray-100 text-gray-700 rounded-xl font-bold active:bg-gray-200 transition">
+          <i class="ph ph-sign-out text-xl"></i> Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS / ACTION MODAL (Full Screen on Mobile) -->
+  <div id="action-modal" class="fixed inset-0 bg-white md:bg-black/70 md:backdrop-blur-sm z-50 hidden flex items-center justify-center p-0 md:p-4">
+    <div class="bg-white w-full h-full md:rounded-2xl md:shadow-2xl md:max-w-4xl md:h-[90vh] flex flex-col overflow-hidden animate-slide-up md:animate-scale-in">
       
       <!-- Modal Header -->
-      <div class="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0">
-        <div>
-          <h3 class="font-bold text-gray-800 text-lg">Application Details</h3>
-          <p class="text-xs text-gray-500 font-mono" id="modal-id">APP-000</p>
+      <div class="bg-white px-4 md:px-6 py-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0 pt-[calc(16px+env(safe-area-inset-top))]">
+        <div class="flex items-center gap-3">
+          <button onclick="closeModal()" class="md:hidden w-8 h-8 -ml-2 rounded-full flex items-center justify-center text-gray-500 active:bg-gray-100"><i class="ph ph-arrow-left text-xl"></i></button>
+          <div>
+            <h3 class="font-bold text-gray-800 text-base md:text-lg leading-tight">Details</h3>
+            <p class="text-xs text-gray-500 font-mono" id="modal-id">APP-000</p>
+          </div>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
           <span id="modal-status-badge"></span>
-          <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500"><i class="ph ph-x"></i></button>
+          <button onclick="closeModal()" class="hidden md:flex w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 items-center justify-center text-gray-500"><i class="ph ph-x"></i></button>
         </div>
       </div>
 
       <!-- Tab Navigation -->
-      <div class="bg-gray-50 px-6 pt-4 border-b border-gray-200 flex gap-4">
-        <button onclick="switchTab('details')" id="tab-btn-details" class="tab-btn active pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Overview</button>
-        <button onclick="switchTab('media')" id="tab-btn-media" class="tab-btn pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Media & Creative</button>
-        <button onclick="switchTab('finance')" id="tab-btn-finance" class="tab-btn pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Finance & Payment</button>
+      <div class="bg-gray-50 px-4 md:px-6 pt-2 md:pt-4 border-b border-gray-200 flex gap-2 md:gap-4 overflow-x-auto no-scrollbar">
+        <button onclick="switchTab('details')" id="tab-btn-details" class="tab-btn active pb-3 px-3 md:px-4 text-xs md:text-sm font-bold border-b-2 border-transparent text-gray-500 transition whitespace-nowrap">Overview</button>
+        <button onclick="switchTab('media')" id="tab-btn-media" class="tab-btn pb-3 px-3 md:px-4 text-xs md:text-sm font-bold border-b-2 border-transparent text-gray-500 transition whitespace-nowrap">Media</button>
+        <button onclick="switchTab('finance')" id="tab-btn-finance" class="tab-btn pb-3 px-3 md:px-4 text-xs md:text-sm font-bold border-b-2 border-transparent text-gray-500 transition whitespace-nowrap">Finance</button>
       </div>
 
       <!-- Modal Body (Scrollable) -->
-      <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+      <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6">
         
         <!-- TAB: DETAILS -->
         <div id="tab-details" class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
           <!-- Left Col: Details -->
           <div class="lg:col-span-2 space-y-6">
             <!-- Info Card -->
-            <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-              <h4 class="text-sm font-bold text-gray-800 uppercase border-b pb-2 mb-4">Ad Specification</h4>
-              <div class="grid grid-cols-2 gap-y-4 text-sm">
-                <div>
+            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Specifications</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 text-sm">
+                <div class="border-b border-gray-100 pb-2 md:border-0 md:pb-0">
                   <span class="block text-xs text-gray-400 uppercase font-bold">Sponsor</span>
                   <span class="font-bold text-gray-800 text-lg" id="modal-sponsor">--</span>
                 </div>
-                <div>
+                <div class="border-b border-gray-100 pb-2 md:border-0 md:pb-0">
                   <span class="block text-xs text-gray-400 uppercase font-bold">Board Owner</span>
                   <span class="font-medium text-gray-700" id="modal-owner">--</span>
                 </div>
-                <div>
+                <div class="border-b border-gray-100 pb-2 md:border-0 md:pb-0">
                   <span class="block text-xs text-gray-400 uppercase font-bold">Ad Type</span>
                   <span class="font-medium text-gray-700" id="modal-type">--</span>
                 </div>
-                <div>
+                <div class="border-b border-gray-100 pb-2 md:border-0 md:pb-0">
                   <span class="block text-xs text-gray-400 uppercase font-bold">Dimensions</span>
                   <span class="font-medium text-gray-700" id="modal-size">--</span>
                 </div>
-                <div>
+                <div class="border-b border-gray-100 pb-2 md:border-0 md:pb-0">
                   <span class="block text-xs text-gray-400 uppercase font-bold">Location</span>
                   <span class="font-medium text-gray-700" id="modal-location">--</span>
                 </div>
@@ -426,20 +530,19 @@
                </div>
             </div>
 
-            <!-- Certificate Preview (Only if active) -->
+            <!-- Certificate Preview -->
             <div id="cert-preview-container" class="hidden">
-               <h4 class="text-sm font-bold text-gray-800 uppercase mb-2">Digital Certificate</h4>
-               <div class="bg-white border-[8px] border-double border-arconGreen p-8 text-center relative cert-watermark rounded shadow-sm">
+               <div class="bg-white border-[4px] md:border-[8px] border-double border-arconGreen p-6 md:p-8 text-center relative cert-watermark rounded shadow-sm">
                   <div class="flex justify-between items-start mb-4">
-                     <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-12 grayscale opacity-50">
+                     <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-8 md:h-12 grayscale opacity-50">
                      <div class="text-right">
-                        <div class="text-[10px] font-bold uppercase text-gray-400">Cert No.</div>
-                        <div class="font-mono font-bold" id="cert-no">--</div>
+                        <div class="text-[8px] md:text-[10px] font-bold uppercase text-gray-400">Cert No.</div>
+                        <div class="font-mono font-bold text-xs md:text-sm" id="cert-no">--</div>
                      </div>
                   </div>
-                  <h2 class="font-serif font-black text-2xl text-arconGreenDark mb-2">CERTIFICATE OF APPROVAL</h2>
-                  <p class="text-sm text-gray-600 mb-6">This certifies that the advertisement described herein complies with ARCON regulations.</p>
-                  <div class="text-xs font-bold uppercase tracking-widest text-gray-400 mt-8">Authorized by Director General</div>
+                  <h2 class="font-serif font-black text-lg md:text-2xl text-arconGreenDark mb-2">CERTIFICATE OF APPROVAL</h2>
+                  <p class="text-xs md:text-sm text-gray-600 mb-6">This certifies that the advertisement described herein complies with ARCON regulations.</p>
+                  <div class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 mt-8">Authorized by Director General</div>
                </div>
             </div>
           </div>
@@ -453,8 +556,8 @@
                <p class="text-[10px] text-gray-400">Scan to verify authenticity in field</p>
             </div>
 
-            <!-- Actions -->
-            <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <!-- Desktop Actions (Hidden Mobile, moved to bottom sheet) -->
+            <div class="hidden md:block bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
               <p class="text-xs font-bold text-gray-400 uppercase mb-4">Officer Actions</p>
               <div class="space-y-3">
                 <button onclick="updateStatus('Active')" class="w-full py-3 rounded-lg bg-arconGreen text-white font-bold hover:bg-arconGreenDark transition flex items-center justify-center gap-2">
@@ -473,21 +576,12 @@
 
         <!-- TAB: MEDIA -->
         <div id="tab-media" class="hidden animate-fade-in">
-           <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-             <h4 class="text-sm font-bold text-gray-800 uppercase border-b pb-2 mb-4">Submitted Creative</h4>
+           <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
              <div class="bg-gray-100 rounded-lg p-2 border border-gray-200 flex justify-center items-center min-h-[300px]">
                <img id="modal-media-img" src="" class="max-h-[400px] max-w-full rounded shadow-sm object-contain" alt="Ad Creative">
                <div id="modal-media-placeholder" class="hidden text-center text-gray-400">
                  <i class="ph ph-image-broken text-4xl mb-2"></i>
-                 <p class="text-sm">No media attached or preview unavailable.</p>
-               </div>
-             </div>
-             <div class="mt-4 flex gap-4 text-sm">
-               <div class="bg-blue-50 text-blue-800 px-3 py-1 rounded font-medium text-xs border border-blue-100">
-                 Format: <span class="font-bold">JPEG / 1920x1080</span>
-               </div>
-               <div class="bg-blue-50 text-blue-800 px-3 py-1 rounded font-medium text-xs border border-blue-100">
-                 Size: <span class="font-bold">2.4 MB</span>
+                 <p class="text-sm">No media attached.</p>
                </div>
              </div>
            </div>
@@ -496,45 +590,57 @@
         <!-- TAB: FINANCE -->
         <div id="tab-finance" class="hidden animate-fade-in">
           <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-            <h4 class="text-sm font-bold text-gray-800 uppercase p-6 border-b">Payment Verification</h4>
-            
-            <div class="p-6 bg-blue-50 border-b border-blue-100 flex items-start gap-3">
-              <i class="ph ph-info text-blue-600 text-xl"></i>
-              <p class="text-sm text-blue-800">
-                Please verify the transaction reference against the bank statement or payment gateway dashboard before approving.
+            <div class="p-4 bg-blue-50 border-b border-blue-100 flex items-start gap-3">
+              <i class="ph ph-info text-blue-600 text-lg"></i>
+              <p class="text-xs md:text-sm text-blue-800">
+                Verify transaction reference against bank statement.
               </p>
             </div>
+            <div class="p-4">
+              <div class="space-y-4 md:space-y-0 md:table w-full">
+                 <!-- Mobile Card for Payment -->
+                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 block md:hidden">
+                    <div class="flex justify-between mb-2">
+                      <span class="text-xs text-gray-500 font-bold uppercase">Ref</span>
+                      <span class="font-mono text-sm" id="pay-ref-mob">--</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                      <span class="text-xs text-gray-500 font-bold uppercase">Amount</span>
+                      <span class="font-bold text-lg" id="pay-amount-mob">--</span>
+                    </div>
+                     <div class="flex justify-between items-center mt-4">
+                       <span id="pay-status-badge-mob"></span>
+                       <button id="btn-verify-pay-mob" onclick="verifyPayment()" class="text-xs bg-arconGreen text-white px-3 py-2 rounded font-bold">Verify</button>
+                     </div>
+                 </div>
 
-            <table class="w-full text-sm text-left">
-              <thead class="bg-gray-50 text-gray-500 font-bold text-xs uppercase border-b">
-                <tr>
-                  <th class="px-6 py-3">Reference ID</th>
-                  <th class="px-6 py-3">Amount</th>
-                  <th class="px-6 py-3">Date</th>
-                  <th class="px-6 py-3">Status</th>
-                  <th class="px-6 py-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="px-6 py-4 font-mono text-gray-600" id="pay-ref">--</td>
-                  <td class="px-6 py-4 font-bold text-gray-800" id="pay-amount">--</td>
-                  <td class="px-6 py-4 text-gray-500" id="pay-date">--</td>
-                  <td class="px-6 py-4" id="pay-status-cell">
-                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Unverified</span>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <button id="btn-verify-pay" onclick="verifyPayment()" class="text-arconGreen hover:bg-green-50 px-3 py-1 rounded font-bold border border-transparent hover:border-green-200 transition">
-                      Confirm Receipt
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                 <!-- Desktop Table -->
+                 <table class="w-full text-sm text-left hidden md:table">
+                    <thead class="bg-gray-50 text-gray-500 font-bold text-xs uppercase border-b">
+                      <tr><th class="px-6 py-3">Reference</th><th class="px-6 py-3">Amount</th><th class="px-6 py-3">Status</th><th class="px-6 py-3 text-right">Action</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="px-6 py-4 font-mono text-gray-600" id="pay-ref">--</td>
+                        <td class="px-6 py-4 font-bold text-gray-800" id="pay-amount">--</td>
+                        <td class="px-6 py-4" id="pay-status-cell">--</td>
+                        <td class="px-6 py-4 text-right"><button id="btn-verify-pay" onclick="verifyPayment()" class="text-arconGreen hover:bg-green-50 px-3 py-1 rounded font-bold border border-transparent hover:border-green-200 transition">Confirm</button></td>
+                      </tr>
+                    </tbody>
+                 </table>
+              </div>
+            </div>
           </div>
         </div>
 
       </div>
+
+      <!-- Mobile Action Footer (Sticky with Safe Area) -->
+      <div class="md:hidden border-t border-gray-200 bg-white p-4 sticky bottom-0 z-10 flex gap-2 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-[calc(16px+env(safe-area-inset-bottom))]">
+        <button onclick="updateStatus('Suspended')" class="flex-1 py-3 rounded-lg border border-red-200 bg-red-50 text-red-600 font-bold text-sm active:bg-red-100">Suspend</button>
+        <button onclick="updateStatus('Active')" class="flex-[2] py-3 rounded-lg bg-arconGreen text-white font-bold text-sm shadow-lg shadow-green-900/20 active:bg-arconGreenDark">Approve</button>
+      </div>
+
     </div>
   </div>
 
@@ -542,58 +648,44 @@
     // --- Config & State ---
     const STORAGE_KEY = "arcon_assets_demo_v3";
     const AUTH_KEY = "arcon_staff_auth";
-    const OFFICER_ID = "ARCON-8842"; // Demo ID
+    const OFFICER_ID = "ARCON-8842";
     
     let assets = [];
     let mapInstance = null;
     let mapMarkers = [];
     let selectedAssetId = null;
 
-    // --- Geodata (Based on snippet + major states) ---
+    // --- Geodata ---
     const NIGERIA_DATA = [
       { state: "Abuja FCT", alias: "abuja", lgas: ["Abaji", "Abuja Municipal", "Bwari", "Gwagwalada", "Kuje", "Kwali"] },
       { state: "Lagos", alias: "lagos", lgas: ["Agege", "Ajeromi-Ifelodun", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti-Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"] },
       { state: "Adamawa", alias: "adamawa", lgas: ["Demsa","Fufure","Ganye","Gayuk","Gombi","Grie","Hong","Jada","Larmurde","Madagali","Maiha","Mayo Belwa","Michika","Mubi North","Mubi South","Numan","Shelleng","Song","Toungo","Yola North","Yola South"] },
-      { state: "Akwa Ibom", alias: "akwa_ibom", lgas: ["Abak","Eastern Obolo","Eket","Esit Eket","Essien Udim","Etim Ekpo","Etinan","Ibeno","Ibesikpo Asutan","Ibiono-Ibom","Ikot Abasi","Ika","Ikono","Ikot Ekpene","Ini","Mkpat-Enin","Itu","Mbo","Nsit-Atai","Nsit-Ibom","Nsit-Ubium","Obot Akara","Okobo","Onna","Oron","Udung-Uko","Ukanafun","Oruk Anam","Uruan","Urue-Offong/Oruko","Uyo"] },
-      { state: "Anambra", alias: "anambra", lgas: ["Aguata","Anambra East","Anaocha","Awka North","Awka South","Ayamelum","Dunukofia","Ekwusigo","Idemili North","Idemili South","Ihiala","Njikoka","Nnewi North","Nnewi South","Ogbaru","Onitsha North","Onitsha South","Orumba North","Orumba South","Oyi"] },
-      { state: "Kano", alias: "kano", lgas: ["Kano Municipal", "Fagge", "Dala", "Gwale", "Tarauni", "Nassarawa", "Kumbotso", "Ungogo"] },
       { state: "Rivers", alias: "rivers", lgas: ["Port Harcourt", "Obio-Akpor", "Okrika", "Ogu–Bolo", "Eleme", "Tai", "Gokana", "Khana", "Oyigbo", "Opobo–Nkoro", "Andoni", "Bonny", "Degema", "Asari-Toru", "Akuku-Toru", "Abua–Odual", "Ahoada East", "Ahoada West", "Ogba–Egbema–Ndoni", "Emohua", "Ikwerre", "Etche", "Omuma"] }
     ];
 
-    // Coordinates for the demo map
     const LOCATIONS = {
-      "Lagos": [6.5244, 3.3792], "Abuja FCT": [9.0765, 7.3986], "Kano": [12.0022, 8.5920],
-      "Rivers": [4.8156, 7.0498], "Adamawa": [9.3265, 12.3984], "Akwa Ibom": [5.0377, 7.9128],
-      "Anambra": [6.2209, 7.0678]
+      "Lagos": [6.5244, 3.3792], "Abuja FCT": [9.0765, 7.3986], "Kano": [12.0022, 8.5920], "Rivers": [4.8156, 7.0498]
     };
 
-    // --- Init & Auth ---
+    // --- Init ---
     function init() {
-      populateStateFilters(); // Populate dropdowns first
-      
+      populateStateFilters();
       const isAuth = localStorage.getItem(AUTH_KEY) === 'true';
-      if(isAuth) {
-        showApp();
-      } else {
-        document.getElementById('view-login').classList.remove('hidden');
-        document.getElementById('app-container').classList.add('hidden');
-      }
+      if(isAuth) showApp();
+      else document.getElementById('view-login').classList.remove('hidden');
     }
 
     function doLogin() {
       const id = document.getElementById('login-id').value;
       const pass = document.getElementById('login-pass').value;
-      
-      if(id && pass) { // Demo: Accept anything not empty
+      if(id && pass) {
         localStorage.setItem(AUTH_KEY, 'true');
         showApp();
-      } else {
-        alert("Invalid credentials");
-      }
+      } else alert("Invalid credentials");
     }
 
     function doLogout() {
-      if(confirm("Sign out of Staff Portal?")) {
+      if(confirm("Sign out?")) {
         localStorage.removeItem(AUTH_KEY);
         location.reload();
       }
@@ -602,52 +694,48 @@
     function showApp() {
       document.getElementById('view-login').classList.add('hidden');
       document.getElementById('app-container').classList.remove('hidden');
-      document.getElementById('officer-id-display').innerText = `ID: ${OFFICER_ID.split('-')[1]}`;
+      document.querySelectorAll('.officer-id-display').forEach(el => el.innerText = `ID: ${OFFICER_ID.split('-')[1]}`);
       loadData();
     }
 
-    // --- Filtering Logic ---
+    // --- Sync Mobile/Desktop Filters ---
     function populateStateFilters() {
-      const stateSelect = document.getElementById('review-state');
-      // Clear existing options except first
-      while (stateSelect.options.length > 1) { stateSelect.remove(1); }
-      
-      NIGERIA_DATA.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.state;
-        opt.innerText = s.state;
-        stateSelect.appendChild(opt);
+      const selects = [document.getElementById('review-state'), document.getElementById('review-state-mob')];
+      selects.forEach(sel => {
+        if(!sel) return;
+        while (sel.options.length > 1) sel.remove(1);
+        NIGERIA_DATA.forEach(s => {
+          let opt = document.createElement('option');
+          opt.value = s.state; opt.innerText = s.state;
+          sel.appendChild(opt);
+        });
       });
     }
 
     function populateReviewLgas() {
       const stateVal = document.getElementById('review-state').value;
       const lgaSelect = document.getElementById('review-lga');
-      
-      // Reset
       lgaSelect.innerHTML = '<option value="all">All LGAs</option>';
-      
       if(stateVal !== 'all') {
         const stateObj = NIGERIA_DATA.find(s => s.state === stateVal);
-        if(stateObj && stateObj.lgas) {
-          stateObj.lgas.forEach(lga => {
-            const opt = document.createElement('option');
-            opt.value = lga;
-            opt.innerText = lga;
-            lgaSelect.appendChild(opt);
-          });
-        }
+        if(stateObj?.lgas) stateObj.lgas.forEach(l => {
+          let opt = document.createElement('option'); opt.value = l; opt.innerText = l;
+          lgaSelect.appendChild(opt);
+        });
       }
     }
 
-    // --- Data Management ---
+    function syncSearch(el) { document.getElementById('review-search').value = el.value; }
+    function syncState(el) { document.getElementById('review-state').value = el.value; }
+    function syncFilter(el) { document.getElementById('review-filter').value = el.value; }
+
+    // --- Data ---
     function loadData() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         assets = raw ? JSON.parse(raw) : [];
         if(assets.length === 0) seedDemoData();
-      } catch (e) { console.error("Data load error", e); assets = []; }
-      
+      } catch (e) { assets = []; }
       updateStats();
       renderDashboardTable();
     }
@@ -655,96 +743,79 @@
     function seedDemoData() {
       const statuses = ['Active', 'Pending', 'Suspended', 'Expired'];
       const types = ['Digital Billboard', 'Unipole', 'Gantry', 'Lamp Post', 'Wall Drape'];
-      const sponsors = ['Glo Mobile', 'Zenith Bank', 'MTN Nigeria', 'Dangote Group', 'First Bank', 'Guinness', 'Airtel', 'Nestle', 'Access Bank', 'Total Energies'];
-      
+      const sponsors = ['Glo Mobile', 'Zenith Bank', 'MTN Nigeria', 'Dangote Group', 'First Bank'];
       let dummy = [];
-
-      // Generate 25 records
-      for(let i=0; i<25; i++) {
-        // Pick a random state object from our list
+      for(let i=0; i<15; i++) {
         const stateObj = NIGERIA_DATA[Math.floor(Math.random() * NIGERIA_DATA.length)];
-        const lga = stateObj.lgas[Math.floor(Math.random() * stateObj.lgas.length)];
-        
         const status = statuses[Math.floor(Math.random() * statuses.length)];
-        const type = types[Math.floor(Math.random() * types.length)];
         const sponsor = sponsors[Math.floor(Math.random() * sponsors.length)];
-        
-        const date = new Date();
-        date.setDate(date.getDate() - Math.floor(Math.random() * 60));
-
-        // Media images
-        const mediaUrls = [
-          "https://images.unsplash.com/photo-1542206395-9feb3edaa68d?w=800&q=80",
-          "https://images.unsplash.com/photo-1622676069902-6c2436402ec5?w=800&q=80",
-          "https://images.unsplash.com/photo-1596720426673-e4e15c90757f?w=800&q=80",
-          "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80"
-        ];
-        const media = mediaUrls[Math.floor(Math.random() * mediaUrls.length)];
-
         dummy.push({
-          id: `APP-2025-${9000+i}`,
+          id: `APP-25-${1000+i}`,
           sponsor: sponsor,
-          purpose: 'Corporate Branding',
-          adType: type,
-          size: '48-Sheet (Standard)',
+          adType: types[Math.floor(Math.random()*types.length)],
           status: status,
           state: stateObj.state,
-          lga: lga,
-          createdAt: date.toISOString().slice(0,10),
-          approvedBy: status === 'Active' ? 'ARCON-8842' : null,
-          approvedDate: status === 'Active' ? date.toISOString().slice(0,10) : null,
-          boardOwner: { name: sponsor },
-          mediaUrl: media,
-          payment: {
-            ref: `PAY-${Math.floor(100000 + Math.random() * 900000)}`,
-            amount: '₦50,000.00',
-            status: status === 'Active' ? 'Verified' : (Math.random() > 0.5 ? 'Verified' : 'Unverified'),
-            date: date.toISOString().slice(0,10)
-          }
+          lga: stateObj.lgas[0],
+          createdAt: new Date().toISOString().slice(0,10),
+          mediaUrl: "https://images.unsplash.com/photo-1542206395-9feb3edaa68d?w=400&q=80",
+          payment: { ref: `TX-${Math.floor(Math.random()*9999)}`, amount: '₦50,000', status: status==='Active'?'Verified':'Unverified' }
         });
       }
-      
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dummy));
       assets = dummy;
     }
 
     function resetData() {
-      if(confirm("Reset database to default mock data?")) {
-        localStorage.removeItem(STORAGE_KEY);
-        location.reload();
-      }
+      if(confirm("Reset database?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); }
     }
 
     function updateStats() {
       document.getElementById('stat-total').innerText = assets.length;
       document.getElementById('stat-pending').innerText = assets.filter(a => a.status === 'Pending').length;
       document.getElementById('stat-active').innerText = assets.filter(a => a.status === 'Active').length;
-      document.getElementById('stat-issues').innerText = assets.filter(a => ['Expired', 'Suspended'].includes(a.status)).length;
+      document.getElementById('stat-issues').innerText = assets.filter(a => ['Expired','Suspended'].includes(a.status)).length;
       
-      const pendingCount = assets.filter(a => a.status === 'Pending').length;
-      const badge = document.getElementById('badge-pending');
-      badge.innerText = pendingCount;
-      badge.classList.toggle('hidden', pendingCount === 0);
+      const pending = assets.filter(a => a.status === 'Pending').length;
+      const bD = document.getElementById('badge-pending-desktop');
+      const bM = document.getElementById('badge-pending-mobile');
+      if(pending > 0) {
+        bD.innerText = pending; bD.classList.remove('hidden');
+        bM.classList.remove('hidden');
+      } else {
+        bD.classList.add('hidden'); bM.classList.add('hidden');
+      }
     }
 
     // --- Views ---
     function setView(viewId) {
+      // Hide all
       ['dashboard', 'reviews', 'map'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
-      document.querySelectorAll('.nav-btn').forEach(b => {
-        b.className = "nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold hover:bg-white/5 hover:text-white transition text-gray-400";
-      });
       
-      const activeBtn = document.getElementById('nav-'+viewId);
-      if(activeBtn) activeBtn.className = "nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold bg-arconGreen text-white shadow-lg shadow-green-900/20";
+      // Update Deskop Nav
+      document.querySelectorAll('.desktop-nav-btn').forEach(b => b.className = "desktop-nav-btn w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold hover:bg-white/5 hover:text-white transition text-gray-400");
+      // Update Mobile Nav
+      document.querySelectorAll('.mobile-nav-btn').forEach(b => b.className = "mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 pt-2");
 
+      // Show Active
       document.getElementById('view-'+viewId).classList.remove('hidden');
-      document.getElementById('page-title').innerText = viewId === 'dashboard' ? 'Dashboard Overview' : (viewId === 'map' ? 'Asset Map' : 'Application Reviews');
+      document.getElementById('page-title').innerText = viewId.charAt(0).toUpperCase() + viewId.slice(1);
+      
+      // Highlight Desktop
+      const dBtn = document.querySelector(`.desktop-nav-btn[onclick*="${viewId}"]`);
+      if(dBtn) dBtn.className = "desktop-nav-btn active w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold bg-arconGreen text-white";
+      
+      // Highlight Mobile
+      const mBtn = document.getElementById('mob-nav-'+viewId);
+      if(mBtn) mBtn.className = "mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-arconGreen pt-2";
 
       if(viewId === 'map') setTimeout(initMap, 200);
       if(viewId === 'reviews') renderReviews();
     }
 
-    // --- Render Tables ---
+    function openMobileMenu() { document.getElementById('mobile-menu').classList.remove('hidden'); }
+    function closeMobileMenu() { document.getElementById('mobile-menu').classList.add('hidden'); }
+
+    // --- Render ---
     function renderDashboardTable() {
       const tbody = document.getElementById('dashboard-table');
       const recent = [...assets].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
@@ -754,266 +825,150 @@
     function renderReviews() {
       const tbody = document.getElementById('reviews-table');
       const search = document.getElementById('review-search').value.toLowerCase();
-      const filterStatus = document.getElementById('review-filter').value;
-      const filterState = document.getElementById('review-state').value;
-      const filterLga = document.getElementById('review-lga').value;
-      const sort = document.getElementById('review-sort').value;
-
+      const filter = document.getElementById('review-filter').value;
+      const state = document.getElementById('review-state').value;
+      
       let filtered = assets.filter(a => {
         const matchesSearch = (a.id||'').toLowerCase().includes(search) || (a.sponsor||'').toLowerCase().includes(search);
-        const matchesStatus = filterStatus === 'all' || a.status === filterStatus;
-        const matchesState = filterState === 'all' || a.state === filterState;
-        const matchesLga = filterLga === 'all' || a.lga === filterLga;
-        
-        return matchesSearch && matchesStatus && matchesState && matchesLga;
+        const matchesStatus = filter === 'all' || a.status === filter;
+        const matchesState = state === 'all' || a.state === state;
+        return matchesSearch && matchesStatus && matchesState;
       });
-
-      // Sorting
-      if(sort === 'newest') filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-      if(sort === 'oldest') filtered.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
-      if(sort === 'sponsor') filtered.sort((a,b) => (a.sponsor||'').localeCompare(b.sponsor||''));
-
+      
       document.getElementById('review-count').innerText = filtered.length;
-      tbody.innerHTML = filtered.map(rowHTML).join('') || '<tr><td colspan="6" class="p-8 text-center text-gray-400">No matching records found</td></tr>';
+      tbody.innerHTML = filtered.map(rowHTML).join('') || '<tr><td colspan="6" class="p-8 text-center text-gray-400">No records found</td></tr>';
     }
 
     function rowHTML(a) {
       return `
         <tr class="hover:bg-gray-50 border-b border-gray-100 group transition">
-          <td class="px-6 py-4 font-mono font-bold text-gray-700 text-xs">${a.id}</td>
-          <td class="px-6 py-4">
-            <div class="font-bold text-gray-900 text-sm">${a.sponsor || 'Unknown'}</div>
+          <td class="px-6 py-4 font-mono font-bold text-gray-700 text-xs" data-label="ID">${a.id}</td>
+          <td class="px-6 py-4" data-label="Applicant">
+            <div class="font-bold text-gray-900 text-sm">${a.sponsor}</div>
             <div class="text-xs text-gray-500">${a.adType}</div>
           </td>
-          <td class="px-6 py-4 text-gray-600 text-xs font-medium">
+          <td class="px-6 py-4 text-gray-600 text-xs font-medium" data-label="Location">
             ${a.state}, ${a.lga || '-'}
           </td>
-          <td class="px-6 py-4">
-             ${getPaymentBadge(a.payment?.status)}
+          <td class="px-6 py-4" data-label="Payment">
+             ${a.payment?.status === 'Verified' ? '<span class="text-green-600 font-bold text-[10px]"><i class="ph ph-check-circle-fill"></i> PAID</span>' : '<span class="text-gray-400 font-bold text-[10px]">Unpaid</span>'}
           </td>
-          <td class="px-6 py-4">${getStatusBadge(a.status)}</td>
-          <td class="px-6 py-4 text-right">
-            <button onclick="openActionModal('${a.id}')" class="bg-white border border-gray-200 text-gray-600 hover:border-arconGreen hover:text-arconGreen hover:shadow-md px-3 py-1.5 rounded-lg text-xs font-bold transition">
-              Manage
-            </button>
+          <td class="px-6 py-4" data-label="Status">${getStatusBadge(a.status)}</td>
+          <td class="px-6 py-4 text-right" data-label="Action">
+            <button onclick="openActionModal('${a.id}')" class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold active:bg-gray-200">Manage</button>
           </td>
         </tr>
       `;
     }
 
     function getStatusBadge(status) {
-      const styles = {
-        'Active': 'bg-green-100 text-green-700 border border-green-200',
-        'Pending': 'bg-yellow-100 text-yellow-700 border border-yellow-200',
-        'Suspended': 'bg-red-100 text-red-700 border border-red-200',
-        'Expired': 'bg-gray-100 text-gray-600 border border-gray-200'
-      };
-      return `<span class="status-chip ${styles[status] || styles['Expired']}">${status}</span>`;
+      const styles = { 'Active': 'bg-green-100 text-green-700', 'Pending': 'bg-yellow-100 text-yellow-700', 'Suspended': 'bg-red-100 text-red-700' };
+      return `<span class="status-chip ${styles[status] || 'bg-gray-100 text-gray-600'}">${status}</span>`;
     }
 
-    function getPaymentBadge(status) {
-       if(status === 'Verified') {
-         return `<span class="text-green-600 font-bold text-[10px] bg-green-50 px-2 py-1 rounded flex w-fit items-center gap-1"><i class="ph ph-check-circle-fill"></i> PAID</span>`;
-       }
-       return `<span class="text-gray-500 font-bold text-[10px] bg-gray-100 px-2 py-1 rounded flex w-fit items-center gap-1">Unverified</span>`;
-    }
-
-    // --- Modal Logic ---
+    // --- Modal ---
     function openActionModal(id) {
       const asset = assets.find(a => a.id === id);
       if(!asset) return;
       selectedAssetId = id;
       
-      // Populate fields (Details)
+      // Fill Data
       document.getElementById('modal-id').innerText = id;
       document.getElementById('modal-status-badge').innerHTML = getStatusBadge(asset.status);
       document.getElementById('modal-sponsor').innerText = asset.sponsor;
-      document.getElementById('modal-owner').innerText = asset.boardOwner?.name || asset.sponsor;
       document.getElementById('modal-type').innerText = asset.adType;
-      document.getElementById('modal-size').innerText = asset.size || 'Standard';
-      document.getElementById('modal-location').innerText = `${asset.state}, ${asset.lga || 'Municipal'}`;
-      document.getElementById('modal-duration').innerText = `${asset.durationVal || 12} ${asset.durationUnit || 'Months'}`;
-
-      // Populate Media
-      const img = document.getElementById('modal-media-img');
-      const placeholder = document.getElementById('modal-media-placeholder');
-      if(asset.mediaUrl) {
-         img.src = asset.mediaUrl;
-         img.classList.remove('hidden');
-         placeholder.classList.add('hidden');
-      } else {
-         img.classList.add('hidden');
-         placeholder.classList.remove('hidden');
-      }
-
-      // Populate Payment
-      document.getElementById('pay-ref').innerText = asset.payment?.ref || 'N/A';
-      document.getElementById('pay-amount').innerText = asset.payment?.amount || '0.00';
-      document.getElementById('pay-date').innerText = asset.payment?.date || '-';
+      document.getElementById('modal-location').innerText = `${asset.state}, ${asset.lga || ''}`;
       
-      const payStatusCell = document.getElementById('pay-status-cell');
-      const verifyBtn = document.getElementById('btn-verify-pay');
-      
-      if(asset.payment?.status === 'Verified') {
-        payStatusCell.innerHTML = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Verified</span>`;
-        verifyBtn.classList.add('hidden');
-      } else {
-        payStatusCell.innerHTML = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Pending Check</span>`;
-        verifyBtn.classList.remove('hidden');
-      }
+      // Media
+      document.getElementById('modal-media-img').src = asset.mediaUrl || '';
+      document.getElementById('modal-media-img').classList.toggle('hidden', !asset.mediaUrl);
+      document.getElementById('modal-media-placeholder').classList.toggle('hidden', !!asset.mediaUrl);
 
-      // Approval Info
-      const authInfo = document.getElementById('approval-info');
-      const certPreview = document.getElementById('cert-preview-container');
+      // Payment (Desktop & Mobile fields)
+      const pay = asset.payment || {};
+      ['pay-ref','pay-ref-mob'].forEach(i => document.getElementById(i).innerText = pay.ref || '--');
+      ['pay-amount','pay-amount-mob'].forEach(i => document.getElementById(i).innerText = pay.amount || '--');
       
-      if(asset.status === 'Active') {
-        authInfo.classList.remove('hidden');
-        certPreview.classList.remove('hidden');
-        document.getElementById('modal-officer').innerText = asset.approvedBy || OFFICER_ID;
-        document.getElementById('modal-approved-date').innerText = asset.approvedDate || asset.createdAt;
-        document.getElementById('cert-no').innerText = id;
-      } else {
-        authInfo.classList.add('hidden');
-        certPreview.classList.add('hidden');
-      }
+      const isPaid = pay.status === 'Verified';
+      const statusHtml = isPaid ? '<span class="text-green-600 font-bold text-xs">Verified</span>' : '<span class="text-yellow-600 font-bold text-xs">Pending</span>';
+      
+      document.getElementById('pay-status-cell').innerHTML = statusHtml;
+      document.getElementById('pay-status-badge-mob').innerHTML = statusHtml;
+      document.getElementById('btn-verify-pay').classList.toggle('hidden', isPaid);
+      document.getElementById('btn-verify-pay-mob').classList.toggle('hidden', isPaid);
 
-      // QR Code
+      // QR
       const qrBox = document.getElementById('modal-qr');
       qrBox.innerHTML = '';
-      new QRCode(qrBox, { text: `ARCON-VERIFY:${id}`, width: 128, height: 128 });
-      
-      switchTab('details'); // Reset to first tab
+      new QRCode(qrBox, { text: `ARCON:${id}`, width: 100, height: 100 });
+
+      // Cert
+      document.getElementById('cert-preview-container').classList.toggle('hidden', asset.status !== 'Active');
+      if(asset.status === 'Active') document.getElementById('cert-no').innerText = id;
+
+      switchTab('details');
       document.getElementById('action-modal').classList.remove('hidden');
     }
 
-    function closeModal() {
-      document.getElementById('action-modal').classList.add('hidden');
-      selectedAssetId = null;
-    }
-
-    function switchTab(tabId) {
-      // Hide all tabs
-      ['details', 'media', 'finance'].forEach(t => {
-        document.getElementById('tab-'+t).classList.add('hidden');
-        document.getElementById('tab-btn-'+t).classList.remove('active', 'border-arconGreen', 'text-arconGreen', 'bg-green-50');
+    function closeModal() { document.getElementById('action-modal').classList.add('hidden'); }
+    
+    function switchTab(t) {
+      ['details','media','finance'].forEach(x => {
+        document.getElementById('tab-'+x).classList.add('hidden');
+        document.getElementById('tab-btn-'+x).classList.remove('active');
       });
-      // Show selected
-      document.getElementById('tab-'+tabId).classList.remove('hidden');
-      document.getElementById('tab-btn-'+tabId).classList.add('active', 'border-arconGreen', 'text-arconGreen', 'bg-green-50');
-    }
-
-    function verifyPayment() {
-       if(!selectedAssetId) return;
-       if(confirm("Confirm that funds have been received for this application?")) {
-          assets = assets.map(a => {
-             if(a.id === selectedAssetId) {
-               return { ...a, payment: { ...a.payment, status: 'Verified' } };
-             }
-             return a;
-          });
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(assets));
-          
-          // Refresh Modal UI
-          openActionModal(selectedAssetId);
-          switchTab('finance');
-          
-          // Refresh background table
-          loadData(); 
-       }
+      document.getElementById('tab-'+t).classList.remove('hidden');
+      document.getElementById('tab-btn-'+t).classList.add('active');
     }
 
     function updateStatus(newStatus) {
       if(!selectedAssetId) return;
-      
-      assets = assets.map(a => {
-        if(a.id === selectedAssetId) {
-           let update = { ...a, status: newStatus };
-           if(newStatus === 'Active' && a.status !== 'Active') {
-             update.approvedBy = OFFICER_ID;
-             update.approvedDate = new Date().toISOString().slice(0,10);
-             // Auto verify payment if approving? Optional logic, lets keep separate for now or auto-verify
-             if(update.payment) update.payment.status = 'Verified';
-           }
-           return update;
-        }
-        return a;
-      });
-
+      assets = assets.map(a => a.id === selectedAssetId ? { ...a, status: newStatus, payment: newStatus==='Active' ? {...a.payment, status:'Verified'} : a.payment } : a);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(assets));
-      
-      closeModal();
-      loadData(); // Re-render all
-      if(mapInstance) filterMapMarkers(); // Update map if open
-      alert(`Asset ${selectedAssetId} updated to ${newStatus}`);
+      closeModal(); loadData();
+      if(mapInstance) filterMapMarkers();
     }
 
-    // --- Map Logic ---
-    function initMap() {
-      if(mapInstance) return; 
-      
-      mapInstance = L.map('map-container').setView([9.0820, 8.6753], 6); 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors',
-        subdomains: 'abcd',
-        maxZoom: 19
-      }).addTo(mapInstance);
+    function verifyPayment() {
+      if(confirm("Confirm payment receipt?")) {
+        assets = assets.map(a => a.id === selectedAssetId ? { ...a, payment: {...a.payment, status:'Verified'} } : a);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(assets));
+        openActionModal(selectedAssetId); switchTab('finance'); loadData();
+      }
+    }
 
-      filterMapMarkers(); // Plot initial
+    // --- Map ---
+    function initMap() {
+      if(mapInstance) return;
+      mapInstance = L.map('map-container').setView([9.0820, 8.6753], 6);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OSM' }).addTo(mapInstance);
+      filterMapMarkers();
+    }
+
+    function toggleMapControls() {
+      const body = document.getElementById('map-controls-body');
+      body.classList.toggle('hidden');
+      document.getElementById('map-controls-icon').classList.toggle('rotate-180');
     }
 
     function filterMapMarkers() {
       if(!mapInstance) return;
-      
-      // Clear existing
-      mapMarkers.forEach(m => mapInstance.removeLayer(m));
-      mapMarkers = [];
-
+      mapMarkers.forEach(m => mapInstance.removeLayer(m)); mapMarkers = [];
       const search = document.getElementById('map-search').value.toLowerCase();
       const filter = document.getElementById('map-filter').value;
-
-      const toPlot = assets.filter(a => {
-         const matchesSearch = (a.id||'').toLowerCase().includes(search) || (a.sponsor||'').toLowerCase().includes(search);
-         const matchesFilter = filter === 'all' || a.status === filter;
-         return matchesSearch && matchesFilter;
-      });
-
-      toPlot.forEach(asset => {
-        // Use coordinates from lookup or default center
-        let baseCoords = LOCATIONS[asset.state] || [9.0820, 8.6753];
-        // Jitter
-        const lat = baseCoords[0] + (Math.random() - 0.5) * 0.5; // Increased jitter for spread
-        const lng = baseCoords[1] + (Math.random() - 0.5) * 0.5;
-
-        const color = asset.status === 'Active' ? '#22c55e' : (asset.status === 'Pending' ? '#eab308' : '#ef4444');
-        const markerHtml = `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.2s;"></div>`;
-        
-        const icon = L.divIcon({ className: 'custom-div-icon', html: markerHtml, iconSize: [14, 14], iconAnchor: [7, 7] });
-
-        const marker = L.marker([lat, lng], { icon: icon })
-          .addTo(mapInstance)
-          .bindPopup(`
-            <div class="font-sans p-1 min-w-[120px]">
-              <div class="text-[10px] font-bold text-gray-400 mb-1">${asset.id}</div>
-              <div class="font-bold text-gray-800 text-sm mb-1">${asset.sponsor}</div>
-              <div class="text-xs text-gray-500 mb-2">${asset.adType}</div>
-              <button onclick="openActionModal('${asset.id}')" class="w-full bg-arconGreen text-white text-[10px] font-bold py-1 rounded">View Details</button>
-            </div>
-          `);
-        
-        mapMarkers.push(marker);
+      
+      assets.filter(a => (filter==='all' || a.status===filter) && (a.id.toLowerCase().includes(search) || a.sponsor.toLowerCase().includes(search)))
+      .forEach(a => {
+        const coords = LOCATIONS[a.state] || [9.0820 + (Math.random()-0.5), 8.6753 + (Math.random()-0.5)];
+        const color = a.status==='Active'?'#22c55e':(a.status==='Pending'?'#eab308':'#ef4444');
+        const icon = L.divIcon({ className: '', html: `<div style="background:${color};width:14px;height:14px;border:2px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>` });
+        mapMarkers.push(L.marker(coords, {icon}).addTo(mapInstance).bindPopup(`<b>${a.sponsor}</b><br>${a.adType}<br><button onclick="openActionModal('${a.id}')" class="text-blue-600 underline">View</button>`));
       });
     }
 
     function centerMap() { if(mapInstance) mapInstance.setView([9.0820, 8.6753], 6); }
-    function toggleSidebar() { 
-      const sb = document.getElementById('sidebar');
-      sb.classList.toggle('-translate-x-full');
-      sb.classList.toggle('absolute'); sb.classList.toggle('h-full');
-    }
-
-    // Start
+    
     window.addEventListener('DOMContentLoaded', init);
-
   </script>
 </body>
 </html>
