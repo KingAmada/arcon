@@ -1,1289 +1,1562 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#008751">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#008751">
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ARCON DG">
+  <!-- iOS PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ARCON DG">
 
-  <title>ARCON | DG Executive Dashboard</title>
+  <title>ARCON | DG Executive Dashboard</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- HTML2PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            arconGreen: "#008751",
-            arconGreenDark: "#00643C",
-            arconGold: "#D4AF37",
-            arconGoldLight: "#F4D03F",
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            serif: ['Merriweather', 'serif'],
-          },
-          animation: {
-            'fade-in': 'fadeIn 0.5s ease-out',
-            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-          },
-          keyframes: {
-            fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-            slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } }
-          },
-          backgroundImage: {
-            'green-gradient': 'linear-gradient(135deg, #008751 0%, #005a32 100%)',
-            'gold-gradient': 'linear-gradient(135deg, #D4AF37 0%, #B4941F 100%)',
-          }
-        }
-      }
-    }
-  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            arconGreen: "#008751",
+            arconGreenDark: "#00643C",
+            arconGold: "#D4AF37",
+            arconGoldLight: "#F4D03F",
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Merriweather', 'serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } }
+          },
+          backgroundImage: {
+            'green-gradient': 'linear-gradient(135deg, #008751 0%, #005a32 100%)',
+            'gold-gradient': 'linear-gradient(135deg, #D4AF37 0%, #B4941F 100%)',
+          }
+        }
+      }
+    }
+  </script>
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:wght@400;700;900&display=swap');
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:wght@400;700;900&display=swap');
 
-    body {
-      font-family: Inter, sans-serif;
-      background: #f8fafc;
-      -webkit-tap-highlight-color: transparent;
-      overscroll-behavior-y: none;
-    }
+    body{
+      font-family: Inter, sans-serif;
+      background:#f8fafc;
+      -webkit-tap-highlight-color:transparent;
+      overscroll-behavior-y:none;
+    }
 
-    .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-    .pt-safe { padding-top: env(safe-area-inset-top); }
-    .bottom-nav-safe { padding-bottom: max(env(safe-area-inset-bottom), 12px); }
+    .pb-safe{ padding-bottom: env(safe-area-inset-bottom); }
+    .pt-safe{ padding-top: env(safe-area-inset-top); }
+    .bottom-nav-safe{ padding-bottom: max(env(safe-area-inset-bottom), 12px); }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar{ width:5px; height:5px; }
+    ::-webkit-scrollbar-track{ background:transparent; }
+    ::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:10px; }
 
-    .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    .card-hover{ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-hover:hover{ transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
 
-    /* =========================
-       REPORT (A4) EXPORT STYLES
-       ========================= */
+    /* =========================
+       ✅ PDF STAGING (FIX CROPPING + BLANK PDF)
+       - DO NOT move off-canvas using left:-9999px
+       - Keep in viewport but invisible
+       ========================= */
+    #report-staging-area{
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 210mm;         /* A4 */
+      min-height: 297mm;    /* A4 */
+      background: #fff;
+      opacity: 0;           /* invisible but renderable */
+      pointer-events: none;
+      z-index: -1;          /* behind app */
+    }
 
-    /* IMPORTANT FIX:
-       Do NOT push staging to left:-9999px (can render blank/cropped in html2canvas).
-       Keep it "real" on screen, but invisible + translated off-canvas. */
-    #report-staging-area{
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 210mm;           /* A4 width */
-      min-height: 297mm;      /* A4 height */
-      background: #fff;
-      opacity: 0;
-      pointer-events: none;
-      /* FIX: Use large fixed translation for safer rendering than 120vw */
-      transform: translate(-5000px, -5000px); 
-      transform-origin: top left;
-      z-index: -1;
-    }
+    /* Report base */
+    .report-root{
+      width: 210mm;
+      background: #fff;
+      color: #0f172a;
+      box-sizing: border-box;
+    }
 
-    /* A4 page rules */
-    @page { size: A4; margin: 0; }
+    .report-page{
+      width: 210mm;
+      min-height: 297mm;
+      box-sizing: border-box;
+      padding: 14mm 14mm 16mm;
+      position: relative;
+      background: #fff;
+      overflow: hidden;
+      font-family: Inter, sans-serif;
+    }
 
-    .report-paper{
-      width: 210mm;
-      min-height: 297mm;
-      box-sizing: border-box;
-      background: #fff;
-      color: #111;
-      line-height: 1.45;
-      font-family: "Times New Roman", Times, serif;
-      padding: 14mm 14mm 12mm 14mm; /* Executive padding */
-    }
+    .page-break{
+      break-before: page;
+      page-break-before: always;
+    }
 
-    .report-header{
-      border-bottom: 3px double #008751;
-      padding-bottom: 10mm;
-      margin-bottom: 8mm;
-    }
+    .report-topbar{
+      position:absolute;
+      top:0; left:0; right:0;
+      height: 10mm;
+      background: linear-gradient(90deg, #008751 0%, #00643C 100%);
+    }
 
-    .report-meta{
-      display: flex;
-      gap: 6mm;
-      justify-content: space-between;
-      align-items: center;
-      margin: 0 0 8mm 0;
-      padding: 3.5mm 4mm;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      font-size: 11px;
-    }
+    .report-watermark{
+      position:absolute;
+      inset: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      opacity: 0.04;
+      transform: rotate(-18deg);
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      font-size: 44px;
+      color: #008751;
+      user-select:none;
+      text-transform: uppercase;
+    }
 
-    .report-section-title{
-      font-size: 13.5px;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      margin: 0 0 4mm 0;
-      padding: 2.8mm 4mm;
-      border-radius: 4px;
-      color: #fff;
-      background: #008751;
-    }
+    .report-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12mm;
+      margin-top: 8mm;
+      padding-bottom: 6mm;
+      border-bottom: 2px solid rgba(0,135,81,0.18);
+    }
 
-    .report-section-title.red{ background:#b91c1c; }
+    .report-brand{
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+    }
 
-    .report-subtitle{
-      font-size: 12px;
-      font-weight: 800;
-      margin: 0 0 2.5mm 0;
-      color: #222;
-    }
+    .report-logo{
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 20px rgba(2,6,23,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .report-logo img{ width: 34px; height: 34px; object-fit: contain; }
 
-    .kpi-row{
-      display: flex;
-      gap: 6mm;
-      margin-bottom: 7mm;
-    }
+    .report-titleblock h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      font-weight: 900;
+      color: #008751;
+      text-transform: uppercase;
+      font-family: Merriweather, serif;
+    }
+    .report-titleblock .sub{
+      margin-top: 6px;
+      font-size: 11px;
+      color: #334155;
+      font-weight: 700;
+    }
+    .report-titleblock .mini{
+      margin-top: 2px;
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 600;
+    }
 
-    .kpi-card{
-      flex: 1;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 6mm 5mm;
-      text-align: center;
-      box-shadow: 0 2px 7px rgba(0,0,0,0.06);
-      background: #fff;
-    }
+    .report-meta{
+      text-align:right;
+      font-size: 10px;
+      color:#334155;
+      font-weight: 700;
+      line-height: 1.6;
+      white-space: nowrap;
+    }
+    .report-meta .pill{
+      display:inline-block;
+      margin-top: 6px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(0,135,81,0.08);
+      border: 1px solid rgba(0,135,81,0.18);
+      color:#0f172a;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      font-size: 9px;
+    }
 
-    .kpi-label{
-      font-size: 10px;
-      color: #666;
-      font-weight: 800;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 2mm;
-    }
+    .report-strip{
+      margin-top: 8mm;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid rgba(2,6,23,0.08);
+      font-size: 10px;
+      color:#0f172a;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
 
-    .kpi-value{
-      font-size: 28px;
-      font-weight: 900;
-      margin: 0;
-      line-height: 1.1;
-    }
+    .report-section-title{
+      margin: 10mm 0 4mm;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #0b3a24;
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      font-size: 11px;
+      text-transform: uppercase;
+      box-shadow: 0 10px 18px rgba(2,6,23,0.10);
+    }
 
-    .kpi-foot{
-      font-size: 9px;
-      margin-top: 2mm;
-      font-weight: 800;
-    }
+    .report-subtitle{
+      margin: 6mm 0 2mm;
+      font-size: 12px;
+      font-weight: 900;
+      color: #0f172a;
+    }
 
-    .report-table{
-      width: 100%;
-      border-collapse: collapse;
-      margin: 0 0 6mm 0;
-      font-size: 11px;
-      table-layout: fixed;
-    }
-    .report-table th{
-      background: #008751;
-      color: #fff;
-      font-weight: 900;
-      text-transform: uppercase;
-      padding: 3mm 2.5mm;
-      border: 1px solid #00643C;
-      text-align: left;
-      letter-spacing: 0.8px;
-      font-size: 10px;
-    }
-    .report-table td{
-      padding: 2.8mm 2.5mm;
-      border: 1px solid #e5e7eb;
-      color: #333;
-      word-wrap: break-word;
-    }
-    .report-table tr:nth-child(even){ background:#f9fafb; }
+    .report-text{
+      font-size: 11px;
+      line-height: 1.75;
+      color: #334155;
+      font-weight: 600;
+      text-align: justify;
+    }
 
-    .report-badge{
-      display: inline-block;
-      padding: 1.2mm 2.4mm;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      border: 1px solid transparent;
-    }
-    .badge-success { background:#dcfce7; color:#166534; border-color:#86efac; }
-    .badge-danger  { background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
-    .badge-warning { background:#fef9c3; color:#854d0e; border-color:#fde047; }
+    .report-kpi-row{
+      display:flex;
+      gap: 10px;
+      margin-top: 8mm;
+    }
 
-    .report-footer{
-      margin-top: 10mm;
-      border-top: 1px solid #d1d5db;
-      padding-top: 5mm;
-      font-size: 10px;
-      text-align: center;
-      color: #666;
-    }
+    .report-kpi{
+      flex:1;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid rgba(2,6,23,0.10);
+      padding: 14px 14px 12px;
+      box-shadow: 0 10px 18px rgba(2,6,23,0.06);
+    }
+    .report-kpi .label{
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #64748b;
+      font-weight: 900;
+    }
+    .report-kpi .value{
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: 900;
+      color: #0f172a;
+    }
+    .report-kpi .hint{
+      margin-top: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      color: #64748b;
+    }
+    .kpi-green .value{ color:#008751; }
+    .kpi-gold  .value{ color:#b08900; }
+    .kpi-red   .value{ color:#b91c1c; }
 
-    .page-break{ page-break-before: always; break-before: page; }
-  </style>
+    .report-bullets{
+      margin: 4mm 0 0;
+      padding-left: 18px;
+      font-size: 11px;
+      color: #334155;
+      font-weight: 650;
+      line-height: 1.8;
+    }
+    .report-bullets li{ margin-bottom: 6px; }
+
+    .report-table{
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4mm;
+      font-size: 10px;
+      overflow:hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(2,6,23,0.10);
+    }
+    .report-table thead th{
+      background: #008751;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 900;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.20);
+      text-align:left;
+    }
+    .report-table td{
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(2,6,23,0.06);
+      color:#0f172a;
+      font-weight: 700;
+    }
+    .report-table tr:nth-child(even) td{ background: #f8fafc; }
+
+    .report-badge{
+      display:inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 900;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .badge-success{ background:#dcfce7; color:#166534; border-color:#86efac; }
+    .badge-warning{ background:#fef9c3; color:#854d0e; border-color:#fde047; }
+    .badge-danger{  background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+
+    .report-sign{
+      position:absolute;
+      left: 14mm;
+      right: 14mm;
+      bottom: 14mm;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap: 10mm;
+    }
+
+    .report-sign .sigblock{
+      width: 72mm;
+      text-align:center;
+    }
+    .report-sign .signame{
+      font-family: cursive;
+      font-size: 18px;
+      color: #008751;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .report-sign .sigline{
+      border-top: 1px solid #0f172a;
+      padding-top: 6px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .report-sign .sigmini{
+      font-size: 9px;
+      color: #64748b;
+      font-weight: 800;
+      margin-top: 3px;
+      letter-spacing: 0.06em;
+    }
+
+    .report-footnote{
+      position:absolute;
+      left: 14mm;
+      right: 14mm;
+      bottom: 8mm;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+      border-top: 1px solid rgba(2,6,23,0.10);
+      padding-top: 6px;
+      font-size: 9px;
+      color:#64748b;
+      font-weight: 700;
+    }
+
+    .report-conf{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(2,6,23,0.10);
+      background:#ffffff;
+      color:#0f172a;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 8px;
+    }
+
+    /* Make sure html2canvas captures correctly */
+    .report-root, .report-page, .report-table, .report-kpi { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  </style>
 </head>
 
 <body class="flex h-screen overflow-hidden text-gray-800 bg-slate-50 pb-[calc(70px+env(safe-area-inset-bottom))] md:pb-0">
 
-    <div id="app-container" class="flex h-full w-full">
-
-        <aside class="hidden md:flex w-72 bg-green-gradient text-white border-r border-white/10 flex-col flex-shrink-0 z-20 relative shadow-xl">
-      <div class="h-24 flex items-center px-6 border-b border-white/10">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg transform rotate-3 transition hover:rotate-0">
-            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-9 h-9 object-contain" crossorigin="anonymous">
-          </div>
-          <div>
-            <h1 class="font-extrabold text-white text-xl tracking-tight leading-none">ARCON</h1>
-            <div class="text-[10px] font-bold text-green-100/80 uppercase tracking-[0.15em] mt-1">Executive Suite</div>
-          </div>
-        </div>
-      </div>
-
-      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-        <div class="px-3 py-2">
-          <p class="text-[10px] font-black uppercase tracking-widest text-green-200/60 mb-3">High Command</p>
-          <button onclick="setView('overview')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
-            <i class="ph ph-chart-line-up text-xl"></i> Overview
-          </button>
-          <button onclick="setView('agencies')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
-            <i class="ph ph-buildings text-xl"></i> Agency Registry
-          </button>
-          <button onclick="setView('map')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
-            <i class="ph ph-globe-hemisphere-west text-xl"></i> National Map
-          </button>
-        </div>
-
-        <div class="px-3 py-2 mt-4">
-          <p class="text-[10px] font-black uppercase tracking-widest text-green-200/60 mb-3">Intelligence</p>
-          <button onclick="setView('reports')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
-            <i class="ph ph-file-pdf text-xl"></i> Reports Center
-          </button>
-        </div>
-      </nav>
-
-      <div class="p-4 border-t border-white/10">
-        <div class="bg-black/20 rounded-2xl p-4 text-white backdrop-blur-sm border border-white/5">
-          <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold border border-white/10">
-              <i class="ph ph-crown text-2xl text-arconGold"></i>
-            </div>
-            <div class="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]"></div>
-          </div>
-          <div>
-            <div class="text-xs text-white/60 font-medium uppercase tracking-wide">Welcome,</div>
-            <div class="font-bold text-base">Director General</div>
-          </div>
-        </div>
-        <button onclick="location.reload()" class="mt-3 w-full py-2 bg-black/20 hover:bg-black/30 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
-          <i class="ph ph-sign-out"></i> Sign Out (Demo)
-        </button>
-      </div>
-    </aside>
-
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-200 flex items-center justify-around z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] bottom-nav-safe h-[calc(70px+env(safe-area-inset-bottom))]">
-      <button onclick="setView('overview')" id="mob-nav-overview" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 active text-arconGreen transition-colors group">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
-          <i class="ph ph-chart-line-up text-2xl mb-0.5"></i>
-        </div>
-        <span class="text-[10px] font-bold">Stats</span>
-      </button>
-      <button onclick="setView('agencies')" id="mob-nav-agencies" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
-          <i class="ph ph-buildings text-2xl mb-0.5"></i>
-        </div>
-        <span class="text-[10px] font-bold">Agencies</span>
-      </button>
-      <button onclick="setView('reports')" id="mob-nav-reports" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
-          <i class="ph ph-file-pdf text-2xl mb-0.5"></i>
-        </div>
-        <span class="text-[10px] font-bold">Reports</span>
-      </button>
-      <button onclick="setView('map')" id="mob-nav-map" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
-          <i class="ph ph-globe-hemisphere-west text-2xl mb-0.5"></i>
-        </div>
-        <span class="text-[10px] font-bold">Map</span>
-      </button>
-    </nav>
-
-        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50 pt-safe">
-
-            <header class="h-16 md:h-24 bg-white/80 backdrop-blur-md border-b border-gray-200/60 flex items-center justify-between px-4 md:px-8 sticky top-0 md:relative z-10">
-        <div>
-          <h2 class="font-black text-gray-800 text-xl md:text-2xl flex items-center gap-3 tracking-tight">
-            <span class="md:hidden text-arconGreen">
-              <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-8 h-8 object-contain" crossorigin="anonymous">
-            </span>
-            <span id="page-title">Executive Dashboard</span>
-          </h2>
-          <p class="hidden md:block text-sm text-gray-500 font-medium mt-1">Real-time regulatory oversight & revenue metrics</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="hidden md:flex items-center gap-2 px-3 py-1 bg-green-50 text-arconGreen text-xs font-bold rounded-full border border-green-100">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Live
-          </span>
-          <button onclick="location.reload()" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-arconGreen hover:bg-green-50 transition-all rounded-full active:scale-95 bg-white border border-gray-100 shadow-sm">
-            <i class="ph ph-arrows-clockwise text-xl"></i>
-          </button>
-        </div>
-      </header>
-
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
-
-                <div id="view-overview" class="space-y-6 animate-fade-in pb-8">
-                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between sticky top-0 z-20 md:relative">
-            <div class="flex items-center gap-2 w-full md:w-auto text-gray-500 text-sm font-bold">
-              <i class="ph ph-funnel text-arconGreen"></i> Drill Down:
-            </div>
-            <div class="flex gap-2 w-full md:w-auto overflow-x-auto">
-              <select id="filter-state" onchange="populateLgas()" class="bg-slate-50 border border-gray-200 text-sm rounded-xl px-4 py-2.5 outline-none font-medium min-w-[140px] focus:ring-2 focus:ring-arconGreen/20">
-                <option value="all">All States</option>
-              </select>
-              <select id="filter-lga" class="bg-slate-50 border border-gray-200 text-sm rounded-xl px-4 py-2.5 outline-none font-medium min-w-[140px] focus:ring-2 focus:ring-arconGreen/20">
-                <option value="all">All LGAs</option>
-              </select>
-              <button onclick="applyFilters()" class="bg-arconGreen text-white px-4 py-2.5 rounded-xl font-bold shadow-lg shadow-arconGreen/20 hover:bg-arconGreenDark transition active:scale-95">
-                Update View
-              </button>
-            </div>
-          </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
-              <div class="flex justify-between items-start mb-3">
-                <div class="w-10 h-10 rounded-xl bg-green-50 text-arconGreen flex items-center justify-center text-xl"><i class="ph ph-currency-ngn"></i></div>
-                <span class="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-1 rounded-full">+12%</span>
-              </div>
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Revenue</p>
-              <h3 id="stat-revenue" class="text-2xl font-black text-gray-800 mt-0.5">₦45.2M</h3>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
-              <div class="flex justify-between items-start mb-3">
-                <div class="w-10 h-10 rounded-xl bg-yellow-50 text-arconGold flex items-center justify-center text-xl"><i class="ph ph-shield-check"></i></div>
-              </div>
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Compliance</p>
-              <h3 id="stat-compliance" class="text-2xl font-black text-gray-800 mt-0.5">68%</h3>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
-              <div class="flex justify-between items-start mb-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph ph-buildings"></i></div>
-              </div>
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agencies</p>
-              <h3 id="stat-agencies" class="text-2xl font-black text-gray-800 mt-0.5">1,240</h3>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
-              <div class="flex justify-between items-start mb-3">
-                <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-xl"><i class="ph ph-gavel"></i></div>
-              </div>
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Enforcements</p>
-              <h3 id="stat-enforcements" class="text-2xl font-black text-gray-800 mt-0.5">85</h3>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-              <div class="flex justify-between items-center mb-6">
-                <div>
-                  <h4 class="font-bold text-gray-800 text-lg">Revenue Trend</h4>
-                  <p class="text-xs text-gray-400">Monthly breakdown (Millions NGN)</p>
-                </div>
-                <button class="text-arconGreen hover:bg-green-50 p-2 rounded-lg transition"><i class="ph ph-download-simple text-xl"></i></button>
-              </div>
-              <div class="h-64 w-full">
-                <canvas id="revChart"></canvas>
-              </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-              <div class="mb-4 flex items-center justify-between">
-                <div>
-                  <h4 class="font-bold text-gray-800 text-lg">Regulatory Alerts</h4>
-                  <p class="text-xs text-gray-400">Real-time situational awareness</p>
-                </div>
-                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              </div>
-              <div class="flex-1 overflow-y-auto space-y-4 pr-2 max-h-[250px] custom-scrollbar">
-                <div class="flex gap-3 items-start border-l-2 border-red-500 pl-3">
-                  <div>
-                    <p class="text-xs font-bold text-gray-800">Unlicensed Billboard detected</p>
-                    <p class="text-[10px] text-gray-500">Ikeja, Lagos • 12 mins ago</p>
-                  </div>
-                </div>
-                <div class="flex gap-3 items-start border-l-2 border-yellow-500 pl-3">
-                  <div>
-                    <p class="text-xs font-bold text-gray-800">Compliance Rate Drop</p>
-                    <p class="text-[10px] text-gray-500">Rivers State • 2 hours ago</p>
-                  </div>
-                </div>
-                <div class="flex gap-3 items-start border-l-2 border-green-500 pl-3">
-                  <div>
-                    <p class="text-xs font-bold text-gray-800">New Agency Registration</p>
-                    <p class="text-[10px] text-gray-500">Abuja FCT • 4 hours ago</p>
-                  </div>
-                </div>
-                <div class="flex gap-3 items-start border-l-2 border-gray-300 pl-3">
-                  <div>
-                    <p class="text-xs font-bold text-gray-800">System Backup Complete</p>
-                    <p class="text-[10px] text-gray-500">System • 6 hours ago</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-                <div id="view-agencies" class="hidden space-y-6 animate-fade-in pb-8">
-          <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-              <h2 class="text-xl font-bold text-gray-800">Agency Registry</h2>
-              <p class="text-sm text-gray-500">Monitor advertising practitioners and their portfolios.</p>
-            </div>
-            <div class="w-full md:w-auto relative">
-              <i class="ph ph-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
-              <input type="text" id="agency-search" oninput="renderAgencies()" placeholder="Search Agency Name or RC..." class="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm w-full md:w-64 focus:ring-2 focus:ring-arconGreen/20 outline-none">
-            </div>
-          </div>
-
-          <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-400 font-bold text-[11px] uppercase tracking-wider border-b border-gray-100">
-                  <tr>
-                    <th class="px-6 py-4">Agency Details</th>
-                    <th class="px-6 py-4">RC Number</th>
-                    <th class="px-6 py-4 text-center">Active Ads</th>
-                    <th class="px-6 py-4 text-center">Compliance Score</th>
-                    <th class="px-6 py-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="agencies-table-body" class="divide-y divide-gray-100"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-                <div id="view-reports" class="hidden space-y-6 animate-fade-in pb-8">
-          <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-20 md:relative">
-            <div>
-              <h2 class="text-xl font-bold text-gray-800">Reports Center</h2>
-              <p class="text-sm text-gray-500">Generate and export official regulatory documents.</p>
-            </div>
-            <div class="flex gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
-              <button onclick="setReportPeriod(this, 'Daily')" class="report-period-btn active px-4 py-2 bg-white text-arconGreen font-bold rounded-lg shadow-sm text-xs transition-all">Daily</button>
-              <button onclick="setReportPeriod(this, 'Monthly')" class="report-period-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-bold rounded-lg text-xs transition-all">Monthly</button>
-              <button onclick="setReportPeriod(this, 'Yearly')" class="report-period-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-bold rounded-lg text-xs transition-all">Yearly</button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-green-gradient text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10" onclick="generatePDF('executive')">
-              <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
-              <div class="relative z-10">
-                <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl mb-4 border border-white/20"><i class="ph ph-presentation-chart"></i></div>
-                <h3 class="text-lg font-bold">Executive Summary</h3>
-                <p class="text-xs text-green-100 mt-1 mb-6 opacity-80">High-level overview of all KPIs including revenue, compliance, and agency metrics.</p>
-                <button class="w-full py-3 bg-white text-arconGreen rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
-                  <i class="ph ph-download-simple text-lg"></i> Download PDF
-                </button>
-              </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all" onclick="generatePDF('financial')">
-              <div class="w-12 h-12 bg-green-50 text-arconGreen rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-file-text"></i></div>
-              <h3 class="text-lg font-bold text-gray-800">Financial Report</h3>
-              <p class="text-xs text-gray-400 mt-1 mb-6">Detailed revenue breakdown, collections, and future projections.</p>
-              <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
-                <i class="ph ph-download-simple text-lg"></i> Download PDF
-              </button>
-            </div>
-
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-red-500 hover:shadow-md transition-all" onclick="generatePDF('enforcement')">
-              <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-warning-octagon"></i></div>
-              <h3 class="text-lg font-bold text-gray-800">Enforcement Log</h3>
-              <p class="text-xs text-gray-400 mt-1 mb-6">List of violations, pending actions, and resolved compliance cases.</p>
-              <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
-                <i class="ph ph-download-simple text-lg"></i> Download PDF
-              </button>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 class="font-bold text-gray-800 text-sm md:text-base">Recent Activity</h3>
-              <span class="text-xs text-gray-400 font-medium">Auto-archived for 90 days</span>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
-                  <tr>
-                    <th class="px-6 py-4">Report Name</th>
-                    <th class="px-6 py-4">Date Generated</th>
-                    <th class="px-6 py-4">Type</th>
-                    <th class="px-6 py-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="report-history-body" class="divide-y divide-gray-100"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-                <div id="view-map" class="hidden h-[75vh] md:h-full flex flex-col bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative animate-fade-in">
-          <div class="absolute top-4 left-4 right-4 z-[400] flex justify-between items-start pointer-events-none">
-            <div class="bg-white/95 backdrop-blur rounded-2xl shadow-xl border border-gray-100 p-4 pointer-events-auto">
-              <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i class="ph ph-globe text-arconGreen"></i> National Compliance Map</h3>
-              <p class="text-[10px] text-gray-400 mt-1">Live feed from zonal offices</p>
-            </div>
-            <div class="bg-white/95 backdrop-blur rounded-full px-4 py-2 shadow-xl border border-gray-100 text-xs font-bold flex gap-4 pointer-events-auto">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-arconGreen shadow-sm shadow-green-500/50"></span> Compliant</span>
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span> Illegal/Expired</span>
-            </div>
-          </div>
-          <div id="map-dg" class="flex-grow w-full bg-slate-100 z-0"></div>
-        </div>
-
-      </div>
-    </main>
-
-        <div id="toast-loading" class="fixed bottom-24 right-6 bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 hidden animate-slide-up">
-      <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-      <div>
-        <p class="font-bold text-sm">Generating PDF...</p>
-        <p class="text-xs text-gray-400">Compiling data and layouts.</p>
-      </div>
-    </div>
-
-        <div id="report-staging-area"></div>
-
-        <div id="agency-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-      <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
-        <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-          <div>
-            <h3 class="font-bold text-xl text-gray-900" id="modal-agency-name">--</h3>
-            <p class="text-xs text-gray-500 font-mono" id="modal-agency-rc">RC: --</p>
-          </div>
-          <button onclick="document.getElementById('agency-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300"><i class="ph ph-x"></i></button>
-        </div>
-        <div class="p-6 overflow-y-auto">
-          <div class="flex gap-4 mb-6">
-            <div class="flex-1 bg-green-50 p-4 rounded-2xl border border-green-100">
-              <p class="text-xs font-bold text-green-700 uppercase">Running Ads</p>
-              <h4 class="text-2xl font-black text-green-900" id="modal-agency-ads">0</h4>
-              </div>
-            <div class="flex-1 bg-blue-50 p-4 rounded-2xl border border-blue-100">
-              <p class="text-xs font-bold text-blue-700 uppercase">APCON ID</p>
-              <h4 class="text-lg font-bold text-blue-900" id="modal-agency-id">--</h4>
-            </div>
-          </div>
-          <h4 class="font-bold text-gray-800 mb-3 text-sm border-b pb-2">Active Campaigns</h4>
-          <ul class="space-y-3" id="modal-campaign-list"></ul>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <script>
-    // --- Data ---
-    const NIGERIA_DATA = [
-      { state: "Abia", lgas: ["Aba North", "Aba South", "Arochukwu", "Bende", "Ikwuano", "Isiala Ngwa North", "Isiala Ngwa South", "Isuikwuato", "Obi Ngwa", "Ohafia", "Osisioma", "Ugwunagbo", "Ukwa East", "Ukwa West", "Umuahia North", "Umuahia South", "Umu Nneochi"] },
-      { state: "Adamawa", lgas: ["Demsa", "Fufure", "Ganye", "Gayuk", "Gombi", "Grie", "Hong", "Jada", "Lamurde", "Madagali", "Maiha", "Mayo Belwa", "Michika", "Mubi North", "Mubi South", "Numan", "Shelleng", "Song", "Toungo", "Yola North", "Yola South"] },
-      { state: "Akwa Ibom", lgas: ["Abak", "Eastern Obolo", "Eket", "Esit Eket", "Essien Udim", "Etim Ekpo", "Etinan", "Ibeno", "Ibesikpo Asutan", "Ibiono-Ibom", "Ika", "Ikono", "Ikot Abasi", "Ikot Ekpene", "Ini", "Itu", "Mbo", "Mkpat-Enin", "Nsit-Atai", "Nsit-Ibom", "Nsit-Ubium", "Obot Akara", "Okobo", "Onna", "Oron", "Oruk Anam", "Udung-Uko", "Ukanafun", "Uruan", "Urue-Offong/Oruko", "Uyo"] },
-      { state: "Anambra", lgas: ["Aguata", "Anambra East", "Anambra West", "Anaocha", "Awka North", "Awka South", "Ayamelum", "Dunukofia", "Ekwusigo", "Idemili North", "Idemili South", "Ihiala", "Njikoka", "Nnewi North", "Nnewi South", "Ogbaru", "Onitsha North", "Onitsha South", "Orumba North", "Orumba South", "Oyi"] },
-      { state: "Bauchi", lgas: ["Alkaleri", "Bauchi", "Bogoro", "Damban", "Darazo", "Dass", "Gamawa", "Ganjuwa", "Giade", "Itas/Gadau", "Jama'are", "Katagum", "Kirfi", "Misau", "Ningi", "Shira", "Tafawa Balewa", "Toro", "Warji", "Zaki"] },
-      { state: "Bayelsa", lgas: ["Brass", "Ekeremor", "Kolokuma/Opokuma", "Nembe", "Ogbia", "Sagbama", "Southern Ijaw", "Yenagoa"] },
-      { state: "Benue", lgas: ["Ado", "Agatu", "Apa", "Buruku", "Gboko", "Guma", "Gwer East", "Gwer West", "Katsina-Ala", "Konshisha", "Kwande", "Logo", "Makurdi", "Obi", "Ogbadibo", "Ohimini", "Oju", "Okpokwu", "Otukpo", "Tarka", "Ukum", "Ushongo", "Vandeikya"] },
-      { state: "Borno", lgas: ["Abadam", "Askira/Uba", "Bama", "Bayo", "Biu", "Chibok", "Damboa", "Dikwa", "Gubio", "Guzamala", "Gwoza", "Hawul", "Jere", "Kaga", "Kala/Balge", "Konduga", "Kukawa", "Kwaya Kusar", "Mafa", "Magumeri", "Maiduguri", "Marte", "Mobbar", "Monguno", "Ngala", "Nganzai", "Shani"] },
-      { state: "Cross River", lgas: ["Abi", "Akamkpa", "Akpabuyo", "Bakassi", "Bekwarra", "Biase", "Boki", "Calabar Municipal", "Calabar South", "Etung", "Ikom", "Obanliku", "Obubra", "Obudu", "Odukpani", "Ogoja", "Yakuur", "Yala"] },
-      { state: "Delta", lgas: ["Aniocha North", "Aniocha South", "Bomadi", "Burutu", "Ethiope East", "Ethiope West", "Ika North East", "Ika South", "Isoko North", "Isoko South", "Ndokwa East", "Ndokwa West", "Okpe", "Oshimili North", "Oshimili South", "Patani", "Sapele", "Udu", "Ughelli North", "Ughelli South", "Ukwuani", "Uvwie", "Warri North", "Warri South", "Warri South West"] },
-      { state: "Ebonyi", lgas: ["Abakaliki", "Afikpo North", "Afikpo South", "Ebonyi", "Ezza North", "Ezza South", "Ikwo", "Ishielu", "Ivo", "Izzi", "Ohaozara", "Ohaukwu", "Onicha"] },
-      { state: "Edo", lgas: ["Akoko-Edo", "Egor", "Esan Central", "Esan North-East", "Esan South-East", "Esan West", "Etsako Central", "Etsako East", "Etsako West", "Igueben", "Ikpoba Okha", "Oredo", "Orhionmwon", "Ovia North-East", "Ovia South-West", "Owan East", "Owan West", "Uhunmwonde"] },
-      { state: "Ekiti", lgas: ["Ado Ekiti", "Efon", "Ekiti East", "Ekiti South-West", "Ekiti West", "Emure", "Gbonyin", "Ido Osi", "Ijero", "Ikere", "Ikole", "Ilejemeje", "Irepodun/Ifelodun", "Ise/Orun", "Moba", "Oye"] },
-      { state: "Enugu", lgas: ["Aninri", "Awgu", "Enugu East", "Enugu North", "Enugu South", "Ezeagu", "Igbo Etiti", "Igbo Eze North", "Igbo Eze South", "Isi Uzo", "Nkanu East", "Nkanu West", "Nsukka", "Oji River", "Udenu", "Udi", "Uzo Uwani"] },
-      { state: "Abuja FCT", lgas: ["Abaji", "Abuja Municipal", "Bwari", "Gwagwalada", "Kuje", "Kwali"] },
-      { state: "Gombe", lgas: ["Akko", "Balanga", "Billiri", "Dukku", "Funakaye", "Gombe", "Kaltungo", "Kwami", "Nafada", "Shongom", "Yamaltu/Deba"] },
-      { state: "Imo", lgas: ["Aboh Mbaise", "Ahiazu Mbaise", "Ehime Mbano", "Ezinihitte", "Ideato North", "Ideato South", "Ihitte/Uboma", "Ikeduru", "Isiala Mbano", "Isu", "Mbaitoli", "Ngor Okpala", "Njaba", "Nkwerre", "Nwangele", "Obowo", "Oguta", "Ohaji/Egbema", "Okigwe", "Orlu", "Orsu", "Oru East", "Oru West", "Owerri Municipal", "Owerri North", "Owerri West", "Unuimo"] },
-      { state: "Jigawa", lgas: ["Auyo", "Babura", "Biriniwa", "Birnin Kudu", "Buji", "Dutse", "Gagarawa", "Garki", "Gumel", "Guri", "Gwaram", "Gwiwa", "Hadejia", "Jahun", "Kafin Hausa", "Kaugama", "Kazaure", "Kiri Kasama", "Kiyawa", "Maigatari", "Malam Madori", "Miga", "Ringim", "Roni", "Sule Tankarkar", "Taura", "Yankwashi"] },
-      { state: "Kaduna", lgas: ["Birnin Gwari", "Chikun", "Giwa", "Igabi", "Ikara", "Jaba", "Jema'a", "Kachia", "Kaduna North", "Kaduna South", "Kagarko", "Kajuru", "Kaura", "Kauru", "Kubau", "Kudan", "Lere", "Makarfi", "Sabon Gari", "Sanga", "Soba", "Zangon Kataf", "Zaria"] },
-      { state: "Kano", lgas: ["Ajingi", "Albasu", "Bagwai", "Bebeji", "Bichi", "Bunkure", "Dala", "Dambatta", "Dawakin Kudu", "Dawakin Tofa", "Doguwa", "Fagge", "Gabasawa", "Garko", "Garun Mallam", "Gaya", "Gezawa", "Gwale", "Gwarzo", "Kabo", "Kano Municipal", "Karaye", "Kibiya", "Kiru", "Kumbotso", "Kunchi", "Kura", "Madobi", "Makoda", "Minjibir", "Nasarawa", "Rano", "Rimin Gado", "Rogo", "Shanono", "Sumaila", "Takai", "Tarauni", "Tofa", "Tsanyawa", "Tudun Wada", "Ungogo", "Warawa", "Wudil"] },
-      { state: "Katsina", lgas: ["Bakori", "Batagarawa", "Batsari", "Baure", "Bindawa", "Charanchi", "Dandume", "Danja", "Dan Musa", "Daura", "Dutsi", "Dutsin Ma", "Faskari", "Funtua", "Ingawa", "Jibia", "Kafur", "Kaita", "Kankara", "Kankia", "Katsina", "Kurfi", "Kusada", "Mai'Adua", "Malumfashi", "Mani", "Mashi", "Matazu", "Musawa", "Rimi", "Sabuwa", "Safana", "Sandamu", "Zango"] },
-      { state: "Kebbi", lgas: ["Aleiro", "Arewa Dandi", "Argungu", "Augie", "Bagudo", "Birnin Kebbi", "Bunza", "Dandi", "Fakai", "Gwandu", "Jega", "Kalgo", "Koko/Besse", "Maiyama", "Ngaski", "Sakaba", "Shanga", "Suru", "Wasagu/Danko", "Yauri", "Zuru"] },
-      { state: "Kogi", lgas: ["Adavi", "Ajaokuta", "Ankpa", "Bassa", "Dekina", "Ibaji", "Idah", "Igalamela Odolu", "Ijumu", "Kabba/Bunu", "Kogi", "Lokoja", "Mopa Muro", "Ofu", "Ogori/Magongo", "Keffi", "Okene", "Olamaboro", "Omala", "Yagba East", "Yagba West"] },
-      { state: "Kwara", lgas: ["Asa", "Baruten", "Edu", "Ekiti", "Ifelodun", "Ilorin East", "Ilorin South", "Ilorin West", "Irepodun", "Isin", "Kaiama", "Moro", "Offa", "Oke Ero", "Oyun", "Pategi"] },
-      { state: "Lagos", lgas: ["Agege", "Ajeromi-Ifelodun", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"] },
-      { state: "Nasarawa", lgas: ["Akwanga", "Awe", "Doma", "Karu", "Keana", "Keffi", "Kokona", "Lafia", "Nasarawa", "Nasarawa Egon", "Obi", "Toto", "Wamba"] },
-      { state: "Niger", lgas: ["Agaie", "Agwara", "Bida", "Borgu", "Bosso", "Chanchaga", "Edati", "Gbako", "Gurara", "Katcha", "Kontagora", "Lapai", "Lavun", "Magama", "Mariga", "Mashegu", "Mokwa", "Moya", "Paikoro", "Rafi", "Rijau", "Shiroro", "Suleja", "Tafa", "Wushishi"] },
-      { state: "Ogun", lgas: ["Abeokuta North", "Abeokuta South", "Ado-Odo/Ota", "Egbado North", "Egbado South", "Ewekoro", "Ifo", "Ijebu East", "Ijebu North", "Ijebu North East", "Ijebu Ode", "Ikenne", "Imeko Afon", "Ipokia", "Obafemi Owode", "Odeda", "Odogbolu", "Ogun Waterside", "Remo North", "Shagamu"] },
-      { state: "Ondo", lgas: ["Akoko North-East", "Akoko North-West", "Akoko South-East", "Akoko South-West", "Akure North", "Akure South", "Ese Odo", "Idanre", "Ifedore", "Ilaje", "Ile Oluji/Okeigbo", "Irele", "Odigbo", "Okitipupa", "Ondo East", "Ondo West", "Ose", "Owo"] },
-      { state: "Osun", lgas: ["Atakunmosa East", "Atakunmosa West", "Aiyedaade", "Aiyedire", "Boluwaduro", "Boripe", "Ede North", "Ede South", "Egbedore", "Ejigbo", "Ife Central", "Ife East", "Ife North", "Ife South", "Ifedayo", "Ifelodun", "Ila", "Ilesa East", "Ilesa West", "Irepodun", "Irewole", "Isokan", "Iwo", "Obokun", "Odo Otin", "Ola Oluwa", "Olorunda", "Oriade", "Orolu", "Osogbo"] },
-      { state: "Oyo", lgas: ["Afijio", "Akinyele", "Atiba", "Atisbo", "Egbeda", "Ibadan North", "Ibadan North-East", "Ibadan North-West", "Ibadan South-East", "Ibadan South-West", "Ibarapa Central", "Ibarapa East", "Ibarapa North", "Ido", "Irepo", "Iseyin", "Itesiwaju", "Iwajowa", "Kajola", "Lagelu", "Ogbomosho North", "Ogbomosho South", "Ogo Oluwa", "Olorunsogo", "Oluyole", "Ona Ara", "Orelope", "Ori Ire", "Oyo East", "Oyo West", "Saki East", "Saki West", "Surulere"] },
-      { state: "Plateau", lgas: ["Barkin Ladi", "Bassa", "Bokkos", "Jos East", "Jos North", "Jos South", "Kanam", "Kanke", "Langtang North", "Langtang South", "Mangu", "Mikang", "Pankshin", "Qua'an Pan", "Riyom", "Shendam", "Wase"] },
-      { state: "Rivers", lgas: ["Abua/Odual", "Ahoada East", "Ahoada West", "Akuku-Toru", "Andoni", "Asari-Toru", "Bonny", "Degema", "Eleme", "Emohua", "Etche", "Gokana", "Ikwerre", "Khana", "Obio/Akpor", "Ogba/Egbema/Ndoni", "Ogu/Bolo", "Okrika", "Omuma", "Opobo/Nkoro", "Oyigbo", "Port Harcourt", "Tai"] },
-      { state: "Sokoto", lgas: ["Binji", "Bodinga", "Dange Shuni", "Gada", "Goronyo", "Gudu", "Gwadabawa", "Illela", "Isa", "Kebbe", "Kware", "Rabah", "Sabon Birni", "Shagari", "Silame", "Sokoto North", "Sokoto South", "Tambuwal", "Tangaza", "Tureta", "Wamako", "Wurno", "Yabo"] },
-      { state: "Taraba", lgas: ["Ardo Kola", "Bali", "Donga", "Gashaka", "Gassol", "Ibi", "Jalingo", "Karim Lamido", "Kumi", "Lau", "Sardauna", "Takum", "Ussa", "Wukari", "Yorro", "Zing"] },
-      { state: "Yobe", lgas: ["Bade", "Bursari", "Damaturu", "Fika", "Fune", "Geidam", "Gujba", "Gulani", "Jakusko", "Karasuwa", "Machina", "Nangere", "Nguru", "Potiskum", "Tarmuwa", "Yunusari", "Yusufari"] },
-      { state: "Zamfara", lgas: ["Anka", "Bakura", "Birnin Magaji/Kiyaw", "Bukkuyum", "Bungudu", "Gummi", "Gusau", "Kaura Namoda", "Maradun", "Maru", "Shinkafi", "Talata Mafara", "Tsafe", "Zurmi"] }
-    ];
-
-    const AGENCIES = [
-      { name: "Insight Publicis", rc: "RC123456", id: "APCON/001", ads: 45, score: 98, campaigns: ["Glo Unlimited", "Pepsi Naija", "Heineken UEFA"] },
-      { name: "X3M Ideas", rc: "RC987654", id: "APCON/042", ads: 32, score: 95, campaigns: ["DSTV Premium", "Access Bank Marathon"] },
-      { name: "Noah's Ark", rc: "RC456789", id: "APCON/015", ads: 28, score: 92, campaigns: ["Airtel 4G", "Indomie Noodles"] },
-      { name: "DDB Lagos", rc: "RC112233", id: "APCON/008", ads: 40, score: 96, campaigns: ["MTN 5G", "Fidelity Bank"] },
-      { name: "Yellow Brick Road", rc: "RC554433", id: "APCON/102", ads: 12, score: 88, campaigns: ["First Bank Centenary"] },
-      { name: "MediaReach OMD", rc: "RC778899", id: "APCON/055", ads: 55, score: 99, campaigns: ["Guinness Gold", "Nestle Milo", "Omo Detergent"] },
-      { name: "7even Interactive", rc: "RC998877", id: "APCON/110", ads: 18, score: 89, campaigns: ["Fidelity Bank", "Uber Nigeria"] },
-      { name: "So&U", rc: "RC445566", id: "APCON/020", ads: 38, score: 94, campaigns: ["Globacom", "Guinness"] }
-    ];
-
-    let mapInstance = null;
-    let revChart = null;
-    let currentReportPeriod = 'Daily';
-
-    // --- Reports History ---
-    const MOCK_REPORTS = [
-      { name: "Executive Summary - Q3", date: "2025-10-01", type: "Executive Summary", key: "executive", period: "Monthly" },
-      { name: "Financial Audit Oct", date: "2025-10-05", type: "Financial Report", key: "financial", period: "Monthly" }
-    ];
-
-    // --- Core Logic ---
-    function init() {
-      populateStates();
-      setView('overview');
-      initCharts();
-      renderAgencies();
-      renderReportHistory();
-    }
-
-    function setView(viewId) {
-      ['overview', 'agencies', 'reports', 'map'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
-      document.getElementById('view-'+viewId).classList.remove('hidden');
-
-      document.querySelectorAll('.desktop-nav-btn, .mobile-nav-btn').forEach(el => {
-        el.classList.remove('text-arconGreen', 'bg-white', 'shadow-lg');
-        if(el.classList.contains('desktop-nav-btn')) el.classList.add('text-white/80', 'hover:bg-white/10');
-        else el.classList.add('text-gray-400');
-      });
-
-      const dBtn = document.querySelector(`.desktop-nav-btn[onclick*="${viewId}"]`);
-      if(dBtn) {
-        dBtn.classList.remove('text-white/80', 'hover:bg-white/10');
-        dBtn.classList.add('bg-white', 'text-arconGreen', 'shadow-lg');
-      }
-
-      const mBtn = document.getElementById('mob-nav-'+viewId);
-      if(mBtn) {
-        mBtn.classList.remove('text-gray-400');
-        mBtn.classList.add('text-arconGreen');
-      }
-
-      document.getElementById('page-title').innerText = viewId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-      if(viewId === 'map') setTimeout(initMap, 200);
-    }
-
-    // --- Filters ---
-    function populateStates() {
-      const sel = document.getElementById('filter-state');
-      NIGERIA_DATA.sort((a,b) => a.state.localeCompare(b.state)).forEach(s => {
-        let opt = document.createElement('option');
-        opt.value = s.state; opt.innerText = s.state;
-        sel.appendChild(opt);
-      });
-    }
-
-    function populateLgas() {
-      const stateVal = document.getElementById('filter-state').value;
-      const lgaSel = document.getElementById('filter-lga');
-      lgaSel.innerHTML = '<option value="all">All LGAs</option>';
-
-      const stateData = NIGERIA_DATA.find(s => s.state === stateVal);
-      if(stateData) {
-        stateData.lgas.sort().forEach(l => {
-          let opt = document.createElement('option');
-          opt.value = l; opt.innerText = l;
-          lgaSel.appendChild(opt);
-        });
-      }
-    }
-
-    function applyFilters() {
-      const state = document.getElementById('filter-state').value;
-      const lga = document.getElementById('filter-lga').value;
-
-      const factor = state === 'all' ? 1 : 0.4;
-
-      document.getElementById('stat-revenue').innerText = '₦' + (45.2 * factor * (0.9 + Math.random()*0.2)).toFixed(1) + 'M';
-      document.getElementById('stat-compliance').innerText = Math.floor(68 * (0.8 + Math.random()*0.4)) + '%';
-      document.getElementById('stat-agencies').innerText = Math.floor(1240 * factor);
-      document.getElementById('stat-enforcements').innerText = Math.floor(85 * factor);
-
-      if(revChart) {
-        revChart.data.datasets[0].data = revChart.data.datasets[0].data.map(v => v * factor * (0.8 + Math.random()*0.4));
-        revChart.update();
-      }
-
-      const locText = state === 'all' ? 'National View' : `${state}${lga !== 'all' ? ', ' + lga : ''}`;
-      alert(`Dashboard updated for: ${locText}`);
-    }
-
-    // --- Agencies Module ---
-    function renderAgencies() {
-      const search = document.getElementById('agency-search').value.toLowerCase();
-      const tbody = document.getElementById('agencies-table-body');
-      tbody.innerHTML = '';
-
-      AGENCIES
-        .filter(a => a.name.toLowerCase().includes(search) || a.rc.toLowerCase().includes(search))
-        .forEach(agency => {
-          const row = `
-            <tr class="hover:bg-slate-50 border-b border-gray-50 transition cursor-pointer" onclick="showAgencyModal('${agency.name.replace(/'/g,"\\'")}')">
-              <td class="px-6 py-4 font-bold text-gray-800">${agency.name}</td>
-              <td class="px-6 py-4 font-mono text-gray-500 text-xs">${agency.rc}</td>
-              <td class="px-6 py-4 text-center"><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-bold">${agency.ads} Active</span></td>
-              <td class="px-6 py-4 text-center">
-                <div class="w-full bg-gray-100 rounded-full h-2 w-24 mx-auto">
-                  <div class="bg-green-500 h-2 rounded-full" style="width: ${agency.score}%"></div>
-                </div>
-                <span class="text-[10px] text-gray-400 font-bold mt-1 block">${agency.score}%</span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <button class="text-gray-400 hover:text-arconGreen"><i class="ph ph-caret-right text-lg"></i></button>
-              </td>
-            </tr>
-          `;
-          tbody.insertAdjacentHTML('beforeend', row);
-        });
-    }
-
-    function showAgencyModal(name) {
-      const agency = AGENCIES.find(a => a.name === name);
-      if(!agency) return;
-
-      document.getElementById('modal-agency-name').innerText = agency.name;
-      document.getElementById('modal-agency-rc').innerText = `RC: ${agency.rc}`;
-      document.getElementById('modal-agency-id').innerText = agency.id;
-      document.getElementById('modal-agency-ads').innerText = agency.ads;
-
-      const list = document.getElementById('modal-campaign-list');
-      list.innerHTML = agency.campaigns.map(c => `
-        <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-arconGreen"><i class="ph ph-megaphone-simple"></i></div>
-          <div>
-            <p class="text-sm font-bold text-gray-800">${c}</p>
-            <p class="text-[10px] text-green-600 font-bold">● Running</p>
-          </div>
-        </li>
-      `).join('');
-
-      document.getElementById('agency-modal').classList.remove('hidden');
-    }
-
-    // --- Reports Module ---
-    function renderReportHistory() {
-      const tbody = document.getElementById('report-history-body');
-      tbody.innerHTML = '';
-      MOCK_REPORTS.forEach((r, idx) => {
-        const row = `
-          <tr class="hover:bg-slate-50 border-b border-gray-50 transition">
-            <td class="px-6 py-4 font-bold text-gray-800 flex items-center gap-2">
-              <i class="ph ph-file-pdf text-red-500 text-lg"></i> ${r.name}
-            </td>
-            <td class="px-6 py-4 text-gray-500 text-xs">${r.date}</td>
-            <td class="px-6 py-4"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${r.type}</span></td>
-            <td class="px-6 py-4 text-right">
-              <button onclick="downloadFromHistory(${idx})" class="text-arconGreen font-bold text-xs hover:underline">Download</button>
-            </td>
-          </tr>
-        `;
-        tbody.insertAdjacentHTML('afterbegin', row);
-      });
-    }
-
-    function downloadFromHistory(idx){
-      const r = MOCK_REPORTS[idx];
-      if(!r) return;
-      currentReportPeriod = r.period || currentReportPeriod;
-      // re-sync UI buttons for period:
-      const btns = [...document.querySelectorAll('.report-period-btn')];
-      btns.forEach(b => {
-        b.classList.remove('bg-white', 'text-arconGreen', 'shadow-sm');
-        b.classList.add('text-gray-500');
-      });
-      const match = btns.find(b => (b.textContent || '').trim().toLowerCase() === (currentReportPeriod || '').toLowerCase());
-      if(match){
-        match.classList.add('bg-white', 'text-arconGreen', 'shadow-sm');
-        match.classList.remove('text-gray-500');
-      }
-      generatePDF(r.key || 'executive');
-    }
-
-    function setReportPeriod(btn, period) {
-      document.querySelectorAll('.report-period-btn').forEach(b => {
-        b.classList.remove('bg-white', 'text-arconGreen', 'shadow-sm');
-        b.classList.add('text-gray-500');
-      });
-      btn.classList.add('bg-white', 'text-arconGreen', 'shadow-sm');
-      btn.classList.remove('text-gray-500');
-      currentReportPeriod = period;
-    }
-
-    function getArconLogoDataUrl(){
-      // Inline SVG "executive" logo (no CORS issues)
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#008751"/>
-              <stop offset="1" stop-color="#005a32"/>
-            </linearGradient>
-          </defs>
-          <rect x="10" y="10" width="200" height="200" rx="46" fill="url(#g)"/>
-          <rect x="22" y="22" width="176" height="176" rx="40" fill="none" stroke="#D4AF37" stroke-width="6"/>
-          <text x="110" y="118" font-family="Inter, Arial" font-size="54" font-weight="900" text-anchor="middle" fill="#ffffff">ARCON</text>
-          <text x="110" y="154" font-family="Inter, Arial" font-size="16" font-weight="800" text-anchor="middle" fill="#F4D03F">IRMS</text>
-        </svg>
-      `.trim();
-      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-    }
-
-    function formatDateLong(d){
-      try {
-        return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-      } catch(e){
-        return d.toISOString().slice(0,10);
-      }
-    }
-
-    // Generate HTML for specific reports
-    function getReportHTML(type) {
-      const now = new Date();
-      const dateLong = formatDateLong(now);
-      const isoDate = now.toISOString().slice(0,10);
-      const ref = 'ARCON-' + Math.floor(Math.random() * 900000 + 100000);
-
-      const logo = getArconLogoDataUrl();
-
-      const reportTypeLabel =
-        type === 'executive' ? 'Confidential Executive Report' :
-        type === 'financial' ? 'Financial Performance Report' :
-        'Enforcement & Compliance Report';
-
-      const header = `
-        <div class="report-header">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10mm;">
-            <div style="display:flex; align-items:center; gap:5mm;">
-              <img src="${logo}" alt="ARCON" style="width:14mm; height:14mm; border-radius:4mm;">
-              <div>
-                <div style="font-size:11px; font-weight:900; letter-spacing:2px; text-transform:uppercase; margin:0;">Federal Republic of Nigeria</div>
-                <div style="margin-top:2mm; font-size:22px; font-weight:900; color:#008751; line-height:1.05;">ADVERTISING REGULATORY COUNCIL OF NIGERIA</div>
-                <div style="margin-top:1.5mm; font-size:10px; color:#555;">Integrated Regulatory Management System (IRMS) • ${reportTypeLabel}</div>
-              </div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:11px; font-weight:900; letter-spacing:1px; text-transform:uppercase;">Head Office</div>
-              <div style="font-size:10px; color:#444; margin-top:1.5mm;">Plot 12, Utako District, Abuja</div>
-              <div style="font-size:10px; color:#444;">www.arcon.gov.ng</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="report-meta">
-          <div><strong>PERIOD:</strong> ${String(currentReportPeriod).toUpperCase()}</div>
-          <div><strong>DATE:</strong> ${dateLong}</div>
-          <div><strong>REF:</strong> ${ref}</div>
-          <div><strong>DOC:</strong> ${type.toUpperCase()}</div>
-        </div>
-      `;
-
-      let content = '';
-
-      if (type === 'executive') {
-        content = `
-          <div class="report-section-title">1.0 Executive Summary</div>
-
-          <div class="kpi-row">
-            <div class="kpi-card">
-              <div class="kpi-label">Total Revenue</div>
-              <div class="kpi-value" style="color:#008751;">₦45.2M</div>
-              <div class="kpi-foot" style="color:#166534;">▲ 12% vs Target</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Compliance Rate</div>
-              <div class="kpi-value" style="color:#D4AF37;">68%</div>
-              <div class="kpi-foot" style="color:#854d0e;">Requires Attention</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Active Enforcements</div>
-              <div class="kpi-value" style="color:#dc2626;">85</div>
-              <div class="kpi-foot" style="color:#991b1b;">Ongoing Cases</div>
-            </div>
-          </div>
-
-          <div class="report-subtitle">1.1 Strategic Overview</div>
-          <p style="font-size:12px; line-height:1.6; text-align:justify; margin:0 0 5mm 0; color:#333;">
-            The period under review indicates strong revenue performance driven by digital vetting fees and improved practitioner onboarding.
-            Compliance rates in selected corridors remain below desired thresholds, requiring targeted zonal interventions and tighter integration with state signage authorities.
-          </p>
-
-          <div class="report-subtitle">1.2 Key Recommendations</div>
-          <ul style="font-size:12px; line-height:1.6; margin:0 0 7mm 0; padding-left:6mm;">
-            <li style="margin-bottom:2mm;">Deploy special enforcement task force to high-risk corridors in Lagos, Rivers, and Delta.</li>
-            <li style="margin-bottom:2mm;">Initiate unified billing integration with LASAA, KASUPDA and other state signage agencies.</li>
-            <li style="margin-bottom:2mm;">Review vetting fee structure for emerging digital media platforms and influencer-led formats.</li>
-          </ul>
-
-          <div class="report-section-title" style="background:#f3f4f6; color:#111; border-left:4px solid #008751; border-radius:0; font-weight:900;">
-            2.0 Performance Metrics
-          </div>
-
-          <table class="report-table">
-            <thead>
-              <tr>
-                <th style="width:34%;">KPI Category</th>
-                <th style="width:16%;">Target</th>
-                <th style="width:16%;">Actual</th>
-                <th style="width:16%;">Variance</th>
-                <th style="width:18%;">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>License Revenue</td><td>₦40.0M</td><td>₦45.2M</td><td>+13%</td><td><span class="report-badge badge-success">Exceeded</span></td></tr>
-              <tr><td>Agency Registration</td><td>1,200</td><td>1,240</td><td>+3.3%</td><td><span class="report-badge badge-success">On Track</span></td></tr>
-              <tr><td>Ad Vetting Volume</td><td>500</td><td>485</td><td>-3%</td><td><span class="report-badge badge-warning">Near Target</span></td></tr>
-              <tr><td>Litigation Cases</td><td>&lt; 5</td><td>2</td><td>-60%</td><td><span class="report-badge badge-success">Optimal</span></td></tr>
-            </tbody>
-          </table>
-
-          <div class="page-break"></div>
-
-          <div class="report-section-title">3.0 Zonal Spotlight</div>
-          <p style="font-size:12px; margin:0 0 5mm 0; color:#333;">
-            Zonal contribution snapshot for <strong>${String(currentReportPeriod).toUpperCase()}</strong> reporting window.
-          </p>
-
-          <table class="report-table">
-            <thead>
-              <tr>
-                <th style="width:40%;">Zone</th>
-                <th style="width:20%;">Revenue</th>
-                <th style="width:20%;">Compliance</th>
-                <th style="width:20%;">Risk Level</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Lagos Zone</td><td>₦28.5M</td><td>71%</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
-              <tr><td>Abuja HQ</td><td>₦10.2M</td><td>78%</td><td><span class="report-badge badge-success">Low</span></td></tr>
-              <tr><td>Kano Zone</td><td>₦4.1M</td><td>64%</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
-              <tr><td>Port Harcourt</td><td>₦2.4M</td><td>56%</td><td><span class="report-badge badge-danger">High</span></td></tr>
-            </tbody>
-          </table>
-        `;
-      }
-
-      if (type === 'financial') {
-        content = `
-          <div class="report-section-title">1.0 Financial Overview</div>
-          <p style="font-size:12px; margin:0 0 6mm 0; color:#333;">
-            Detailed breakdown of all revenue streams processed through the Integrated Regulatory Management System (IRMS).
-          </p>
-
-          <table class="report-table">
-            <thead>
-              <tr>
-                <th style="width:42%;">Revenue Stream</th>
-                <th style="width:14%; text-align:center;">Tx Count</th>
-                <th style="width:22%; text-align:right;">Gross (₦)</th>
-                <th style="width:22%; text-align:right;">Net (₦)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Vetting Fees (Digital)</td><td style="text-align:center;">320</td><td style="text-align:right;">18,500,000</td><td style="text-align:right;">18,500,000</td></tr>
-              <tr><td>Vetting Fees (Traditional)</td><td style="text-align:center;">130</td><td style="text-align:right;">6,500,000</td><td style="text-align:right;">6,500,000</td></tr>
-              <tr><td>Practitioner Licenses</td><td style="text-align:center;">120</td><td style="text-align:right;">12,000,000</td><td style="text-align:right;">12,000,000</td></tr>
-              <tr><td>Fines & Penalties</td><td style="text-align:center;">45</td><td style="text-align:right;">5,200,000</td><td style="text-align:right;">5,200,000</td></tr>
-              <tr><td>Corporate Registration</td><td style="text-align:center;">30</td><td style="text-align:right;">3,000,000</td><td style="text-align:right;">3,000,000</td></tr>
-              <tr style="font-weight:900; background:#f0fdf4;">
-                <td>TOTAL REVENUE</td><td style="text-align:center;">645</td><td style="text-align:right;">45,200,000</td><td style="text-align:right;">45,200,000</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="page-break"></div>
-
-          <div class="report-section-title" style="background:#f3f4f6; color:#111; border-left:4px solid #008751; border-radius:0; font-weight:900;">
-            2.0 Zonal Contribution
-          </div>
-
-          <div style="margin:0 0 5mm 0; border:1px solid #e5e7eb; border-radius:8px; padding:5mm;">
-            <div style="font-weight:900; font-size:11px; margin-bottom:3mm;">Visual Snapshot (Bar)</div>
-            <div style="height:50mm; display:flex; align-items:flex-end; justify-content:space-around; gap:4mm;">
-              <div style="text-align:center; flex:1;">
-                <div style="height:34mm; width:100%; background:#008751; border-radius:6px;"></div>
-                <div style="font-size:10px; margin-top:2mm; font-weight:900;">LAGOS (63%)</div>
-              </div>
-              <div style="text-align:center; flex:1;">
-                <div style="height:18mm; width:100%; background:#008751; opacity:0.75; border-radius:6px;"></div>
-                <div style="font-size:10px; margin-top:2mm; font-weight:900;">ABUJA (22%)</div>
-              </div>
-              <div style="text-align:center; flex:1;">
-                <div style="height:8mm; width:100%; background:#008751; opacity:0.55; border-radius:6px;"></div>
-                <div style="font-size:10px; margin-top:2mm; font-weight:900;">KANO (9%)</div>
-              </div>
-              <div style="text-align:center; flex:1;">
-                <div style="height:6mm; width:100%; background:#008751; opacity:0.35; border-radius:6px;"></div>
-                <div style="font-size:10px; margin-top:2mm; font-weight:900;">PHC (6%)</div>
-              </div>
-            </div>
-          </div>
-
-          <table class="report-table">
-            <thead><tr><th style="width:40%;">Region</th><th style="width:35%;">Revenue</th><th style="width:25%;">Growth (MoM)</th></tr></thead>
-            <tbody>
-              <tr><td>Lagos Zone</td><td>₦28,500,000</td><td><span class="report-badge badge-success">+5.2%</span></td></tr>
-              <tr><td>Abuja HQ</td><td>₦10,200,000</td><td><span class="report-badge badge-success">+1.8%</span></td></tr>
-              <tr><td>Kano Zone</td><td>₦4,100,000</td><td><span class="report-badge badge-warning">-0.5%</span></td></tr>
-              <tr><td>Port Harcourt</td><td>₦2,400,000</td><td><span class="report-badge badge-danger">-2.1%</span></td></tr>
-            </tbody>
-          </table>
-        `;
-      }
-
-      if (type === 'enforcement') {
-        content = `
-          <div class="report-section-title red">1.0 Enforcement Actions Log</div>
-          <p style="font-size:12px; margin:0 0 6mm 0; color:#333;">Record of regulatory breaches, investigative actions, and sanctions imposed.</p>
-
-          <table class="report-table">
-            <thead>
-              <tr>
-                <th style="width:16%;">Date</th>
-                <th style="width:28%;">Entity / Agency</th>
-                <th style="width:24%;">Violation Type</th>
-                <th style="width:18%;">Location</th>
-                <th style="width:14%;">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>2025-10-12</td><td>Globus Marketing</td><td>Illegal Siting (No Permit)</td><td>Ikeja, Lagos</td><td><span class="report-badge badge-danger">Sanctioned</span></td></tr>
-              <tr><td>2025-10-11</td><td>Prime Media Ltd</td><td>Unapproved Creative</td><td>Wuse II, Abuja</td><td><span class="report-badge badge-warning">Under Review</span></td></tr>
-              <tr><td>2025-10-09</td><td>City Wall Ads</td><td>Expired License</td><td>GRA, Port Harcourt</td><td><span class="report-badge badge-warning">Removal Notice</span></td></tr>
-              <tr><td>2025-10-08</td><td>NextGen Promo</td><td>Indecent Exposure</td><td>Kano Municipal</td><td><span class="report-badge badge-danger">Litigation</span></td></tr>
-              <tr><td>2025-10-05</td><td>Alpha Outdoor</td><td>Non-payment of Fees</td><td>Lekki, Lagos</td><td><span class="report-badge badge-danger">Sealed</span></td></tr>
-              <tr><td>2025-10-02</td><td>Zenith Boards</td><td>Structural Defect</td><td>Enugu North</td><td><span class="report-badge badge-success">Resolved</span></td></tr>
-            </tbody>
-          </table>
-
-          <div class="page-break"></div>
-
-          <div class="report-section-title" style="background:#f3f4f6; color:#111; border-left:4px solid #b91c1c; border-radius:0; font-weight:900;">
-            2.0 Compliance Summary
-          </div>
-
-          <ul style="font-size:12px; line-height:1.8; padding-left:6mm; margin:0;">
-            <li><strong>Total Violations Reported:</strong> 142</li>
-            <li><strong>Compliance Notices Served:</strong> 98</li>
-            <li><strong>Direct Enforcement (Removals):</strong> 22</li>
-            <li><strong>Pending Legal Actions:</strong> 4</li>
-          </ul>
-        `;
-      }
-
-      const footer = `
-        <div class="report-footer">
-          <div style="margin:8mm 0 6mm 0; display:flex; justify-content:flex-end;">
-            <div style="text-align:center;">
-              <div style="height:14mm; margin-bottom:2mm;">
-                <span style="font-family:cursive; font-size:20px; color:#008751;">Dr. Olalekan Fadolapo</span>
-              </div>
-              <div style="border-top:1px solid #000; width:60mm; margin-top:2mm; padding-top:2mm; font-weight:900; text-transform:uppercase;">
-                Director General
-              </div>
-              <div style="font-size:9px; font-style:italic;">Digitally Signed & Authenticated</div>
-            </div>
-          </div>
-          <p style="margin:0;">Generated via ARCON Integrated Regulatory Management System (IRMS) • System ID: DG-TERM-01</p>
-          <p style="margin:1mm 0 0 0;">This document is confidential property of the Federal Government of Nigeria.</p>
-        </div>
-      `;
-
-      return `
-        <div class="report-paper" id="report-root" data-type="${type}" data-date="${isoDate}">
-          ${header}
-          ${content}
-          ${footer}
-        </div>
-      `;
-    }
-
-    function safeFilename(str){
-      return String(str)
-        .replace(/[\\/:*?"<>|]+/g, "-")
-        .replace(/\s+/g, "_")
-        .replace(/_+/g, "_")
-        .trim();
-    }
-
-    async function waitForReportAssets(container){
-      // wait images
-      const imgs = Array.from(container.querySelectorAll('img'));
-      await Promise.all(imgs.map(img => {
-        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
-        return new Promise(res => {
-          const done = () => res();
-          img.addEventListener('load', done, { once:true });
-          img.addEventListener('error', done, { once:true });
-        });
-      }));
-
-      // wait fonts
-      if(document.fonts && document.fonts.ready){
-        try { await document.fonts.ready; } catch(e){}
-      }
-
-      // small settle (layout/paint)
-      await new Promise(r => setTimeout(r, 60));
-    }
-
-    async function generatePDF(type) {
-      const toast = document.getElementById('toast-loading');
-      const staging = document.getElementById('report-staging-area');
-
-      toast.classList.remove('hidden');
-
-      // Inject HTML
-      staging.innerHTML = getReportHTML(type);
-
-      const reportEl = staging.querySelector('.report-paper');
-      if(!reportEl){
-        toast.classList.add('hidden');
-        alert("Report template failed to render.");
-        return;
-      }
-
-      // Ensure assets are loaded before capture
-      await waitForReportAssets(reportEl);
-
-      // FIX: Get the actual rendered dimensions of the report element
-      const finalWidth = reportEl.offsetWidth;
-      const finalHeight = reportEl.offsetHeight;
-
-      const todayISO = new Date().toISOString().slice(0,10);
-      const period = String(currentReportPeriod || 'Daily').toUpperCase();
-
-      const typeLabel = type === 'executive' ? 'EXECUTIVE'
-                    : type === 'financial' ? 'FINANCIAL'
-                    : 'ENFORCEMENT';
-
-      const filename = safeFilename(`ARCON_${typeLabel}_${period}_${todayISO}.pdf`);
-
-      // Use mm units + A4 to stop crop issues
-      const opt = {
-        margin: 0,
-        filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 3,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
-          // FIX: Pass final dimensions to capture the entire content accurately
-          scrollY: 0,
-          windowWidth: finalWidth,
-          windowHeight: finalHeight,
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-      };
-
-      try {
-        await html2pdf().set(opt).from(reportEl).save();
-
-        toast.classList.add('hidden');
-
-        // Add to history
-        const today = new Date().toISOString().slice(0,10);
-        const friendlyType = type === 'executive' ? 'Executive Summary' : (type === 'financial' ? 'Financial Report' : 'Enforcement Log');
-
-        MOCK_REPORTS.unshift({
-          name: `${friendlyType} - ${currentReportPeriod}`,
-          date: today,
-          type: friendlyType,
-          key: type,
-          period: currentReportPeriod
-        });
-        renderReportHistory();
-
-      } catch (err) {
-        console.error(err);
-        toast.classList.add('hidden');
-        alert("Error generating PDF. Please try again.");
-      }
-    }
-
-    // --- Visuals ---
-    function initMap() {
-      if(mapInstance) { mapInstance.invalidateSize(); return; }
-      mapInstance = L.map('map-dg').setView([9.0820, 8.6753], 6);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM' }).addTo(mapInstance);
-
-      const style = { fillColor: '#008751', fillOpacity: 0.6, radius: 6, weight: 2, color: 'white' };
-      L.circleMarker([9.07, 7.39], style).addTo(mapInstance);
-      L.circleMarker([6.52, 3.37], style).addTo(mapInstance);
-    }
-
-    function initCharts() {
-      const ctx = document.getElementById('revChart').getContext('2d');
-      const grad = ctx.createLinearGradient(0,0,0,300);
-      grad.addColorStop(0, 'rgba(0, 135, 81, 0.15)');
-      grad.addColorStop(1, 'rgba(0, 135, 81, 0)');
-
-      revChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-          datasets: [{
-            label: 'Revenue',
-            data: [15, 22, 18, 30, 28, 45.2],
-            borderColor: '#008751',
-            backgroundColor: grad,
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { x: { display: false }, y: { display: false } }
-        }
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
+  <!-- APP CONTAINER -->
+  <div id="app-container" class="flex h-full w-full">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden md:flex w-72 bg-green-gradient text-white border-r border-white/10 flex-col flex-shrink-0 z-20 relative shadow-xl">
+      <div class="h-24 flex items-center px-6 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg transform rotate-3 transition hover:rotate-0">
+            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-9 h-9 object-contain" crossorigin="anonymous">
+          </div>
+          <div>
+            <h1 class="font-extrabold text-white text-xl tracking-tight leading-none">ARCON</h1>
+            <div class="text-[10px] font-bold text-green-100/80 uppercase tracking-[0.15em] mt-1">Executive Suite</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+        <div class="px-3 py-2">
+          <p class="text-[10px] font-black uppercase tracking-widest text-green-200/60 mb-3">High Command</p>
+          <button onclick="setView('overview')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
+            <i class="ph ph-chart-line-up text-xl"></i> Overview
+          </button>
+          <button onclick="setView('agencies')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
+            <i class="ph ph-buildings text-xl"></i> Agency Registry
+          </button>
+          <button onclick="setView('map')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
+            <i class="ph ph-globe-hemisphere-west text-xl"></i> National Map
+          </button>
+        </div>
+
+        <div class="px-3 py-2 mt-4">
+          <p class="text-[10px] font-black uppercase tracking-widest text-green-200/60 mb-3">Intelligence</p>
+          <button onclick="setView('reports')" class="desktop-nav-btn group w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all duration-200 text-white/80 hover:bg-white/10 hover:text-white hover:shadow-lg">
+            <i class="ph ph-file-pdf text-xl"></i> Reports Center
+          </button>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-white/10">
+        <div class="bg-black/20 rounded-2xl p-4 text-white backdrop-blur-sm border border-white/5">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold border border-white/10">
+              <i class="ph ph-crown text-2xl text-arconGold"></i>
+            </div>
+            <div class="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]"></div>
+          </div>
+          <div>
+            <div class="text-xs text-white/60 font-medium uppercase tracking-wide">Welcome,</div>
+            <div class="font-bold text-base">Director General</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-200 flex items-center justify-around z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] bottom-nav-safe h-[calc(70px+env(safe-area-inset-bottom))]">
+      <button onclick="setView('overview')" id="mob-nav-overview" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 active text-arconGreen transition-colors group">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
+          <i class="ph ph-chart-line-up text-2xl mb-0.5"></i>
+        </div>
+        <span class="text-[10px] font-bold">Stats</span>
+      </button>
+      <button onclick="setView('agencies')" id="mob-nav-agencies" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
+          <i class="ph ph-buildings text-2xl mb-0.5"></i>
+        </div>
+        <span class="text-[10px] font-bold">Agencies</span>
+      </button>
+      <button onclick="setView('reports')" id="mob-nav-reports" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
+          <i class="ph ph-file-pdf text-2xl mb-0.5"></i>
+        </div>
+        <span class="text-[10px] font-bold">Reports</span>
+      </button>
+      <button onclick="setView('map')" id="mob-nav-map" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 transition-colors group">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-50 transition-colors">
+          <i class="ph ph-globe-hemisphere-west text-2xl mb-0.5"></i>
+        </div>
+        <span class="text-[10px] font-bold">Map</span>
+      </button>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50 pt-safe">
+
+      <!-- Header -->
+      <header class="h-16 md:h-24 bg-white/80 backdrop-blur-md border-b border-gray-200/60 flex items-center justify-between px-4 md:px-8 sticky top-0 md:relative z-10">
+        <div>
+          <h2 class="font-black text-gray-800 text-xl md:text-2xl flex items-center gap-3 tracking-tight">
+            <span class="md:hidden text-arconGreen"><img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-8 h-8 object-contain" crossorigin="anonymous"></span>
+            <span id="page-title">Executive Dashboard</span>
+          </h2>
+          <p class="hidden md:block text-sm text-gray-500 font-medium mt-1">Real-time regulatory oversight & revenue metrics</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="hidden md:flex items-center gap-2 px-3 py-1 bg-green-50 text-arconGreen text-xs font-bold rounded-full border border-green-100">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Live
+          </span>
+          <button onclick="location.reload()" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-arconGreen hover:bg-green-50 transition-all rounded-full active:scale-95 bg-white border border-gray-100 shadow-sm">
+            <i class="ph ph-arrows-clockwise text-xl"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Scroll Area -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+
+        <!-- VIEW: OVERVIEW -->
+        <div id="view-overview" class="space-y-6 animate-fade-in pb-8">
+          <!-- Filters -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between sticky top-0 z-20 md:relative">
+            <div class="flex items-center gap-2 w-full md:w-auto text-gray-500 text-sm font-bold">
+              <i class="ph ph-funnel text-arconGreen"></i> Drill Down:
+            </div>
+            <div class="flex gap-2 w-full md:w-auto overflow-x-auto">
+              <select id="filter-state" onchange="populateLgas()" class="bg-slate-50 border border-gray-200 text-sm rounded-xl px-4 py-2.5 outline-none font-medium min-w-[140px] focus:ring-2 focus:ring-arconGreen/20">
+                <option value="all">All States</option>
+              </select>
+              <select id="filter-lga" class="bg-slate-50 border border-gray-200 text-sm rounded-xl px-4 py-2.5 outline-none font-medium min-w-[140px] focus:ring-2 focus:ring-arconGreen/20">
+                <option value="all">All LGAs</option>
+              </select>
+              <button onclick="applyFilters()" class="bg-arconGreen text-white px-4 py-2.5 rounded-xl font-bold shadow-lg shadow-arconGreen/20 hover:bg-arconGreenDark transition active:scale-95">
+                Update View
+              </button>
+            </div>
+          </div>
+
+          <!-- Expanded Metrics Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
+              <div class="flex justify-between items-start mb-3">
+                <div class="w-10 h-10 rounded-xl bg-green-50 text-arconGreen flex items-center justify-center text-xl"><i class="ph ph-currency-ngn"></i></div>
+                <span class="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-1 rounded-full">+12%</span>
+              </div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Revenue</p>
+              <h3 id="stat-revenue" class="text-2xl font-black text-gray-800 mt-0.5">₦45.2M</h3>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
+              <div class="flex justify-between items-start mb-3">
+                <div class="w-10 h-10 rounded-xl bg-yellow-50 text-arconGold flex items-center justify-center text-xl"><i class="ph ph-shield-check"></i></div>
+              </div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Compliance</p>
+              <h3 id="stat-compliance" class="text-2xl font-black text-gray-800 mt-0.5">68%</h3>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
+              <div class="flex justify-between items-start mb-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph ph-buildings"></i></div>
+              </div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agencies</p>
+              <h3 id="stat-agencies" class="text-2xl font-black text-gray-800 mt-0.5">1,240</h3>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group">
+              <div class="flex justify-between items-start mb-3">
+                <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-xl"><i class="ph ph-gavel"></i></div>
+              </div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Enforcements</p>
+              <h3 id="stat-enforcements" class="text-2xl font-black text-gray-800 mt-0.5">85</h3>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center mb-6">
+                <div>
+                  <h4 class="font-bold text-gray-800 text-lg">Revenue Trend</h4>
+                  <p class="text-xs text-gray-400">Monthly breakdown (Millions NGN)</p>
+                </div>
+                <button onclick="generatePDF('financial')" class="text-arconGreen hover:bg-green-50 p-2 rounded-lg transition" title="Download Financial Report PDF">
+                  <i class="ph ph-download-simple text-xl"></i>
+                </button>
+              </div>
+              <div class="h-64 w-full">
+                <canvas id="revChart"></canvas>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <h4 class="font-bold text-gray-800 text-lg">Regulatory Alerts</h4>
+                  <p class="text-xs text-gray-400">Real-time situational awareness</p>
+                </div>
+                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              </div>
+              <div class="flex-1 overflow-y-auto space-y-4 pr-2 max-h-[250px]">
+                <div class="flex gap-3 items-start border-l-2 border-red-500 pl-3">
+                  <div>
+                    <p class="text-xs font-bold text-gray-800">Unlicensed Billboard detected</p>
+                    <p class="text-[10px] text-gray-500">Ikeja, Lagos • 12 mins ago</p>
+                  </div>
+                </div>
+                <div class="flex gap-3 items-start border-l-2 border-yellow-500 pl-3">
+                  <div>
+                    <p class="text-xs font-bold text-gray-800">Compliance Rate Drop</p>
+                    <p class="text-[10px] text-gray-500">Rivers State • 2 hours ago</p>
+                  </div>
+                </div>
+                <div class="flex gap-3 items-start border-l-2 border-green-500 pl-3">
+                  <div>
+                    <p class="text-xs font-bold text-gray-800">New Agency Registration</p>
+                    <p class="text-[10px] text-gray-500">Abuja FCT • 4 hours ago</p>
+                  </div>
+                </div>
+                <div class="flex gap-3 items-start border-l-2 border-gray-300 pl-3">
+                  <div>
+                    <p class="text-xs font-bold text-gray-800">System Backup Complete</p>
+                    <p class="text-[10px] text-gray-500">System • 6 hours ago</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW: AGENCIES -->
+        <div id="view-agencies" class="hidden space-y-6 animate-fade-in pb-8">
+          <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800">Agency Registry</h2>
+              <p class="text-sm text-gray-500">Monitor advertising practitioners and their portfolios.</p>
+            </div>
+            <div class="w-full md:w-auto relative">
+              <i class="ph ph-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+              <input type="text" id="agency-search" oninput="renderAgencies()" placeholder="Search Agency Name or RC..." class="pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm w-full md:w-64 focus:ring-2 focus:ring-arconGreen/20 outline-none">
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 text-gray-400 font-bold text-[11px] uppercase tracking-wider border-b border-gray-100">
+                  <tr>
+                    <th class="px-6 py-4">Agency Details</th>
+                    <th class="px-6 py-4">RC Number</th>
+                    <th class="px-6 py-4 text-center">Active Ads</th>
+                    <th class="px-6 py-4 text-center">Compliance Score</th>
+                    <th class="px-6 py-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="agencies-table-body" class="divide-y divide-gray-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW: REPORTS -->
+        <div id="view-reports" class="hidden space-y-6 animate-fade-in pb-8">
+          <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-20 md:relative">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800">Reports Center</h2>
+              <p class="text-sm text-gray-500">Generate and export official regulatory documents.</p>
+            </div>
+            <div class="flex gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+              <button onclick="setReportPeriod(this, 'Daily')" class="report-period-btn active px-4 py-2 bg-white text-arconGreen font-bold rounded-lg shadow-sm text-xs transition-all">Daily</button>
+              <button onclick="setReportPeriod(this, 'Monthly')" class="report-period-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-bold rounded-lg text-xs transition-all">Monthly</button>
+              <button onclick="setReportPeriod(this, 'Yearly')" class="report-period-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-bold rounded-lg text-xs transition-all">Yearly</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-green-gradient text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10" onclick="generatePDF('executive')">
+              <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
+              <div class="relative z-10">
+                <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl mb-4 border border-white/20"><i class="ph ph-presentation-chart"></i></div>
+                <h3 class="text-lg font-bold">Executive Summary</h3>
+                <p class="text-xs text-green-100 mt-1 mb-6 opacity-80">High-level overview of all KPIs including revenue, compliance, and agency metrics.</p>
+                <button class="w-full py-3 bg-white text-arconGreen rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                  <i class="ph ph-download-simple text-lg"></i> Download PDF
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all" onclick="generatePDF('financial')">
+              <div class="w-12 h-12 bg-green-50 text-arconGreen rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-file-text"></i></div>
+              <h3 class="text-lg font-bold text-gray-800">Financial Report</h3>
+              <p class="text-xs text-gray-400 mt-1 mb-6">Detailed revenue breakdown, collections, and future projections.</p>
+              <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
+                <i class="ph ph-download-simple text-lg"></i> Download PDF
+              </button>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-red-500 hover:shadow-md transition-all" onclick="generatePDF('enforcement')">
+              <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-warning-octagon"></i></div>
+              <h3 class="text-lg font-bold text-gray-800">Enforcement Log</h3>
+              <p class="text-xs text-gray-400 mt-1 mb-6">List of violations, pending actions, and resolved compliance cases.</p>
+              <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
+                <i class="ph ph-download-simple text-lg"></i> Download PDF
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 class="font-bold text-gray-800 text-sm md:text-base">Recent Activity</h3>
+              <span class="text-xs text-gray-400 font-medium">Auto-archived for 90 days</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 text-gray-400 font-bold text-[11px] uppercase tracking-wider">
+                  <tr>
+                    <th class="px-6 py-4">Report Name</th>
+                    <th class="px-6 py-4">Date Generated</th>
+                    <th class="px-6 py-4">Type</th>
+                    <th class="px-6 py-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="report-history-body" class="divide-y divide-gray-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW: MAP -->
+        <div id="view-map" class="hidden h-[75vh] md:h-full flex flex-col bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative animate-fade-in">
+          <div class="absolute top-4 left-4 right-4 z-[400] flex justify-between items-start pointer-events-none">
+            <div class="bg-white/95 backdrop-blur rounded-2xl shadow-xl border border-gray-100 p-4 pointer-events-auto">
+              <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i class="ph ph-globe text-arconGreen"></i> National Compliance Map</h3>
+              <p class="text-[10px] text-gray-400 mt-1">Live feed from zonal offices</p>
+            </div>
+            <div class="bg-white/95 backdrop-blur rounded-full px-4 py-2 shadow-xl border border-gray-100 text-xs font-bold flex gap-4 pointer-events-auto">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-arconGreen shadow-sm shadow-green-500/50"></span> Compliant</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span> Illegal/Expired</span>
+            </div>
+          </div>
+          <div id="map-dg" class="flex-grow w-full bg-slate-100 z-0"></div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- LOADING TOAST -->
+    <div id="toast-loading" class="fixed bottom-24 right-6 bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 hidden animate-slide-up">
+      <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      <div>
+        <p class="font-bold text-sm">Generating PDF...</p>
+        <p class="text-xs text-gray-400">Compiling data and layouts.</p>
+      </div>
+    </div>
+
+    <!-- REPORT STAGING AREA (Hidden but in-viewport for html2canvas) -->
+    <div id="report-staging-area"></div>
+
+    <!-- AGENCY DETAIL MODAL -->
+    <div id="agency-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
+        <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-xl text-gray-900" id="modal-agency-name">--</h3>
+            <p class="text-xs text-gray-500 font-mono" id="modal-agency-rc">RC: --</p>
+          </div>
+          <button onclick="document.getElementById('agency-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="p-6 overflow-y-auto">
+          <div class="flex gap-4 mb-6">
+            <div class="flex-1 bg-green-50 p-4 rounded-2xl border border-green-100">
+              <p class="text-xs font-bold text-green-700 uppercase">Running Ads</p>
+              <h4 class="text-2xl font-black text-green-900" id="modal-agency-ads">0</h4>
+            </div>
+            <div class="flex-1 bg-blue-50 p-4 rounded-2xl border border-blue-100">
+              <p class="text-xs font-bold text-blue-700 uppercase">APCON ID</p>
+              <h4 class="text-lg font-bold text-blue-900" id="modal-agency-id">--</h4>
+            </div>
+          </div>
+          <h4 class="font-bold text-gray-800 mb-3 text-sm border-b pb-2">Active Campaigns</h4>
+          <ul class="space-y-3" id="modal-campaign-list"></ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* =========================
+       DATA
+       ========================= */
+
+    const LOGO_URL = "https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg";
+
+    // Nigeria states + LGAs (kept compact but complete)
+    const NIGERIA_DATA = [
+      {state:"Abia",lgas:["Aba North","Aba South","Arochukwu","Bende","Ikwuano","Isiala Ngwa North","Isiala Ngwa South","Isuikwuato","Obi Ngwa","Ohafia","Osisioma","Ugwunagbo","Ukwa East","Ukwa West","Umuahia North","Umuahia South","Umu Nneochi"]},
+      {state:"Adamawa",lgas:["Demsa","Fufure","Ganye","Gayuk","Gombi","Grie","Hong","Jada","Lamurde","Madagali","Maiha","Mayo Belwa","Michika","Mubi North","Mubi South","Numan","Shelleng","Song","Toungo","Yola North","Yola South"]},
+      {state:"Akwa Ibom",lgas:["Abak","Eastern Obolo","Eket","Esit Eket","Essien Udim","Etim Ekpo","Etinan","Ibeno","Ibesikpo Asutan","Ibiono-Ibom","Ika","Ikono","Ikot Abasi","Ikot Ekpene","Ini","Itu","Mbo","Mkpat-Enin","Nsit-Atai","Nsit-Ibom","Nsit-Ubium","Obot Akara","Okobo","Onna","Oron","Oruk Anam","Udung-Uko","Ukanafun","Uruan","Urue-Offong/Oruko","Uyo"]},
+      {state:"Anambra",lgas:["Aguata","Anambra East","Anambra West","Anaocha","Awka North","Awka South","Ayamelum","Dunukofia","Ekwusigo","Idemili North","Idemili South","Ihiala","Njikoka","Nnewi North","Nnewi South","Ogbaru","Onitsha North","Onitsha South","Orumba North","Orumba South","Oyi"]},
+      {state:"Bauchi",lgas:["Alkaleri","Bauchi","Bogoro","Damban","Darazo","Dass","Gamawa","Ganjuwa","Giade","Itas/Gadau","Jama'are","Katagum","Kirfi","Misau","Ningi","Shira","Tafawa Balewa","Toro","Warji","Zaki"]},
+      {state:"Bayelsa",lgas:["Brass","Ekeremor","Kolokuma/Opokuma","Nembe","Ogbia","Sagbama","Southern Ijaw","Yenagoa"]},
+      {state:"Benue",lgas:["Ado","Agatu","Apa","Buruku","Gboko","Guma","Gwer East","Gwer West","Katsina-Ala","Konshisha","Kwande","Logo","Makurdi","Obi","Ogbadibo","Ohimini","Oju","Okpokwu","Otukpo","Tarka","Ukum","Ushongo","Vandeikya"]},
+      {state:"Borno",lgas:["Abadam","Askira/Uba","Bama","Bayo","Biu","Chibok","Damboa","Dikwa","Gubio","Guzamala","Gwoza","Hawul","Jere","Kaga","Kala/Balge","Konduga","Kukawa","Kwaya Kusar","Mafa","Magumeri","Maiduguri","Marte","Mobbar","Monguno","Ngala","Nganzai","Shani"]},
+      {state:"Cross River",lgas:["Abi","Akamkpa","Akpabuyo","Bakassi","Bekwarra","Biase","Boki","Calabar Municipal","Calabar South","Etung","Ikom","Obanliku","Obubra","Obudu","Odukpani","Ogoja","Yakuur","Yala"]},
+      {state:"Delta",lgas:["Aniocha North","Aniocha South","Bomadi","Burutu","Ethiope East","Ethiope West","Ika North East","Ika South","Isoko North","Isoko South","Ndokwa East","Ndokwa West","Okpe","Oshimili North","Oshimili South","Patani","Sapele","Udu","Ughelli North","Ughelli South","Ukwuani","Uvwie","Warri North","Warri South","Warri South West"]},
+      {state:"Ebonyi",lgas:["Abakaliki","Afikpo North","Afikpo South","Ebonyi","Ezza North","Ezza South","Ikwo","Ishielu","Ivo","Izzi","Ohaozara","Ohaukwu","Onicha"]},
+      {state:"Edo",lgas:["Akoko-Edo","Egor","Esan Central","Esan North-East","Esan South-East","Esan West","Etsako Central","Etsako East","Etsako West","Igueben","Ikpoba Okha","Oredo","Orhionmwon","Ovia North-East","Ovia South-West","Owan East","Owan West","Uhunmwonde"]},
+      {state:"Ekiti",lgas:["Ado Ekiti","Efon","Ekiti East","Ekiti South-West","Ekiti West","Emure","Gbonyin","Ido Osi","Ijero","Ikere","Ikole","Ilejemeje","Irepodun/Ifelodun","Ise/Orun","Moba","Oye"]},
+      {state:"Enugu",lgas:["Aninri","Awgu","Enugu East","Enugu North","Enugu South","Ezeagu","Igbo Etiti","Igbo Eze North","Igbo Eze South","Isi Uzo","Nkanu East","Nkanu West","Nsukka","Oji River","Udenu","Udi","Uzo Uwani"]},
+      {state:"Abuja FCT",lgas:["Abaji","Abuja Municipal","Bwari","Gwagwalada","Kuje","Kwali"]},
+      {state:"Gombe",lgas:["Akko","Balanga","Billiri","Dukku","Funakaye","Gombe","Kaltungo","Kwami","Nafada","Shongom","Yamaltu/Deba"]},
+      {state:"Imo",lgas:["Aboh Mbaise","Ahiazu Mbaise","Ehime Mbano","Ezinihitte","Ideato North","Ideato South","Ihitte/Uboma","Ikeduru","Isiala Mbano","Isu","Mbaitoli","Ngor Okpala","Njaba","Nkwerre","Nwangele","Obowo","Oguta","Ohaji/Egbema","Okigwe","Orlu","Orsu","Oru East","Oru West","Owerri Municipal","Owerri North","Owerri West","Unuimo"]},
+      {state:"Jigawa",lgas:["Auyo","Babura","Biriniwa","Birnin Kudu","Buji","Dutse","Gagarawa","Garki","Gumel","Guri","Gwaram","Gwiwa","Hadejia","Jahun","Kafin Hausa","Kaugama","Kazaure","Kiri Kasama","Kiyawa","Maigatari","Malam Madori","Miga","Ringim","Roni","Sule Tankarkar","Taura","Yankwashi"]},
+      {state:"Kaduna",lgas:["Birnin Gwari","Chikun","Giwa","Igabi","Ikara","Jaba","Jema'a","Kachia","Kaduna North","Kaduna South","Kagarko","Kajuru","Kaura","Kauru","Kubau","Kudan","Lere","Makarfi","Sabon Gari","Sanga","Soba","Zangon Kataf","Zaria"]},
+      {state:"Kano",lgas:["Ajingi","Albasu","Bagwai","Bebeji","Bichi","Bunkure","Dala","Dambatta","Dawakin Kudu","Dawakin Tofa","Doguwa","Fagge","Gabasawa","Garko","Garun Mallam","Gaya","Gezawa","Gwale","Gwarzo","Kabo","Kano Municipal","Karaye","Kibiya","Kiru","Kumbotso","Kunchi","Kura","Madobi","Makoda","Minjibir","Nasarawa","Rano","Rimin Gado","Rogo","Shanono","Sumaila","Takai","Tarauni","Tofa","Tsanyawa","Tudun Wada","Ungogo","Warawa","Wudil"]},
+      {state:"Katsina",lgas:["Bakori","Batagarawa","Batsari","Baure","Bindawa","Charanchi","Dandume","Danja","Dan Musa","Daura","Dutsi","Dutsin Ma","Faskari","Funtua","Ingawa","Jibia","Kafur","Kaita","Kankara","Kankia","Katsina","Kurfi","Kusada","Mai'Adua","Malumfashi","Mani","Mashi","Matazu","Musawa","Rimi","Sabuwa","Safana","Sandamu","Zango"]},
+      {state:"Kebbi",lgas:["Aleiro","Arewa Dandi","Argungu","Augie","Bagudo","Birnin Kebbi","Bunza","Dandi","Fakai","Gwandu","Jega","Kalgo","Koko/Besse","Maiyama","Ngaski","Sakaba","Shanga","Suru","Wasagu/Danko","Yauri","Zuru"]},
+      {state:"Kogi",lgas:["Adavi","Ajaokuta","Ankpa","Bassa","Dekina","Ibaji","Idah","Igalamela Odolu","Ijumu","Kabba/Bunu","Kogi","Lokoja","Mopa Muro","Ofu","Ogori/Magongo","Okehi","Okene","Olamaboro","Omala","Yagba East","Yagba West"]},
+      {state:"Kwara",lgas:["Asa","Baruten","Edu","Ekiti","Ifelodun","Ilorin East","Ilorin South","Ilorin West","Irepodun","Isin","Kaiama","Moro","Offa","Oke Ero","Oyun","Pategi"]},
+      {state:"Lagos",lgas:["Agege","Ajeromi-Ifelodun","Alimosho","Amuwo-Odofin","Apapa","Badagry","Epe","Eti Osa","Ibeju-Lekki","Ifako-Ijaiye","Ikeja","Ikorodu","Kosofe","Lagos Island","Lagos Mainland","Mushin","Ojo","Oshodi-Isolo","Shomolu","Surulere"]},
+      {state:"Nasarawa",lgas:["Akwanga","Awe","Doma","Karu","Keana","Keffi","Kokona","Lafia","Nasarawa","Nasarawa Egon","Obi","Toto","Wamba"]},
+      {state:"Niger",lgas:["Agaie","Agwara","Bida","Borgu","Bosso","Chanchaga","Edati","Gbako","Gurara","Katcha","Kontagora","Lapai","Lavun","Magama","Mariga","Mashegu","Mokwa","Moya","Paikoro","Rafi","Rijau","Shiroro","Suleja","Tafa","Wushishi"]},
+      {state:"Ogun",lgas:["Abeokuta North","Abeokuta South","Ado-Odo/Ota","Egbado North","Egbado South","Ewekoro","Ifo","Ijebu East","Ijebu North","Ijebu North East","Ijebu Ode","Ikenne","Imeko Afon","Ipokia","Obafemi Owode","Odeda","Odogbolu","Ogun Waterside","Remo North","Shagamu"]},
+      {state:"Ondo",lgas:["Akoko North-East","Akoko North-West","Akoko South-East","Akoko South-West","Akure North","Akure South","Ese Odo","Idanre","Ifedore","Ilaje","Ile Oluji/Okeigbo","Irele","Odigbo","Okitipupa","Ondo East","Ondo West","Ose","Owo"]},
+      {state:"Osun",lgas:["Atakunmosa East","Atakunmosa West","Aiyedaade","Aiyedire","Boluwaduro","Boripe","Ede North","Ede South","Egbedore","Ejigbo","Ife Central","Ife East","Ife North","Ife South","Ifedayo","Ifelodun","Ila","Ilesa East","Ilesa West","Irepodun","Irewole","Isokan","Iwo","Obokun","Odo Otin","Ola Oluwa","Olorunda","Oriade","Orolu","Osogbo"]},
+      {state:"Oyo",lgas:["Afijio","Akinyele","Atiba","Atisbo","Egbeda","Ibadan North","Ibadan North-East","Ibadan North-West","Ibadan South-East","Ibadan South-West","Ibarapa Central","Ibarapa East","Ibarapa North","Ido","Irepo","Iseyin","Itesiwaju","Iwajowa","Kajola","Lagelu","Ogbomosho North","Ogbomosho South","Ogo Oluwa","Olorunsogo","Oluyole","Ona Ara","Orelope","Ori Ire","Oyo East","Oyo West","Saki East","Saki West","Surulere"]},
+      {state:"Plateau",lgas:["Barkin Ladi","Bassa","Bokkos","Jos East","Jos North","Jos South","Kanam","Kanke","Langtang North","Langtang South","Mangu","Mikang","Pankshin","Qua'an Pan","Riyom","Shendam","Wase"]},
+      {state:"Rivers",lgas:["Abua/Odual","Ahoada East","Ahoada West","Akuku-Toru","Andoni","Asari-Toru","Bonny","Degema","Eleme","Emohua","Etche","Gokana","Ikwerre","Khana","Obio/Akpor","Ogba/Egbema/Ndoni","Ogu/Bolo","Okrika","Omuma","Opobo/Nkoro","Oyigbo","Port Harcourt","Tai"]},
+      {state:"Sokoto",lgas:["Binji","Bodinga","Dange Shuni","Gada","Goronyo","Gudu","Gwadabawa","Illela","Isa","Kebbe","Kware","Rabah","Sabon Birni","Shagari","Silame","Sokoto North","Sokoto South","Tambuwal","Tangaza","Tureta","Wamako","Wurno","Yabo"]},
+      {state:"Taraba",lgas:["Ardo Kola","Bali","Donga","Gashaka","Gassol","Ibi","Jalingo","Karim Lamido","Kumi","Lau","Sardauna","Takum","Ussa","Wukari","Yorro","Zing"]},
+      {state:"Yobe",lgas:["Bade","Bursari","Damaturu","Fika","Fune","Geidam","Gujba","Gulani","Jakusko","Karasuwa","Machina","Nangere","Nguru","Potiskum","Tarmuwa","Yunusari","Yusufari"]},
+      {state:"Zamfara",lgas:["Anka","Bakura","Birnin Magaji/Kiyaw","Bukkuyum","Bungudu","Gummi","Gusau","Kaura Namoda","Maradun","Maru","Shinkafi","Talata Mafara","Tsafe","Zurmi"]}
+    ];
+
+    const AGENCIES = [
+      { name: "Insight Publicis", rc: "RC123456", id: "APCON/001", ads: 45, score: 98, campaigns: ["Glo Unlimited", "Pepsi Naija", "Heineken UEFA"] },
+      { name: "X3M Ideas", rc: "RC987654", id: "APCON/042", ads: 32, score: 95, campaigns: ["DSTV Premium", "Access Bank Marathon"] },
+      { name: "Noah's Ark", rc: "RC456789", id: "APCON/015", ads: 28, score: 92, campaigns: ["Airtel 4G", "Indomie Noodles"] },
+      { name: "DDB Lagos", rc: "RC112233", id: "APCON/008", ads: 40, score: 96, campaigns: ["MTN 5G", "Fidelity Bank"] },
+      { name: "Yellow Brick Road", rc: "RC554433", id: "APCON/102", ads: 12, score: 88, campaigns: ["First Bank Centenary"] },
+      { name: "MediaReach OMD", rc: "RC778899", id: "APCON/055", ads: 55, score: 99, campaigns: ["Guinness Gold", "Nestle Milo", "Omo Detergent"] },
+      { name: "7even Interactive", rc: "RC998877", id: "APCON/110", ads: 18, score: 89, campaigns: ["Fidelity Bank", "Uber Nigeria"] },
+      { name: "So&U", rc: "RC445566", id: "APCON/020", ads: 38, score: 94, campaigns: ["Globacom", "Guinness"] }
+    ];
+
+    let mapInstance = null;
+    let revChart = null;
+    let currentReportPeriod = 'Daily';
+
+    // Report history
+    const MOCK_REPORTS = [
+      { name: "Executive Summary - Q3", date: "2025-10-01", type: "Executive Summary", key: "executive", period: "Quarterly" },
+      { name: "Financial Audit Oct", date: "2025-10-05", type: "Financial Report", key: "financial", period: "Monthly" }
+    ];
+
+    /* =========================
+       CORE INIT
+       ========================= */
+    function init() {
+      populateStates();
+      setView('overview');
+      initCharts();
+      renderAgencies();
+      renderReportHistory();
+    }
+
+    function setView(viewId) {
+      ['overview', 'agencies', 'reports', 'map'].forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
+      document.getElementById('view-' + viewId).classList.remove('hidden');
+
+      document.querySelectorAll('.desktop-nav-btn, .mobile-nav-btn').forEach(el => {
+        el.classList.remove('text-arconGreen', 'bg-white', 'shadow-lg');
+        if (el.classList.contains('desktop-nav-btn')) el.classList.add('text-white/80', 'hover:bg-white/10');
+        else el.classList.add('text-gray-400');
+      });
+
+      const dBtn = document.querySelector(`.desktop-nav-btn[onclick*="${viewId}"]`);
+      if (dBtn) {
+        dBtn.classList.remove('text-white/80', 'hover:bg-white/10');
+        dBtn.classList.add('bg-white', 'text-arconGreen', 'shadow-lg');
+      }
+
+      const mBtn = document.getElementById('mob-nav-' + viewId);
+      if (mBtn) {
+        mBtn.classList.remove('text-gray-400');
+        mBtn.classList.add('text-arconGreen');
+      }
+
+      document.getElementById('page-title').innerText = viewId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      if (viewId === 'map') setTimeout(initMap, 200);
+    }
+
+    /* =========================
+       FILTERS
+       ========================= */
+    function populateStates() {
+      const sel = document.getElementById('filter-state');
+      NIGERIA_DATA.slice().sort((a, b) => a.state.localeCompare(b.state)).forEach(s => {
+        let opt = document.createElement('option');
+        opt.value = s.state; opt.innerText = s.state;
+        sel.appendChild(opt);
+      });
+    }
+
+    function populateLgas() {
+      const stateVal = document.getElementById('filter-state').value;
+      const lgaSel = document.getElementById('filter-lga');
+      lgaSel.innerHTML = '<option value="all">All LGAs</option>';
+
+      const stateData = NIGERIA_DATA.find(s => s.state === stateVal);
+      if (stateData) {
+        stateData.lgas.slice().sort().forEach(l => {
+          let opt = document.createElement('option');
+          opt.value = l; opt.innerText = l;
+          lgaSel.appendChild(opt);
+        });
+      }
+    }
+
+    function applyFilters() {
+      const state = document.getElementById('filter-state').value;
+      const lga = document.getElementById('filter-lga').value;
+
+      const factor = state === 'all' ? 1 : 0.4;
+      document.getElementById('stat-revenue').innerText = '₦' + (45.2 * factor * (0.9 + Math.random() * 0.2)).toFixed(1) + 'M';
+      document.getElementById('stat-compliance').innerText = Math.floor(68 * (0.8 + Math.random() * 0.4)) + '%';
+      document.getElementById('stat-agencies').innerText = Math.floor(1240 * factor);
+      document.getElementById('stat-enforcements').innerText = Math.floor(85 * factor);
+
+      if (revChart) {
+        revChart.data.datasets[0].data = revChart.data.datasets[0].data.map(v => v * factor * (0.8 + Math.random() * 0.4));
+        revChart.update();
+      }
+
+      const locText = state === 'all' ? 'National View' : `${state}${lga !== 'all' ? ', ' + lga : ''}`;
+      alert(`Dashboard updated for: ${locText}`);
+    }
+
+    /* =========================
+       AGENCIES
+       ========================= */
+    function renderAgencies() {
+      const search = (document.getElementById('agency-search')?.value || '').toLowerCase();
+      const tbody = document.getElementById('agencies-table-body');
+      tbody.innerHTML = '';
+
+      AGENCIES
+        .filter(a => a.name.toLowerCase().includes(search) || a.rc.toLowerCase().includes(search))
+        .forEach(agency => {
+          const row = `
+            <tr class="hover:bg-slate-50 border-b border-gray-50 transition cursor-pointer" onclick="showAgencyModal('${escapeHtmlAttr(agency.name)}')">
+              <td class="px-6 py-4 font-bold text-gray-800">${escapeHtml(agency.name)}</td>
+              <td class="px-6 py-4 font-mono text-gray-500 text-xs">${escapeHtml(agency.rc)}</td>
+              <td class="px-6 py-4 text-center"><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-bold">${agency.ads} Active</span></td>
+              <td class="px-6 py-4 text-center">
+                <div class="w-full bg-gray-100 rounded-full h-2 w-24 mx-auto">
+                  <div class="bg-green-500 h-2 rounded-full" style="width:${agency.score}%"></div>
+                </div>
+                <span class="text-[10px] text-gray-400 font-bold mt-1 block">${agency.score}%</span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <button class="text-gray-400 hover:text-arconGreen"><i class="ph ph-caret-right text-lg"></i></button>
+              </td>
+            </tr>
+          `;
+          tbody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+
+    function showAgencyModal(name) {
+      const agency = AGENCIES.find(a => a.name === name);
+      if (!agency) return;
+
+      document.getElementById('modal-agency-name').innerText = agency.name;
+      document.getElementById('modal-agency-rc').innerText = `RC: ${agency.rc}`;
+      document.getElementById('modal-agency-id').innerText = agency.id;
+      document.getElementById('modal-agency-ads').innerText = agency.ads;
+
+      const list = document.getElementById('modal-campaign-list');
+      list.innerHTML = agency.campaigns.map(c => `
+        <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-arconGreen"><i class="ph ph-megaphone-simple"></i></div>
+          <div>
+            <p class="text-sm font-bold text-gray-800">${escapeHtml(c)}</p>
+            <p class="text-[10px] text-green-600 font-bold">● Running</p>
+          </div>
+        </li>
+      `).join('');
+
+      document.getElementById('agency-modal').classList.remove('hidden');
+    }
+
+    /* =========================
+       REPORTS UI
+       ========================= */
+    function renderReportHistory() {
+      const tbody = document.getElementById('report-history-body');
+      tbody.innerHTML = '';
+      MOCK_REPORTS.forEach((r) => {
+        const row = `
+          <tr class="hover:bg-slate-50 border-b border-gray-50 transition">
+            <td class="px-6 py-4 font-bold text-gray-800 flex items-center gap-2">
+              <i class="ph ph-file-pdf text-red-500 text-lg"></i> ${escapeHtml(r.name)}
+            </td>
+            <td class="px-6 py-4 text-gray-500 text-xs">${escapeHtml(r.date)}</td>
+            <td class="px-6 py-4">
+              <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${escapeHtml(r.type)}</span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <button onclick="generatePDF('${escapeHtmlAttr(r.key || 'executive')}')" class="text-arconGreen font-bold text-xs hover:underline">Download</button>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('afterbegin', row);
+      });
+    }
+
+    function setReportPeriod(btn, period) {
+      document.querySelectorAll('.report-period-btn').forEach(b => {
+        b.classList.remove('bg-white', 'text-arconGreen', 'shadow-sm');
+        b.classList.add('text-gray-500');
+      });
+      btn.classList.add('bg-white', 'text-arconGreen', 'shadow-sm');
+      btn.classList.remove('text-gray-500');
+      currentReportPeriod = period;
+    }
+
+    /* =========================
+       ✅ EXECUTIVE PDF TEMPLATES
+       - Built for A4 210mm x 297mm
+       - Page breaks included
+       ========================= */
+    function getReportHTML(type) {
+      const now = new Date();
+      const dateHuman = now.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
+      const ref = 'ARCON-' + String(Math.floor(Math.random() * 900000) + 100000);
+
+      // Pull live stats from dashboard (fallbacks)
+      const revenueText = (document.getElementById('stat-revenue')?.innerText || "₦45.2M");
+      const complianceText = (document.getElementById('stat-compliance')?.innerText || "68%");
+      const enforcementsText = (document.getElementById('stat-enforcements')?.innerText || "85");
+      const agenciesText = (document.getElementById('stat-agencies')?.innerText || "1,240");
+
+      const period = String(currentReportPeriod || 'Daily').toUpperCase();
+      const docLabel = (type === 'executive') ? 'EXECUTIVE' : (type === 'financial') ? 'FINANCIAL' : 'ENFORCEMENT';
+
+      const header = `
+        <div class="report-topbar"></div>
+        <div class="report-watermark">ARCON IRMS</div>
+
+        <div class="report-header">
+          <div class="report-brand">
+            <div class="report-logo">
+              <img src="${LOGO_URL}" crossorigin="anonymous" />
+            </div>
+            <div class="report-titleblock">
+              <h1>Advertising Regulatory Council of Nigeria</h1>
+              <div class="sub">Integrated Regulatory Management System (IRMS) • Confidential Executive Report</div>
+              <div class="mini">Plot 12, Utako District, Abuja • www.arcon.gov.ng</div>
+            </div>
+          </div>
+
+          <div class="report-meta">
+            <div>FEDERAL REPUBLIC OF NIGERIA</div>
+            <div>HEAD OFFICE, ABUJA</div>
+            <div class="pill">${docLabel} REPORT</div>
+          </div>
+        </div>
+
+        <div class="report-strip">
+          <div>PERIOD: ${period}</div>
+          <div>DATE: ${dateHuman}</div>
+          <div>REF: ${ref}</div>
+          <div>DOC: ${docLabel}</div>
+        </div>
+      `;
+
+      const signAndFoot = `
+        <div class="report-sign">
+          <div class="report-conf">
+            <span>CONFIDENTIAL</span>
+            <span style="opacity:.45;">•</span>
+            <span>DIGITALLY GENERATED</span>
+          </div>
+
+          <div class="sigblock">
+            <div class="signame">Dr. Olalekan Fadolapo</div>
+            <div class="sigline">Director General</div>
+            <div class="sigmini">Digitally Signed & Authenticated</div>
+          </div>
+        </div>
+
+        <div class="report-footnote">
+          <div>Generated via ARCON IRMS • System ID: DG-TERM-01</div>
+          <div>© Federal Government of Nigeria</div>
+        </div>
+      `;
+
+      // EXECUTIVE (2 pages)
+      if (type === 'executive') {
+        return `
+          <div class="report-root">
+            <div class="report-page">
+              ${header}
+
+              <div class="report-section-title">1.0 EXECUTIVE SUMMARY</div>
+
+              <div class="report-kpi-row">
+                <div class="report-kpi kpi-green">
+                  <div class="label">Total Revenue</div>
+                  <div class="value">${escapeHtml(revenueText)}</div>
+                  <div class="hint">▲ 12% vs Target • Collections strengthened</div>
+                </div>
+                <div class="report-kpi kpi-gold">
+                  <div class="label">Compliance Rate</div>
+                  <div class="value">${escapeHtml(complianceText)}</div>
+                  <div class="hint">Priority: Rivers / Delta • Requires attention</div>
+                </div>
+                <div class="report-kpi kpi-red">
+                  <div class="label">Active Enforcements</div>
+                  <div class="value">${escapeHtml(enforcementsText)}</div>
+                  <div class="hint">Ongoing cases • Enforcement escalation</div>
+                </div>
+              </div>
+
+              <div class="report-subtitle">1.1 Strategic Overview</div>
+              <div class="report-text">
+                The period under review indicates a robust performance in revenue generation, driven by improved digitized vetting throughput and practitioner onboarding.
+                However, compliance rates in key corridors remain below desired thresholds, requiring targeted zonal interventions and tighter integration with state signage authorities.
+                The agency registry continues to grow, expanding oversight coverage nationwide and strengthening regulatory intelligence.
+              </div>
+
+              <div class="report-subtitle">1.2 Key Recommendations</div>
+              <ul class="report-bullets">
+                <li>Deploy special enforcement task force to Port Harcourt and Asaba to address high-incidence illegal placements.</li>
+                <li>Initiate digital integration with State Signage Agencies (e.g., LASAA, KASUPDA) for unified billing and shared enforcement signals.</li>
+                <li>Review vetting fee structure for emerging digital media formats and influencer-led advertising verticals.</li>
+                <li>Strengthen practitioner verification: license renewal gating + automated compliance scoring tied to agency portfolios.</li>
+              </ul>
+
+              ${signAndFoot}
+            </div>
+
+            <div class="report-page page-break">
+              ${header}
+
+              <div class="report-section-title">2.0 PERFORMANCE METRICS</div>
+
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>KPI Category</th>
+                    <th>Target</th>
+                    <th>Actual</th>
+                    <th>Variance</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>License Revenue</td>
+                    <td>₦40.0M</td>
+                    <td>₦45.2M</td>
+                    <td>+13%</td>
+                    <td><span class="report-badge badge-success">Exceeded</span></td>
+                  </tr>
+                  <tr>
+                    <td>Agency Registration</td>
+                    <td>1,200</td>
+                    <td>${escapeHtml(agenciesText)}</td>
+                    <td>+3.3%</td>
+                    <td><span class="report-badge badge-success">On Track</span></td>
+                  </tr>
+                  <tr>
+                    <td>Ad Vetting Volume</td>
+                    <td>500</td>
+                    <td>485</td>
+                    <td>-3%</td>
+                    <td><span class="report-badge badge-warning">Near Target</span></td>
+                  </tr>
+                  <tr>
+                    <td>Litigation Cases</td>
+                    <td>&lt; 5</td>
+                    <td>2</td>
+                    <td>-60%</td>
+                    <td><span class="report-badge badge-success">Optimal</span></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="report-subtitle">2.1 Notes</div>
+              <div class="report-text">
+                The KPI matrix reflects system-captured outcomes processed through IRMS. “Actual” values are compiled from live operational modules (agency registry, vetting transactions, and enforcement logs).
+                Where zoning drill-down is applied on the dashboard, this report reflects the current applied view.
+              </div>
+
+              ${signAndFoot}
+            </div>
+          </div>
+        `;
+      }
+
+      // FINANCIAL (2 pages)
+      if (type === 'financial') {
+        return `
+          <div class="report-root">
+            <div class="report-page">
+              ${header}
+
+              <div class="report-section-title">1.0 FINANCIAL OVERVIEW</div>
+
+              <div class="report-text">
+                Detailed breakdown of all revenue streams processed through the Integrated Regulatory Management System (IRMS).
+                Figures represent aggregated transactions for the selected period and reflect vetting fees, practitioner licensing, corporate registrations, and penalties.
+              </div>
+
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Revenue Stream</th>
+                    <th style="text-align:center;">Tx Count</th>
+                    <th style="text-align:right;">Gross (NGN)</th>
+                    <th style="text-align:right;">Net (NGN)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Vetting Fees (Digital)</td><td style="text-align:center;">320</td><td style="text-align:right;">18,500,000</td><td style="text-align:right;">18,500,000</td></tr>
+                  <tr><td>Vetting Fees (Traditional)</td><td style="text-align:center;">130</td><td style="text-align:right;">6,500,000</td><td style="text-align:right;">6,500,000</td></tr>
+                  <tr><td>Practitioner Licenses</td><td style="text-align:center;">120</td><td style="text-align:right;">12,000,000</td><td style="text-align:right;">12,000,000</td></tr>
+                  <tr><td>Fines & Penalties</td><td style="text-align:center;">45</td><td style="text-align:right;">5,200,000</td><td style="text-align:right;">5,200,000</td></tr>
+                  <tr><td>Corporate Registration</td><td style="text-align:center;">30</td><td style="text-align:right;">3,000,000</td><td style="text-align:right;">3,000,000</td></tr>
+                  <tr style="font-weight:900;">
+                    <td>TOTAL REVENUE</td>
+                    <td style="text-align:center;">645</td>
+                    <td style="text-align:right;">45,200,000</td>
+                    <td style="text-align:right;">45,200,000</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="report-subtitle">1.1 Financial Position</div>
+              <ul class="report-bullets">
+                <li>Collections efficiency improved due to digitized vetting throughput and reduced manual reconciliation.</li>
+                <li>Penalty revenue is elevated due to strict enforcement actions in high-traffic corridors.</li>
+                <li>Projected growth relies on state signage integration and automated compliance scoring enforcement.</li>
+              </ul>
+
+              ${signAndFoot}
+            </div>
+
+            <div class="report-page page-break">
+              ${header}
+
+              <div class="report-section-title">2.0 ZONAL CONTRIBUTION</div>
+
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Region</th>
+                    <th>Revenue</th>
+                    <th>Growth (MoM)</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Lagos Zone</td><td>₦28,500,000</td><td><span class="report-badge badge-success">+5.2%</span></td><td>Digital vetting dominance</td></tr>
+                  <tr><td>Abuja HQ</td><td>₦10,200,000</td><td><span class="report-badge badge-success">+1.8%</span></td><td>Licensing & compliance audits</td></tr>
+                  <tr><td>Kano Zone</td><td>₦4,100,000</td><td><span class="report-badge badge-warning">-0.5%</span></td><td>Seasonality + enforcement cycle</td></tr>
+                  <tr><td>Port Harcourt</td><td>₦2,400,000</td><td><span class="report-badge badge-danger">-2.1%</span></td><td>Compliance drop requires action</td></tr>
+                </tbody>
+              </table>
+
+              <div class="report-subtitle">2.1 Recommendations</div>
+              <ul class="report-bullets">
+                <li>Deploy unified billing + receipts with signage agencies to reduce leakage and expand collection footprint.</li>
+                <li>Introduce category-based fee schedule for digital/creator formats with stronger verification gates.</li>
+                <li>Automate zonal targets and enforce KPI accountability dashboards for directors.</li>
+              </ul>
+
+              ${signAndFoot}
+            </div>
+          </div>
+        `;
+      }
+
+      // ENFORCEMENT (2 pages)
+      return `
+        <div class="report-root">
+          <div class="report-page">
+            ${header}
+
+            <div class="report-section-title" style="background:#7f1d1d;">1.0 ENFORCEMENT ACTIONS LOG</div>
+
+            <div class="report-text">
+              Record of regulatory breaches, investigative actions, and sanctions imposed for the selected period.
+              This log is generated from IRMS enforcement records, including notices, seal actions, removals, and litigation triggers.
+            </div>
+
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Entity / Agency</th>
+                  <th>Violation Type</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>2025-10-12</td><td>Globus Marketing</td><td>Illegal Siting (No Permit)</td><td>Ikeja, Lagos</td><td><span class="report-badge badge-danger">Sanctioned</span></td></tr>
+                <tr><td>2025-10-11</td><td>Prime Media Ltd</td><td>Unapproved Creative</td><td>Wuse II, Abuja</td><td><span class="report-badge badge-warning">Under Review</span></td></tr>
+                <tr><td>2025-10-09</td><td>City Wall Ads</td><td>Expired License</td><td>GRA, Port Harcourt</td><td><span class="report-badge badge-warning">Removal Notice</span></td></tr>
+                <tr><td>2025-10-08</td><td>NextGen Promo</td><td>Indecent Exposure</td><td>Kano Municipal</td><td><span class="report-badge badge-danger">Litigation</span></td></tr>
+                <tr><td>2025-10-05</td><td>Alpha Outdoor</td><td>Non-payment of Fees</td><td>Lekki, Lagos</td><td><span class="report-badge badge-danger">Sealed</span></td></tr>
+                <tr><td>2025-10-02</td><td>Zenith Boards</td><td>Structural Defect</td><td>Enugu North</td><td><span class="report-badge badge-success">Resolved</span></td></tr>
+              </tbody>
+            </table>
+
+            ${signAndFoot}
+          </div>
+
+          <div class="report-page page-break">
+            ${header}
+
+            <div class="report-section-title" style="background:#0f172a;">2.0 COMPLIANCE SUMMARY</div>
+
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Total Violations Reported</td><td>142</td><td><span class="report-badge badge-warning">Elevated</span></td></tr>
+                <tr><td>Compliance Notices Served</td><td>98</td><td><span class="report-badge badge-success">Operational</span></td></tr>
+                <tr><td>Direct Enforcement (Removals)</td><td>22</td><td><span class="report-badge badge-warning">Active</span></td></tr>
+                <tr><td>Pending Legal Actions</td><td>4</td><td><span class="report-badge badge-danger">High Priority</span></td></tr>
+              </tbody>
+            </table>
+
+            <div class="report-subtitle">2.1 Actions Required</div>
+            <ul class="report-bullets">
+              <li>Increase patrol frequency in Lagos high-traffic corridors and Abuja arterial routes.</li>
+              <li>Enforce automated expiry lockouts for agencies with unresolved compliance notices.</li>
+              <li>Strengthen creative approval verification for sensitive categories before outdoor placements.</li>
+            </ul>
+
+            ${signAndFoot}
+          </div>
+        </div>
+      `;
+    }
+
+    /* =========================
+       ✅ PDF GENERATION (FIX CROPPING + BLANK)
+       ========================= */
+    async function generatePDF(type) {
+      const toast = document.getElementById('toast-loading');
+      const staging = document.getElementById('report-staging-area');
+      toast.classList.remove('hidden');
+
+      // Inject report HTML
+      staging.innerHTML = getReportHTML(type);
+      const reportEl = staging.querySelector('.report-root');
+
+      if (!reportEl) {
+        toast.classList.add('hidden');
+        alert("Report template failed to render.");
+        return;
+      }
+
+      // Temporarily bring staging into render stack (still invisible)
+      const prev = {
+        opacity: staging.style.opacity,
+        zIndex: staging.style.zIndex,
+        left: staging.style.left,
+        top: staging.style.top
+      };
+
+      staging.style.left = "0px";
+      staging.style.top = "0px";
+      staging.style.zIndex = "9999";
+      staging.style.opacity = "0.001";
+
+      try {
+        await waitForReportAssets(reportEl);
+
+        const rect = reportEl.getBoundingClientRect();
+        const w = Math.ceil(rect.width);
+        const h = Math.ceil(rect.height);
+
+        const todayISO = new Date().toISOString().slice(0, 10);
+        const period = String(currentReportPeriod || 'Daily').toUpperCase();
+        const typeLabel = type === 'executive' ? 'EXECUTIVE' : type === 'financial' ? 'FINANCIAL' : 'ENFORCEMENT';
+        const filename = safeFilename(`ARCON_${typeLabel}_${period}_${todayISO}.pdf`);
+
+        const opt = {
+          margin: 0,
+          filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 3,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: "#ffffff",
+
+            // ✅ Kill crop/offset
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
+
+            // ✅ Force exact capture window
+            width: w,
+            height: h,
+            windowWidth: w,
+            windowHeight: h
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] }
+        };
+
+        await html2pdf().set(opt).from(reportEl).save();
+
+        // Add to history
+        const friendlyType =
+          type === 'executive' ? 'Executive Summary' :
+          type === 'financial' ? 'Financial Report' :
+          'Enforcement Log';
+
+        MOCK_REPORTS.unshift({
+          name: `${friendlyType} - ${currentReportPeriod}`,
+          date: todayISO,
+          type: friendlyType,
+          key: type,
+          period: currentReportPeriod
+        });
+        renderReportHistory();
+
+      } catch (err) {
+        console.error(err);
+        alert("Error generating PDF. Please try again.");
+      } finally {
+        // Restore staging
+        staging.style.opacity = prev.opacity || "0";
+        staging.style.zIndex = prev.zIndex || "-1";
+        staging.style.left = prev.left || "0px";
+        staging.style.top = prev.top || "0px";
+
+        toast.classList.add('hidden');
+      }
+    }
+
+    // Wait for fonts + images + layout (prevents blank PDFs)
+    async function waitForReportAssets(rootEl) {
+      try {
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      } catch (_) {}
+
+      const imgs = Array.from(rootEl.querySelectorAll('img'));
+      await Promise.all(imgs.map(img => new Promise(resolve => {
+        if (img.complete && img.naturalWidth > 0) return resolve();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      })));
+
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    }
+
+    function safeFilename(name) {
+      return String(name).replace(/[\\/:*?"<>|]+/g, "_").replace(/\s+/g, "_");
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeHtmlAttr(str) {
+      // attribute-safe (still basic)
+      return escapeHtml(str).replace(/"/g, "&quot;");
+    }
+
+    /* =========================
+       MAP
+       ========================= */
+    function initMap() {
+      if (mapInstance) { mapInstance.invalidateSize(); return; }
+      mapInstance = L.map('map-dg').setView([9.0820, 8.6753], 6);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM' }).addTo(mapInstance);
+
+      const style = { color: '#ffffff', fillColor: '#008751', fillOpacity: 0.6, radius: 6, weight: 2 };
+      L.circleMarker([9.07, 7.39], style).addTo(mapInstance);
+      L.circleMarker([6.52, 3.37], style).addTo(mapInstance);
+    }
+
+    /* =========================
+       CHARTS
+       ========================= */
+    function initCharts() {
+      const canvas = document.getElementById('revChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const grad = ctx.createLinearGradient(0, 0, 0, 300);
+      grad.addColorStop(0, 'rgba(0, 135, 81, 0.15)');
+      grad.addColorStop(1, 'rgba(0, 135, 81, 0)');
+
+      revChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Revenue',
+            data: [15, 22, 18, 30, 28, 45.2],
+            borderColor: '#008751',
+            backgroundColor: grad,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { display: false }, y: { display: false } }
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
