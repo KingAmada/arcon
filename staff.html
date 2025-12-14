@@ -66,6 +66,10 @@
       background-size: 50%;
       opacity: 0.05;
     }
+
+    .tab-btn.active {
+      @apply border-arconGreen text-arconGreen bg-green-50;
+    }
   </style>
 </head>
 
@@ -255,27 +259,46 @@
         <!-- REVIEWS VIEW -->
         <div id="view-reviews" class="hidden space-y-6 h-full flex flex-col">
           <!-- Toolbar -->
-          <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <div class="flex flex-wrap gap-2 w-full md:w-auto">
-              <div class="relative flex-grow md:flex-grow-0">
+          <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            
+            <div class="flex flex-col md:flex-row gap-2 w-full xl:w-auto">
+              <!-- Search -->
+              <div class="relative w-full md:w-64">
                 <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
                 <input type="text" id="review-search" oninput="renderReviews()" placeholder="Search ID, Sponsor..." class="w-full pl-10 pr-4 py-2 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-arconGreen outline-none">
               </div>
-              <select id="review-filter" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-4 py-2 outline-none font-medium">
-                <option value="all">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Active">Active</option>
-                <option value="Suspended">Suspended</option>
-                <option value="Expired">Expired</option>
-              </select>
-              <select id="review-sort" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-4 py-2 outline-none font-medium">
+              
+              <!-- Filters -->
+              <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+                <select id="review-state" onchange="populateReviewLgas(); renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium min-w-[140px]">
+                  <option value="all">All States</option>
+                  <!-- Populated via JS -->
+                </select>
+                
+                <select id="review-lga" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium min-w-[140px]">
+                  <option value="all">All LGAs</option>
+                  <!-- Populated via JS -->
+                </select>
+
+                <select id="review-filter" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium">
+                  <option value="all">All Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Active">Active</option>
+                  <option value="Suspended">Suspended</option>
+                  <option value="Expired">Expired</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4 w-full xl:w-auto justify-between xl:justify-end">
+              <select id="review-sort" onchange="renderReviews()" class="bg-gray-50 border border-gray-300 text-sm rounded-lg px-3 py-2 outline-none font-medium">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
                 <option value="sponsor">Sponsor Name</option>
               </select>
-            </div>
-            <div class="text-xs text-gray-500 font-medium">
-              Showing <span class="font-bold text-gray-800" id="review-count">0</span> records
+              <div class="text-xs text-gray-500 font-medium whitespace-nowrap">
+                Showing <span class="font-bold text-gray-800" id="review-count">0</span> records
+              </div>
             </div>
           </div>
 
@@ -348,10 +371,18 @@
         </div>
       </div>
 
+      <!-- Tab Navigation -->
+      <div class="bg-gray-50 px-6 pt-4 border-b border-gray-200 flex gap-4">
+        <button onclick="switchTab('details')" id="tab-btn-details" class="tab-btn active pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Overview</button>
+        <button onclick="switchTab('media')" id="tab-btn-media" class="tab-btn pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Media & Creative</button>
+        <button onclick="switchTab('finance')" id="tab-btn-finance" class="tab-btn pb-3 px-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">Finance & Payment</button>
+      </div>
+
       <!-- Modal Body (Scrollable) -->
       <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
+        
+        <!-- TAB: DETAILS -->
+        <div id="tab-details" class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
           <!-- Left Col: Details -->
           <div class="lg:col-span-2 space-y-6">
             <!-- Info Card -->
@@ -438,8 +469,71 @@
               </div>
             </div>
           </div>
-
         </div>
+
+        <!-- TAB: MEDIA -->
+        <div id="tab-media" class="hidden animate-fade-in">
+           <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+             <h4 class="text-sm font-bold text-gray-800 uppercase border-b pb-2 mb-4">Submitted Creative</h4>
+             <div class="bg-gray-100 rounded-lg p-2 border border-gray-200 flex justify-center items-center min-h-[300px]">
+               <img id="modal-media-img" src="" class="max-h-[400px] max-w-full rounded shadow-sm object-contain" alt="Ad Creative">
+               <div id="modal-media-placeholder" class="hidden text-center text-gray-400">
+                 <i class="ph ph-image-broken text-4xl mb-2"></i>
+                 <p class="text-sm">No media attached or preview unavailable.</p>
+               </div>
+             </div>
+             <div class="mt-4 flex gap-4 text-sm">
+               <div class="bg-blue-50 text-blue-800 px-3 py-1 rounded font-medium text-xs border border-blue-100">
+                 Format: <span class="font-bold">JPEG / 1920x1080</span>
+               </div>
+               <div class="bg-blue-50 text-blue-800 px-3 py-1 rounded font-medium text-xs border border-blue-100">
+                 Size: <span class="font-bold">2.4 MB</span>
+               </div>
+             </div>
+           </div>
+        </div>
+
+        <!-- TAB: FINANCE -->
+        <div id="tab-finance" class="hidden animate-fade-in">
+          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+            <h4 class="text-sm font-bold text-gray-800 uppercase p-6 border-b">Payment Verification</h4>
+            
+            <div class="p-6 bg-blue-50 border-b border-blue-100 flex items-start gap-3">
+              <i class="ph ph-info text-blue-600 text-xl"></i>
+              <p class="text-sm text-blue-800">
+                Please verify the transaction reference against the bank statement or payment gateway dashboard before approving.
+              </p>
+            </div>
+
+            <table class="w-full text-sm text-left">
+              <thead class="bg-gray-50 text-gray-500 font-bold text-xs uppercase border-b">
+                <tr>
+                  <th class="px-6 py-3">Reference ID</th>
+                  <th class="px-6 py-3">Amount</th>
+                  <th class="px-6 py-3">Date</th>
+                  <th class="px-6 py-3">Status</th>
+                  <th class="px-6 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="px-6 py-4 font-mono text-gray-600" id="pay-ref">--</td>
+                  <td class="px-6 py-4 font-bold text-gray-800" id="pay-amount">--</td>
+                  <td class="px-6 py-4 text-gray-500" id="pay-date">--</td>
+                  <td class="px-6 py-4" id="pay-status-cell">
+                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Unverified</span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <button id="btn-verify-pay" onclick="verifyPayment()" class="text-arconGreen hover:bg-green-50 px-3 py-1 rounded font-bold border border-transparent hover:border-green-200 transition">
+                      Confirm Receipt
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -455,16 +549,28 @@
     let mapMarkers = [];
     let selectedAssetId = null;
 
-    // --- Geodata (Approximate Centers) ---
+    // --- Geodata (Based on snippet + major states) ---
+    const NIGERIA_DATA = [
+      { state: "Abuja FCT", alias: "abuja", lgas: ["Abaji", "Abuja Municipal", "Bwari", "Gwagwalada", "Kuje", "Kwali"] },
+      { state: "Lagos", alias: "lagos", lgas: ["Agege", "Ajeromi-Ifelodun", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti-Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"] },
+      { state: "Adamawa", alias: "adamawa", lgas: ["Demsa","Fufure","Ganye","Gayuk","Gombi","Grie","Hong","Jada","Larmurde","Madagali","Maiha","Mayo Belwa","Michika","Mubi North","Mubi South","Numan","Shelleng","Song","Toungo","Yola North","Yola South"] },
+      { state: "Akwa Ibom", alias: "akwa_ibom", lgas: ["Abak","Eastern Obolo","Eket","Esit Eket","Essien Udim","Etim Ekpo","Etinan","Ibeno","Ibesikpo Asutan","Ibiono-Ibom","Ikot Abasi","Ika","Ikono","Ikot Ekpene","Ini","Mkpat-Enin","Itu","Mbo","Nsit-Atai","Nsit-Ibom","Nsit-Ubium","Obot Akara","Okobo","Onna","Oron","Udung-Uko","Ukanafun","Oruk Anam","Uruan","Urue-Offong/Oruko","Uyo"] },
+      { state: "Anambra", alias: "anambra", lgas: ["Aguata","Anambra East","Anaocha","Awka North","Awka South","Ayamelum","Dunukofia","Ekwusigo","Idemili North","Idemili South","Ihiala","Njikoka","Nnewi North","Nnewi South","Ogbaru","Onitsha North","Onitsha South","Orumba North","Orumba South","Oyi"] },
+      { state: "Kano", alias: "kano", lgas: ["Kano Municipal", "Fagge", "Dala", "Gwale", "Tarauni", "Nassarawa", "Kumbotso", "Ungogo"] },
+      { state: "Rivers", alias: "rivers", lgas: ["Port Harcourt", "Obio-Akpor", "Okrika", "Ogu–Bolo", "Eleme", "Tai", "Gokana", "Khana", "Oyigbo", "Opobo–Nkoro", "Andoni", "Bonny", "Degema", "Asari-Toru", "Akuku-Toru", "Abua–Odual", "Ahoada East", "Ahoada West", "Ogba–Egbema–Ndoni", "Emohua", "Ikwerre", "Etche", "Omuma"] }
+    ];
+
+    // Coordinates for the demo map
     const LOCATIONS = {
       "Lagos": [6.5244, 3.3792], "Abuja FCT": [9.0765, 7.3986], "Kano": [12.0022, 8.5920],
-      "Rivers": [4.8156, 7.0498], "Oyo": [7.3775, 3.9470], "Kaduna": [10.5105, 7.4165],
-      "Enugu": [6.4584, 7.5464], "Edo": [6.5244, 5.8987], "Delta": [5.5544, 5.7932],
-      "Ogun": [7.1604, 3.3483], "Anambra": [6.2209, 7.0678]
+      "Rivers": [4.8156, 7.0498], "Adamawa": [9.3265, 12.3984], "Akwa Ibom": [5.0377, 7.9128],
+      "Anambra": [6.2209, 7.0678]
     };
 
     // --- Init & Auth ---
     function init() {
+      populateStateFilters(); // Populate dropdowns first
+      
       const isAuth = localStorage.getItem(AUTH_KEY) === 'true';
       if(isAuth) {
         showApp();
@@ -500,6 +606,40 @@
       loadData();
     }
 
+    // --- Filtering Logic ---
+    function populateStateFilters() {
+      const stateSelect = document.getElementById('review-state');
+      // Clear existing options except first
+      while (stateSelect.options.length > 1) { stateSelect.remove(1); }
+      
+      NIGERIA_DATA.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.state;
+        opt.innerText = s.state;
+        stateSelect.appendChild(opt);
+      });
+    }
+
+    function populateReviewLgas() {
+      const stateVal = document.getElementById('review-state').value;
+      const lgaSelect = document.getElementById('review-lga');
+      
+      // Reset
+      lgaSelect.innerHTML = '<option value="all">All LGAs</option>';
+      
+      if(stateVal !== 'all') {
+        const stateObj = NIGERIA_DATA.find(s => s.state === stateVal);
+        if(stateObj && stateObj.lgas) {
+          stateObj.lgas.forEach(lga => {
+            const opt = document.createElement('option');
+            opt.value = lga;
+            opt.innerText = lga;
+            lgaSelect.appendChild(opt);
+          });
+        }
+      }
+    }
+
     // --- Data Management ---
     function loadData() {
       try {
@@ -518,15 +658,28 @@
       const sponsors = ['Glo Mobile', 'Zenith Bank', 'MTN Nigeria', 'Dangote Group', 'First Bank', 'Guinness', 'Airtel', 'Nestle', 'Access Bank', 'Total Energies'];
       
       let dummy = [];
-      const statesKeys = Object.keys(LOCATIONS);
 
-      for(let i=0; i<18; i++) {
-        const state = statesKeys[Math.floor(Math.random() * statesKeys.length)];
+      // Generate 25 records
+      for(let i=0; i<25; i++) {
+        // Pick a random state object from our list
+        const stateObj = NIGERIA_DATA[Math.floor(Math.random() * NIGERIA_DATA.length)];
+        const lga = stateObj.lgas[Math.floor(Math.random() * stateObj.lgas.length)];
+        
         const status = statuses[Math.floor(Math.random() * statuses.length)];
         const type = types[Math.floor(Math.random() * types.length)];
         const sponsor = sponsors[Math.floor(Math.random() * sponsors.length)];
+        
         const date = new Date();
         date.setDate(date.getDate() - Math.floor(Math.random() * 60));
+
+        // Media images
+        const mediaUrls = [
+          "https://images.unsplash.com/photo-1542206395-9feb3edaa68d?w=800&q=80",
+          "https://images.unsplash.com/photo-1622676069902-6c2436402ec5?w=800&q=80",
+          "https://images.unsplash.com/photo-1596720426673-e4e15c90757f?w=800&q=80",
+          "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80"
+        ];
+        const media = mediaUrls[Math.floor(Math.random() * mediaUrls.length)];
 
         dummy.push({
           id: `APP-2025-${9000+i}`,
@@ -535,12 +688,19 @@
           adType: type,
           size: '48-Sheet (Standard)',
           status: status,
-          state: state,
-          lga: 'Municipal',
+          state: stateObj.state,
+          lga: lga,
           createdAt: date.toISOString().slice(0,10),
           approvedBy: status === 'Active' ? 'ARCON-8842' : null,
           approvedDate: status === 'Active' ? date.toISOString().slice(0,10) : null,
-          boardOwner: { name: sponsor }
+          boardOwner: { name: sponsor },
+          mediaUrl: media,
+          payment: {
+            ref: `PAY-${Math.floor(100000 + Math.random() * 900000)}`,
+            amount: '₦50,000.00',
+            status: status === 'Active' ? 'Verified' : (Math.random() > 0.5 ? 'Verified' : 'Unverified'),
+            date: date.toISOString().slice(0,10)
+          }
         });
       }
       
@@ -594,13 +754,18 @@
     function renderReviews() {
       const tbody = document.getElementById('reviews-table');
       const search = document.getElementById('review-search').value.toLowerCase();
-      const filter = document.getElementById('review-filter').value;
+      const filterStatus = document.getElementById('review-filter').value;
+      const filterState = document.getElementById('review-state').value;
+      const filterLga = document.getElementById('review-lga').value;
       const sort = document.getElementById('review-sort').value;
 
       let filtered = assets.filter(a => {
         const matchesSearch = (a.id||'').toLowerCase().includes(search) || (a.sponsor||'').toLowerCase().includes(search);
-        const matchesFilter = filter === 'all' || a.status === filter;
-        return matchesSearch && matchesFilter;
+        const matchesStatus = filterStatus === 'all' || a.status === filterStatus;
+        const matchesState = filterState === 'all' || a.state === filterState;
+        const matchesLga = filterLga === 'all' || a.lga === filterLga;
+        
+        return matchesSearch && matchesStatus && matchesState && matchesLga;
       });
 
       // Sorting
@@ -624,9 +789,7 @@
             ${a.state}, ${a.lga || '-'}
           </td>
           <td class="px-6 py-4">
-            <span class="text-green-600 font-bold text-[10px] bg-green-50 px-2 py-1 rounded flex w-fit items-center gap-1">
-              <i class="ph ph-check-circle-fill"></i> PAID
-            </span>
+             ${getPaymentBadge(a.payment?.status)}
           </td>
           <td class="px-6 py-4">${getStatusBadge(a.status)}</td>
           <td class="px-6 py-4 text-right">
@@ -648,13 +811,20 @@
       return `<span class="status-chip ${styles[status] || styles['Expired']}">${status}</span>`;
     }
 
+    function getPaymentBadge(status) {
+       if(status === 'Verified') {
+         return `<span class="text-green-600 font-bold text-[10px] bg-green-50 px-2 py-1 rounded flex w-fit items-center gap-1"><i class="ph ph-check-circle-fill"></i> PAID</span>`;
+       }
+       return `<span class="text-gray-500 font-bold text-[10px] bg-gray-100 px-2 py-1 rounded flex w-fit items-center gap-1">Unverified</span>`;
+    }
+
     // --- Modal Logic ---
     function openActionModal(id) {
       const asset = assets.find(a => a.id === id);
       if(!asset) return;
       selectedAssetId = id;
       
-      // Populate fields
+      // Populate fields (Details)
       document.getElementById('modal-id').innerText = id;
       document.getElementById('modal-status-badge').innerHTML = getStatusBadge(asset.status);
       document.getElementById('modal-sponsor').innerText = asset.sponsor;
@@ -663,6 +833,34 @@
       document.getElementById('modal-size').innerText = asset.size || 'Standard';
       document.getElementById('modal-location').innerText = `${asset.state}, ${asset.lga || 'Municipal'}`;
       document.getElementById('modal-duration').innerText = `${asset.durationVal || 12} ${asset.durationUnit || 'Months'}`;
+
+      // Populate Media
+      const img = document.getElementById('modal-media-img');
+      const placeholder = document.getElementById('modal-media-placeholder');
+      if(asset.mediaUrl) {
+         img.src = asset.mediaUrl;
+         img.classList.remove('hidden');
+         placeholder.classList.add('hidden');
+      } else {
+         img.classList.add('hidden');
+         placeholder.classList.remove('hidden');
+      }
+
+      // Populate Payment
+      document.getElementById('pay-ref').innerText = asset.payment?.ref || 'N/A';
+      document.getElementById('pay-amount').innerText = asset.payment?.amount || '0.00';
+      document.getElementById('pay-date').innerText = asset.payment?.date || '-';
+      
+      const payStatusCell = document.getElementById('pay-status-cell');
+      const verifyBtn = document.getElementById('btn-verify-pay');
+      
+      if(asset.payment?.status === 'Verified') {
+        payStatusCell.innerHTML = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Verified</span>`;
+        verifyBtn.classList.add('hidden');
+      } else {
+        payStatusCell.innerHTML = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Pending Check</span>`;
+        verifyBtn.classList.remove('hidden');
+      }
 
       // Approval Info
       const authInfo = document.getElementById('approval-info');
@@ -684,12 +882,44 @@
       qrBox.innerHTML = '';
       new QRCode(qrBox, { text: `ARCON-VERIFY:${id}`, width: 128, height: 128 });
       
+      switchTab('details'); // Reset to first tab
       document.getElementById('action-modal').classList.remove('hidden');
     }
 
     function closeModal() {
       document.getElementById('action-modal').classList.add('hidden');
       selectedAssetId = null;
+    }
+
+    function switchTab(tabId) {
+      // Hide all tabs
+      ['details', 'media', 'finance'].forEach(t => {
+        document.getElementById('tab-'+t).classList.add('hidden');
+        document.getElementById('tab-btn-'+t).classList.remove('active', 'border-arconGreen', 'text-arconGreen', 'bg-green-50');
+      });
+      // Show selected
+      document.getElementById('tab-'+tabId).classList.remove('hidden');
+      document.getElementById('tab-btn-'+tabId).classList.add('active', 'border-arconGreen', 'text-arconGreen', 'bg-green-50');
+    }
+
+    function verifyPayment() {
+       if(!selectedAssetId) return;
+       if(confirm("Confirm that funds have been received for this application?")) {
+          assets = assets.map(a => {
+             if(a.id === selectedAssetId) {
+               return { ...a, payment: { ...a.payment, status: 'Verified' } };
+             }
+             return a;
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(assets));
+          
+          // Refresh Modal UI
+          openActionModal(selectedAssetId);
+          switchTab('finance');
+          
+          // Refresh background table
+          loadData(); 
+       }
     }
 
     function updateStatus(newStatus) {
@@ -701,6 +931,8 @@
            if(newStatus === 'Active' && a.status !== 'Active') {
              update.approvedBy = OFFICER_ID;
              update.approvedDate = new Date().toISOString().slice(0,10);
+             // Auto verify payment if approving? Optional logic, lets keep separate for now or auto-verify
+             if(update.payment) update.payment.status = 'Verified';
            }
            return update;
         }
@@ -746,10 +978,11 @@
       });
 
       toPlot.forEach(asset => {
+        // Use coordinates from lookup or default center
         let baseCoords = LOCATIONS[asset.state] || [9.0820, 8.6753];
         // Jitter
-        const lat = baseCoords[0] + (Math.random() - 0.5) * 0.15;
-        const lng = baseCoords[1] + (Math.random() - 0.5) * 0.15;
+        const lat = baseCoords[0] + (Math.random() - 0.5) * 0.5; // Increased jitter for spread
+        const lng = baseCoords[1] + (Math.random() - 0.5) * 0.5;
 
         const color = asset.status === 'Active' ? '#22c55e' : (asset.status === 'Pending' ? '#eab308' : '#ef4444');
         const markerHtml = `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.2s;"></div>`;
