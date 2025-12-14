@@ -83,221 +83,167 @@
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
 
     /* =========================
-       REPORT TEMPLATE (A4)
-       Fixes "blank 3.5kb PDF" by keeping staging content paintable
+       REPORT (A4) EXPORT STYLES
        ========================= */
 
-    /* Keep staging IN the viewport so html2canvas can actually paint it.
-       Invisible + non-interactive. */
+    /* IMPORTANT FIX:
+       Do NOT push staging to left:-9999px (can render blank/cropped in html2canvas).
+       Keep it "real" on screen, but invisible + translated off-canvas. */
     #report-staging-area{
       position: fixed;
       left: 0;
       top: 0;
-      width: 210mm;
-      height: 297mm;
-      opacity: 0.001;            /* invisible but paintable */
+      width: 210mm;           /* A4 width */
+      min-height: 297mm;      /* A4 height */
+      background: #fff;
+      opacity: 0;
       pointer-events: none;
-      background: transparent;
-      z-index: -9999;
-      overflow: hidden;
+      transform: translateX(-120vw);
+      transform-origin: top left;
+      z-index: -1;
     }
 
-    .report-page{
+    /* A4 page rules */
+    @page { size: A4; margin: 0; }
+
+    .report-paper{
       width: 210mm;
       min-height: 297mm;
-      background: #ffffff;
       box-sizing: border-box;
-      padding: 14mm 16mm;
+      background: #fff;
       color: #111;
       line-height: 1.45;
       font-family: "Times New Roman", Times, serif;
+      padding: 14mm 14mm 12mm 14mm; /* Executive padding */
     }
 
-    .report-topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      padding-bottom: 10px;
+    .report-header{
       border-bottom: 3px double #008751;
-      margin-bottom: 14px;
-    }
-
-    .report-brand{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-    }
-
-    .report-brand img{
-      width: 54px;
-      height: 54px;
-      object-fit: contain;
-      border-radius: 12px;
-    }
-
-    .report-title h1{
-      margin: 0;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #008751;
-    }
-
-    .report-title p{
-      margin: 3px 0 0 0;
-      font-size: 10px;
-      color: #555;
+      padding-bottom: 10mm;
+      margin-bottom: 8mm;
     }
 
     .report-meta{
-      display:flex;
-      justify-content:space-between;
-      gap: 10px;
-      margin: 12px 0 18px;
-      font-size: 10px;
-      border: 1px solid #ddd;
-      padding: 8px 10px;
+      display: flex;
+      gap: 6mm;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 8mm 0;
+      padding: 3.5mm 4mm;
+      border: 1px solid #e5e7eb;
       background: #f9fafb;
+      font-size: 11px;
     }
 
-    .report-meta strong{ letter-spacing: 0.06em; }
-
     .report-section-title{
-      background: #008751;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin: 0 0 4mm 0;
+      padding: 2.8mm 4mm;
+      border-radius: 4px;
       color: #fff;
-      padding: 8px 12px;
-      font-size: 12px;
-      margin: 18px 0 10px;
-      border-radius: 6px;
-      letter-spacing: 0.04em;
-      font-weight: 900;
+      background: #008751;
     }
 
     .report-section-title.red{ background:#b91c1c; }
-    .report-section-title.gray{
-      background:#f3f4f6;
-      color:#222;
-      border-left: 4px solid #008751;
-      border-radius: 6px;
-    }
-    .report-section-title.gray.red{
-      border-left-color:#b91c1c;
+
+    .report-subtitle{
+      font-size: 12px;
+      font-weight: 800;
+      margin: 0 0 2.5mm 0;
+      color: #222;
     }
 
-    .kpi-grid{
-      display:flex;
-      gap: 12px;
-      margin: 10px 0 14px;
+    .kpi-row{
+      display: flex;
+      gap: 6mm;
+      margin-bottom: 7mm;
     }
+
     .kpi-card{
       flex: 1;
       border: 1px solid #e5e7eb;
       border-radius: 10px;
-      padding: 12px 12px;
+      padding: 6mm 5mm;
       text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 7px rgba(0,0,0,0.06);
+      background: #fff;
     }
+
     .kpi-label{
-      font-size: 9px;
+      font-size: 10px;
       color: #666;
-      font-weight: 900;
+      font-weight: 800;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
+      margin-bottom: 2mm;
     }
+
     .kpi-value{
-      margin-top: 6px;
-      font-size: 22px;
+      font-size: 28px;
       font-weight: 900;
+      margin: 0;
+      line-height: 1.1;
     }
-    .kpi-note{
-      margin-top: 6px;
+
+    .kpi-foot{
       font-size: 9px;
-      font-weight: 700;
-      color: #166534;
+      margin-top: 2mm;
+      font-weight: 800;
     }
 
     .report-table{
       width: 100%;
       border-collapse: collapse;
-      margin: 10px 0 14px;
-      font-size: 10px;
+      margin: 0 0 6mm 0;
+      font-size: 11px;
+      table-layout: fixed;
     }
     .report-table th{
-      background-color: #008751;
-      color: white;
+      background: #008751;
+      color: #fff;
       font-weight: 900;
       text-transform: uppercase;
-      padding: 8px 8px;
+      padding: 3mm 2.5mm;
       border: 1px solid #00643C;
       text-align: left;
-      letter-spacing: 0.08em;
-      font-size: 9px;
+      letter-spacing: 0.8px;
+      font-size: 10px;
     }
     .report-table td{
-      padding: 7px 8px;
+      padding: 2.8mm 2.5mm;
       border: 1px solid #e5e7eb;
       color: #333;
-      vertical-align: top;
+      word-wrap: break-word;
     }
-    .report-table tr:nth-child(even){ background-color:#f9fafb; }
+    .report-table tr:nth-child(even){ background:#f9fafb; }
 
     .report-badge{
-      display:inline-block;
-      padding: 2px 8px;
+      display: inline-block;
+      padding: 1.2mm 2.4mm;
       border-radius: 999px;
       font-weight: 900;
       font-size: 9px;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.8px;
       border: 1px solid transparent;
-      white-space: nowrap;
     }
-    .badge-success{ background:#dcfce7; color:#166534; border-color:#86efac; }
-    .badge-danger{ background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
-    .badge-warning{ background:#fef9c3; color:#854d0e; border-color:#fde047; }
+    .badge-success { background:#dcfce7; color:#166534; border-color:#86efac; }
+    .badge-danger  { background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+    .badge-warning { background:#fef9c3; color:#854d0e; border-color:#fde047; }
 
     .report-footer{
-      margin-top: 18px;
+      margin-top: 10mm;
       border-top: 1px solid #d1d5db;
-      padding-top: 10px;
-      font-size: 9px;
+      padding-top: 5mm;
+      font-size: 10px;
       text-align: center;
       color: #666;
     }
 
-    .signature-wrap{
-      margin-top: 18px;
-      display:flex;
-      justify-content:flex-end;
-    }
-    .signature-box{
-      width: 240px;
-      text-align:center;
-    }
-    .signature-name{
-      font-family: cursive;
-      font-size: 18px;
-      color:#008751;
-      margin-bottom: 6px;
-    }
-    .signature-line{
-      border-top: 1px solid #111;
-      padding-top: 6px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 10px;
-    }
-    .signature-note{
-      font-size: 9px;
-      font-style: italic;
-      margin-top: 2px;
-    }
-
     .page-break{ page-break-before: always; break-before: page; }
-    .avoid-break{ page-break-inside: avoid; break-inside: avoid; }
   </style>
 </head>
 
@@ -311,7 +257,7 @@
       <div class="h-24 flex items-center px-6 border-b border-white/10">
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg transform rotate-3 transition hover:rotate-0">
-            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-9 h-9 object-contain">
+            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-9 h-9 object-contain" crossorigin="anonymous">
           </div>
           <div>
             <h1 class="font-extrabold text-white text-xl tracking-tight leading-none">ARCON</h1>
@@ -393,7 +339,9 @@
       <header class="h-16 md:h-24 bg-white/80 backdrop-blur-md border-b border-gray-200/60 flex items-center justify-between px-4 md:px-8 sticky top-0 md:relative z-10">
         <div>
           <h2 class="font-black text-gray-800 text-xl md:text-2xl flex items-center gap-3 tracking-tight">
-            <span class="md:hidden text-arconGreen"><img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-8 h-8 object-contain"></span>
+            <span class="md:hidden text-arconGreen">
+              <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-8 h-8 object-contain" crossorigin="anonymous">
+            </span>
             <span id="page-title">Executive Dashboard</span>
           </h2>
           <p class="hidden md:block text-sm text-gray-500 font-medium mt-1">Real-time regulatory oversight & revenue metrics</p>
@@ -468,23 +416,19 @@
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Main Chart -->
             <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
               <div class="flex justify-between items-center mb-6">
                 <div>
                   <h4 class="font-bold text-gray-800 text-lg">Revenue Trend</h4>
                   <p class="text-xs text-gray-400">Monthly breakdown (Millions NGN)</p>
                 </div>
-                <button class="text-arconGreen hover:bg-green-50 p-2 rounded-lg transition" onclick="generatePDF('financial')">
-                  <i class="ph ph-download-simple text-xl"></i>
-                </button>
+                <button class="text-arconGreen hover:bg-green-50 p-2 rounded-lg transition"><i class="ph ph-download-simple text-xl"></i></button>
               </div>
               <div class="h-64 w-full">
                 <canvas id="revChart"></canvas>
               </div>
             </div>
 
-            <!-- Live Intelligence Feed -->
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
               <div class="mb-4 flex items-center justify-between">
                 <div>
@@ -648,7 +592,7 @@
       </div>
     </div>
 
-    <!-- REPORT STAGING AREA (Hidden but paintable) -->
+    <!-- REPORT STAGING AREA (Hidden but Rendered) -->
     <div id="report-staging-area"></div>
 
     <!-- AGENCY DETAIL MODAL -->
@@ -659,9 +603,7 @@
             <h3 class="font-bold text-xl text-gray-900" id="modal-agency-name">--</h3>
             <p class="text-xs text-gray-500 font-mono" id="modal-agency-rc">RC: --</p>
           </div>
-          <button onclick="document.getElementById('agency-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300">
-            <i class="ph ph-x"></i>
-          </button>
+          <button onclick="document.getElementById('agency-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300"><i class="ph ph-x"></i></button>
         </div>
         <div class="p-6 overflow-y-auto">
           <div class="flex gap-4 mb-6">
@@ -737,9 +679,13 @@
 
     let mapInstance = null;
     let revChart = null;
-
-    // Report period (shared)
     let currentReportPeriod = 'Daily';
+
+    // --- Reports History ---
+    const MOCK_REPORTS = [
+      { name: "Executive Summary - Q3", date: "2025-10-01", type: "Executive Summary", key: "executive", period: "Monthly" },
+      { name: "Financial Audit Oct", date: "2025-10-05", type: "Financial Report", key: "financial", period: "Monthly" }
+    ];
 
     // --- Core Logic ---
     function init() {
@@ -754,14 +700,12 @@
       ['overview', 'agencies', 'reports', 'map'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
       document.getElementById('view-'+viewId).classList.remove('hidden');
 
-      // Update Nav States
       document.querySelectorAll('.desktop-nav-btn, .mobile-nav-btn').forEach(el => {
         el.classList.remove('text-arconGreen', 'bg-white', 'shadow-lg');
         if(el.classList.contains('desktop-nav-btn')) el.classList.add('text-white/80', 'hover:bg-white/10');
         else el.classList.add('text-gray-400');
       });
 
-      // Highlight Active
       const dBtn = document.querySelector(`.desktop-nav-btn[onclick*="${viewId}"]`);
       if(dBtn) {
         dBtn.classList.remove('text-white/80', 'hover:bg-white/10');
@@ -774,19 +718,16 @@
         mBtn.classList.add('text-arconGreen');
       }
 
-      document.getElementById('page-title').innerText =
-        viewId.charAt(0).toUpperCase() + viewId.slice(1);
-
+      document.getElementById('page-title').innerText = viewId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
       if(viewId === 'map') setTimeout(initMap, 200);
     }
 
     // --- Filters ---
     function populateStates() {
       const sel = document.getElementById('filter-state');
-      NIGERIA_DATA.slice().sort((a,b) => a.state.localeCompare(b.state)).forEach(s => {
+      NIGERIA_DATA.sort((a,b) => a.state.localeCompare(b.state)).forEach(s => {
         let opt = document.createElement('option');
-        opt.value = s.state;
-        opt.innerText = s.state;
+        opt.value = s.state; opt.innerText = s.state;
         sel.appendChild(opt);
       });
     }
@@ -798,10 +739,9 @@
 
       const stateData = NIGERIA_DATA.find(s => s.state === stateVal);
       if(stateData) {
-        stateData.lgas.slice().sort().forEach(l => {
+        stateData.lgas.sort().forEach(l => {
           let opt = document.createElement('option');
-          opt.value = l;
-          opt.innerText = l;
+          opt.value = l; opt.innerText = l;
           lgaSel.appendChild(opt);
         });
       }
@@ -829,8 +769,7 @@
 
     // --- Agencies Module ---
     function renderAgencies() {
-      const searchEl = document.getElementById('agency-search');
-      const search = (searchEl ? searchEl.value : '').toLowerCase();
+      const search = document.getElementById('agency-search').value.toLowerCase();
       const tbody = document.getElementById('agencies-table-body');
       tbody.innerHTML = '';
 
@@ -841,9 +780,7 @@
             <tr class="hover:bg-slate-50 border-b border-gray-50 transition cursor-pointer" onclick="showAgencyModal('${agency.name.replace(/'/g,"\\'")}')">
               <td class="px-6 py-4 font-bold text-gray-800">${agency.name}</td>
               <td class="px-6 py-4 font-mono text-gray-500 text-xs">${agency.rc}</td>
-              <td class="px-6 py-4 text-center">
-                <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-bold">${agency.ads} Active</span>
-              </td>
+              <td class="px-6 py-4 text-center"><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-bold">${agency.ads} Active</span></td>
               <td class="px-6 py-4 text-center">
                 <div class="w-full bg-gray-100 rounded-full h-2 w-24 mx-auto">
                   <div class="bg-green-500 h-2 rounded-full" style="width: ${agency.score}%"></div>
@@ -871,9 +808,7 @@
       const list = document.getElementById('modal-campaign-list');
       list.innerHTML = agency.campaigns.map(c => `
         <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-arconGreen">
-            <i class="ph ph-megaphone-simple"></i>
-          </div>
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-arconGreen"><i class="ph ph-megaphone-simple"></i></div>
           <div>
             <p class="text-sm font-bold text-gray-800">${c}</p>
             <p class="text-[10px] text-green-600 font-bold">● Running</p>
@@ -884,33 +819,44 @@
       document.getElementById('agency-modal').classList.remove('hidden');
     }
 
-    // =========================
-    // REPORTS MODULE (FIXED: NO BLANK PDFs)
-    // =========================
+    // --- Reports Module ---
+    function renderReportHistory() {
+      const tbody = document.getElementById('report-history-body');
+      tbody.innerHTML = '';
+      MOCK_REPORTS.forEach((r, idx) => {
+        const row = `
+          <tr class="hover:bg-slate-50 border-b border-gray-50 transition">
+            <td class="px-6 py-4 font-bold text-gray-800 flex items-center gap-2">
+              <i class="ph ph-file-pdf text-red-500 text-lg"></i> ${r.name}
+            </td>
+            <td class="px-6 py-4 text-gray-500 text-xs">${r.date}</td>
+            <td class="px-6 py-4"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${r.type}</span></td>
+            <td class="px-6 py-4 text-right">
+              <button onclick="downloadFromHistory(${idx})" class="text-arconGreen font-bold text-xs hover:underline">Download</button>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('afterbegin', row);
+      });
+    }
 
-    const ARCON_LOGO_DATA_URI = (() => {
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#008751"/>
-              <stop offset="1" stop-color="#005a32"/>
-            </linearGradient>
-          </defs>
-          <rect x="10" y="10" width="108" height="108" rx="22" fill="url(#g)"/>
-          <circle cx="64" cy="54" r="22" fill="#D4AF37" opacity="0.95"/>
-          <path d="M40 86c8-8 17-12 24-12s16 4 24 12" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-          <text x="64" y="60" text-anchor="middle" font-family="Inter, Arial" font-weight="900" font-size="18" fill="#0b2d1d">ARCON</text>
-          <text x="64" y="104" text-anchor="middle" font-family="Inter, Arial" font-weight="800" font-size="10" fill="#ffffff" opacity="0.9">IRMS</text>
-        </svg>
-      `.trim();
-      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-    })();
-
-    const MOCK_REPORTS = [
-      { name: "Executive Summary - Q3", date: "2025-10-01", type: "Executive Summary", template: "executive", period: "Yearly" },
-      { name: "Financial Audit Oct", date: "2025-10-05", type: "Financial Report", template: "financial", period: "Monthly" }
-    ];
+    function downloadFromHistory(idx){
+      const r = MOCK_REPORTS[idx];
+      if(!r) return;
+      currentReportPeriod = r.period || currentReportPeriod;
+      // re-sync UI buttons for period:
+      const btns = [...document.querySelectorAll('.report-period-btn')];
+      btns.forEach(b => {
+        b.classList.remove('bg-white', 'text-arconGreen', 'shadow-sm');
+        b.classList.add('text-gray-500');
+      });
+      const match = btns.find(b => (b.textContent || '').trim().toLowerCase() === (currentReportPeriod || '').toLowerCase());
+      if(match){
+        match.classList.add('bg-white', 'text-arconGreen', 'shadow-sm');
+        match.classList.remove('text-gray-500');
+      }
+      generatePDF(r.key || 'executive');
+    }
 
     function setReportPeriod(btn, period) {
       document.querySelectorAll('.report-period-btn').forEach(b => {
@@ -922,77 +868,71 @@
       currentReportPeriod = period;
     }
 
-    function renderReportHistory() {
-      const tbody = document.getElementById('report-history-body');
-      tbody.innerHTML = '';
-
-      MOCK_REPORTS.forEach((r, idx) => {
-        const row = `
-          <tr class="hover:bg-slate-50 border-b border-gray-50 transition">
-            <td class="px-6 py-4 font-bold text-gray-800 flex items-center gap-2">
-              <i class="ph ph-file-pdf text-red-500 text-lg"></i> ${r.name}
-            </td>
-            <td class="px-6 py-4 text-gray-500 text-xs">${r.date}</td>
-            <td class="px-6 py-4">
-              <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${r.type}</span>
-            </td>
-            <td class="px-6 py-4 text-right">
-              <button onclick="downloadReportFromHistory(${idx})" class="text-arconGreen font-bold text-xs hover:underline">Download</button>
-            </td>
-          </tr>
-        `;
-        tbody.insertAdjacentHTML('beforeend', row);
-      });
+    function getArconLogoDataUrl(){
+      // Inline SVG "executive" logo (no CORS issues)
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#008751"/>
+              <stop offset="1" stop-color="#005a32"/>
+            </linearGradient>
+          </defs>
+          <rect x="10" y="10" width="200" height="200" rx="46" fill="url(#g)"/>
+          <rect x="22" y="22" width="176" height="176" rx="40" fill="none" stroke="#D4AF37" stroke-width="6"/>
+          <text x="110" y="118" font-family="Inter, Arial" font-size="54" font-weight="900" text-anchor="middle" fill="#ffffff">ARCON</text>
+          <text x="110" y="154" font-family="Inter, Arial" font-size="16" font-weight="800" text-anchor="middle" fill="#F4D03F">IRMS</text>
+        </svg>
+      `.trim();
+      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
     }
 
-    async function downloadReportFromHistory(idx) {
-      const r = MOCK_REPORTS[idx];
-      if(!r) return;
-
-      const prev = currentReportPeriod;
-      currentReportPeriod = r.period || currentReportPeriod;
-
+    function formatDateLong(d){
       try {
-        await generatePDF(r.template, false, r.name);
-      } finally {
-        currentReportPeriod = prev;
+        return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch(e){
+        return d.toISOString().slice(0,10);
       }
     }
 
+    // Generate HTML for specific reports
     function getReportHTML(type) {
       const now = new Date();
-      const date = now.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' });
+      const dateLong = formatDateLong(now);
+      const isoDate = now.toISOString().slice(0,10);
       const ref = 'ARCON-' + Math.floor(Math.random() * 900000 + 100000);
 
-      const reportTypeLabel =
-        type === 'executive' ? 'Executive Summary' :
-        type === 'financial' ? 'Financial Report' :
-        'Enforcement Log';
+      const logo = getArconLogoDataUrl();
 
-      const topbar = `
-        <div class="report-topbar avoid-break">
-          <div class="report-brand">
-            <img src="${ARCON_LOGO_DATA_URI}" alt="ARCON Logo" />
-            <div class="report-title">
-              <h1>Advertising Regulatory Council of Nigeria</h1>
-              <p>Integrated Regulatory Management System (IRMS) • Confidential Executive Report</p>
+      const reportTypeLabel =
+        type === 'executive' ? 'Confidential Executive Report' :
+        type === 'financial' ? 'Financial Performance Report' :
+        'Enforcement & Compliance Report';
+
+      const header = `
+        <div class="report-header">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10mm;">
+            <div style="display:flex; align-items:center; gap:5mm;">
+              <img src="${logo}" alt="ARCON" style="width:14mm; height:14mm; border-radius:4mm;">
+              <div>
+                <div style="font-size:11px; font-weight:900; letter-spacing:2px; text-transform:uppercase; margin:0;">Federal Republic of Nigeria</div>
+                <div style="margin-top:2mm; font-size:22px; font-weight:900; color:#008751; line-height:1.05;">ADVERTISING REGULATORY COUNCIL OF NIGERIA</div>
+                <div style="margin-top:1.5mm; font-size:10px; color:#555;">Integrated Regulatory Management System (IRMS) • ${reportTypeLabel}</div>
+              </div>
             </div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:10px; font-weight:900; letter-spacing:0.12em; text-transform:uppercase; color:#111;">
-              Federal Republic of Nigeria
-            </div>
-            <div style="font-size:9px; color:#555; margin-top:4px;">
-              Plot 12, Utako District, Abuja • www.arcon.gov.ng
+            <div style="text-align:right;">
+              <div style="font-size:11px; font-weight:900; letter-spacing:1px; text-transform:uppercase;">Head Office</div>
+              <div style="font-size:10px; color:#444; margin-top:1.5mm;">Plot 12, Utako District, Abuja</div>
+              <div style="font-size:10px; color:#444;">www.arcon.gov.ng</div>
             </div>
           </div>
         </div>
 
-        <div class="report-meta avoid-break">
-          <div><strong>REPORT:</strong> ${reportTypeLabel.toUpperCase()}</div>
+        <div class="report-meta">
           <div><strong>PERIOD:</strong> ${String(currentReportPeriod).toUpperCase()}</div>
-          <div><strong>DATE:</strong> ${date}</div>
+          <div><strong>DATE:</strong> ${dateLong}</div>
           <div><strong>REF:</strong> ${ref}</div>
+          <div><strong>DOC:</strong> ${type.toUpperCase()}</div>
         </div>
       `;
 
@@ -1000,50 +940,51 @@
 
       if (type === 'executive') {
         content = `
-          <div class="report-section-title">1.0 EXECUTIVE SUMMARY</div>
+          <div class="report-section-title">1.0 Executive Summary</div>
 
-          <div class="kpi-grid avoid-break">
+          <div class="kpi-row">
             <div class="kpi-card">
               <div class="kpi-label">Total Revenue</div>
               <div class="kpi-value" style="color:#008751;">₦45.2M</div>
-              <div class="kpi-note">▲ 12% vs Target</div>
+              <div class="kpi-foot" style="color:#166534;">▲ 12% vs Target</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-label">Compliance Rate</div>
               <div class="kpi-value" style="color:#D4AF37;">68%</div>
-              <div class="kpi-note" style="color:#854d0e;">Requires Attention</div>
+              <div class="kpi-foot" style="color:#854d0e;">Requires Attention</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-label">Active Enforcements</div>
               <div class="kpi-value" style="color:#dc2626;">85</div>
-              <div class="kpi-note" style="color:#991b1b;">Ongoing Cases</div>
+              <div class="kpi-foot" style="color:#991b1b;">Ongoing Cases</div>
             </div>
           </div>
 
-          <div class="avoid-break">
-            <div style="font-size:11px; font-weight:900; margin: 6px 0 6px; color:#222;">1.1 STRATEGIC OVERVIEW</div>
-            <p style="font-size:11px; color:#333; margin:0; text-align:justify;">
-              The period under review indicates strong revenue performance driven by digital vetting fees and improved practitioner onboarding.
-              Compliance rates in select regions remain below internal thresholds, requiring targeted zonal interventions and tighter integration with state signage authorities.
-            </p>
+          <div class="report-subtitle">1.1 Strategic Overview</div>
+          <p style="font-size:12px; line-height:1.6; text-align:justify; margin:0 0 5mm 0; color:#333;">
+            The period under review indicates strong revenue performance driven by digital vetting fees and improved practitioner onboarding.
+            Compliance rates in selected corridors remain below desired thresholds, requiring targeted zonal interventions and tighter integration with state signage authorities.
+          </p>
 
-            <div style="font-size:11px; font-weight:900; margin: 10px 0 6px; color:#222;">1.2 KEY RECOMMENDATIONS</div>
-            <ul style="font-size:11px; color:#333; margin:0; padding-left:16px;">
-              <li>Deploy special enforcement task force for illegal outdoor placements in high-traffic corridors.</li>
-              <li>Integrate billing & permit validation with LASAA, KASUPDA and other state signage agencies.</li>
-              <li>Expand digital vetting pipeline for online creators and emerging ad formats.</li>
-            </ul>
+          <div class="report-subtitle">1.2 Key Recommendations</div>
+          <ul style="font-size:12px; line-height:1.6; margin:0 0 7mm 0; padding-left:6mm;">
+            <li style="margin-bottom:2mm;">Deploy special enforcement task force to high-risk corridors in Lagos, Rivers, and Delta.</li>
+            <li style="margin-bottom:2mm;">Initiate unified billing integration with LASAA, KASUPDA and other state signage agencies.</li>
+            <li style="margin-bottom:2mm;">Review vetting fee structure for emerging digital media platforms and influencer-led formats.</li>
+          </ul>
+
+          <div class="report-section-title" style="background:#f3f4f6; color:#111; border-left:4px solid #008751; border-radius:0; font-weight:900;">
+            2.0 Performance Metrics
           </div>
 
-          <div class="report-section-title gray">2.0 PERFORMANCE METRICS</div>
           <table class="report-table">
             <thead>
               <tr>
-                <th>KPI Category</th>
-                <th>Target</th>
-                <th>Actual</th>
-                <th>Variance</th>
-                <th>Status</th>
+                <th style="width:34%;">KPI Category</th>
+                <th style="width:16%;">Target</th>
+                <th style="width:16%;">Actual</th>
+                <th style="width:16%;">Variance</th>
+                <th style="width:18%;">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -1054,41 +995,46 @@
             </tbody>
           </table>
 
-          <div class="avoid-break">
-            <div style="font-size:11px; font-weight:900; margin: 6px 0 6px; color:#222;">2.1 NEXT 30 DAYS FOCUS</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Initiative</th>
-                  <th>Owner</th>
-                  <th>Deliverable</th>
-                  <th>Risk</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Unified Billing Pilot</td><td>IRMS Team</td><td>LASAA integration sandbox + API</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
-                <tr><td>Highway Outdoor Sweep</td><td>Enforcement</td><td>Removal notices + compliance follow-up</td><td><span class="report-badge badge-danger">High</span></td></tr>
-                <tr><td>Digital Vetting Scale-up</td><td>Vetting Unit</td><td>Creator portal + fast-lane review</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-        `;
-      }
+          <div class="page-break"></div>
 
-      if (type === 'financial') {
-        content = `
-          <div class="report-section-title">1.0 FINANCIAL OVERVIEW</div>
-          <p style="font-size:11px; margin:0 0 10px; color:#333;">
-            Detailed breakdown of revenue streams processed through the Integrated Regulatory Management System (IRMS).
+          <div class="report-section-title">3.0 Zonal Spotlight</div>
+          <p style="font-size:12px; margin:0 0 5mm 0; color:#333;">
+            Zonal contribution snapshot for <strong>${String(currentReportPeriod).toUpperCase()}</strong> reporting window.
           </p>
 
           <table class="report-table">
             <thead>
               <tr>
-                <th>Revenue Stream</th>
-                <th style="text-align:center;">Tx Count</th>
-                <th style="text-align:right;">Gross (NGN)</th>
-                <th style="text-align:right;">Net (NGN)</th>
+                <th style="width:40%;">Zone</th>
+                <th style="width:20%;">Revenue</th>
+                <th style="width:20%;">Compliance</th>
+                <th style="width:20%;">Risk Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Lagos Zone</td><td>₦28.5M</td><td>71%</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
+              <tr><td>Abuja HQ</td><td>₦10.2M</td><td>78%</td><td><span class="report-badge badge-success">Low</span></td></tr>
+              <tr><td>Kano Zone</td><td>₦4.1M</td><td>64%</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
+              <tr><td>Port Harcourt</td><td>₦2.4M</td><td>56%</td><td><span class="report-badge badge-danger">High</span></td></tr>
+            </tbody>
+          </table>
+        `;
+      }
+
+      if (type === 'financial') {
+        content = `
+          <div class="report-section-title">1.0 Financial Overview</div>
+          <p style="font-size:12px; margin:0 0 6mm 0; color:#333;">
+            Detailed breakdown of all revenue streams processed through the Integrated Regulatory Management System (IRMS).
+          </p>
+
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th style="width:42%;">Revenue Stream</th>
+                <th style="width:14%; text-align:center;">Tx Count</th>
+                <th style="width:22%; text-align:right;">Gross (₦)</th>
+                <th style="width:22%; text-align:right;">Net (₦)</th>
               </tr>
             </thead>
             <tbody>
@@ -1098,41 +1044,41 @@
               <tr><td>Fines & Penalties</td><td style="text-align:center;">45</td><td style="text-align:right;">5,200,000</td><td style="text-align:right;">5,200,000</td></tr>
               <tr><td>Corporate Registration</td><td style="text-align:center;">30</td><td style="text-align:right;">3,000,000</td><td style="text-align:right;">3,000,000</td></tr>
               <tr style="font-weight:900; background:#f0fdf4;">
-                <td>TOTAL</td><td style="text-align:center;">645</td><td style="text-align:right;">45,200,000</td><td style="text-align:right;">45,200,000</td>
+                <td>TOTAL REVENUE</td><td style="text-align:center;">645</td><td style="text-align:right;">45,200,000</td><td style="text-align:right;">45,200,000</td>
               </tr>
             </tbody>
           </table>
 
-          <div class="report-section-title gray">2.0 ZONAL CONTRIBUTION</div>
+          <div class="page-break"></div>
 
-          <div class="avoid-break" style="border:1px solid #eee; border-radius:10px; padding:12px; margin-bottom:10px;">
-            <div style="font-size:10px; font-weight:900; letter-spacing:0.10em; text-transform:uppercase; color:#333; margin-bottom:8px;">
-              Revenue Share Snapshot
-            </div>
-            <div style="display:flex; gap:10px; align-items:flex-end; height:120px;">
-              <div style="flex:1; text-align:center;">
-                <div style="height:90px; background:#008751; border-radius:8px;"></div>
-                <div style="font-size:9px; margin-top:5px; font-weight:900;">LAGOS (63%)</div>
+          <div class="report-section-title" style="background:#f3f4f6; color:#111; border-left:4px solid #008751; border-radius:0; font-weight:900;">
+            2.0 Zonal Contribution
+          </div>
+
+          <div style="margin:0 0 5mm 0; border:1px solid #e5e7eb; border-radius:8px; padding:5mm;">
+            <div style="font-weight:900; font-size:11px; margin-bottom:3mm;">Visual Snapshot (Bar)</div>
+            <div style="height:50mm; display:flex; align-items:flex-end; justify-content:space-around; gap:4mm;">
+              <div style="text-align:center; flex:1;">
+                <div style="height:34mm; width:100%; background:#008751; border-radius:6px;"></div>
+                <div style="font-size:10px; margin-top:2mm; font-weight:900;">LAGOS (63%)</div>
               </div>
-              <div style="flex:1; text-align:center;">
-                <div style="height:45px; background:#008751; opacity:0.75; border-radius:8px;"></div>
-                <div style="font-size:9px; margin-top:5px; font-weight:900;">ABUJA (22%)</div>
+              <div style="text-align:center; flex:1;">
+                <div style="height:18mm; width:100%; background:#008751; opacity:0.75; border-radius:6px;"></div>
+                <div style="font-size:10px; margin-top:2mm; font-weight:900;">ABUJA (22%)</div>
               </div>
-              <div style="flex:1; text-align:center;">
-                <div style="height:25px; background:#008751; opacity:0.55; border-radius:8px;"></div>
-                <div style="font-size:9px; margin-top:5px; font-weight:900;">KANO (9%)</div>
+              <div style="text-align:center; flex:1;">
+                <div style="height:8mm; width:100%; background:#008751; opacity:0.55; border-radius:6px;"></div>
+                <div style="font-size:10px; margin-top:2mm; font-weight:900;">KANO (9%)</div>
               </div>
-              <div style="flex:1; text-align:center;">
-                <div style="height:18px; background:#008751; opacity:0.35; border-radius:8px;"></div>
-                <div style="font-size:9px; margin-top:5px; font-weight:900;">PHC (6%)</div>
+              <div style="text-align:center; flex:1;">
+                <div style="height:6mm; width:100%; background:#008751; opacity:0.35; border-radius:6px;"></div>
+                <div style="font-size:10px; margin-top:2mm; font-weight:900;">PHC (6%)</div>
               </div>
             </div>
           </div>
 
           <table class="report-table">
-            <thead>
-              <tr><th>Region</th><th>Revenue</th><th>Growth (MoM)</th></tr>
-            </thead>
+            <thead><tr><th style="width:40%;">Region</th><th style="width:35%;">Revenue</th><th style="width:25%;">Growth (MoM)</th></tr></thead>
             <tbody>
               <tr><td>Lagos Zone</td><td>₦28,500,000</td><td><span class="report-badge badge-success">+5.2%</span></td></tr>
               <tr><td>Abuja HQ</td><td>₦10,200,000</td><td><span class="report-badge badge-success">+1.8%</span></td></tr>
@@ -1145,19 +1091,17 @@
 
       if (type === 'enforcement') {
         content = `
-          <div class="report-section-title red">1.0 ENFORCEMENT ACTIONS LOG</div>
-          <p style="font-size:11px; margin:0 0 10px; color:#333;">
-            Record of regulatory breaches, investigative actions, and sanctions imposed.
-          </p>
+          <div class="report-section-title red">1.0 Enforcement Actions Log</div>
+          <p style="font-size:12px; margin:0 0 6mm 0; color:#333;">Record of regulatory breaches, investigative actions, and sanctions imposed.</p>
 
           <table class="report-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Entity / Agency</th>
-                <th>Violation Type</th>
-                <th>Location</th>
-                <th>Status</th>
+                <th style="width:16%;">Date</th>
+                <th style="width:28%;">Entity / Agency</th>
+                <th style="width:24%;">Violation Type</th>
+                <th style="width:18%;">Location</th>
+                <th style="width:14%;">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -1170,8 +1114,13 @@
             </tbody>
           </table>
 
-          <div class="report-section-title gray red">2.0 COMPLIANCE SUMMARY</div>
-          <ul style="font-size:11px; line-height:1.55; padding-left:16px; margin:0;">
+          <div class="page-break"></div>
+
+          <div class="report-section-title" style="background:#f3f4f6; color:#111; border-left:4px solid #b91c1c; border-radius:0; font-weight:900;">
+            2.0 Compliance Summary
+          </div>
+
+          <ul style="font-size:12px; line-height:1.8; padding-left:6mm; margin:0;">
             <li><strong>Total Violations Reported:</strong> 142</li>
             <li><strong>Compliance Notices Served:</strong> 98</li>
             <li><strong>Direct Enforcement (Removals):</strong> 22</li>
@@ -1181,105 +1130,129 @@
       }
 
       const footer = `
-        <div class="signature-wrap avoid-break">
-          <div class="signature-box">
-            <div class="signature-name">Dr. Olalekan Fadolapo</div>
-            <div class="signature-line">Director General</div>
-            <div class="signature-note">Digitally Signed & Authenticated</div>
+        <div class="report-footer">
+          <div style="margin:8mm 0 6mm 0; display:flex; justify-content:flex-end;">
+            <div style="text-align:center;">
+              <div style="height:14mm; margin-bottom:2mm;">
+                <span style="font-family:cursive; font-size:20px; color:#008751;">Dr. Olalekan Fadolapo</span>
+              </div>
+              <div style="border-top:1px solid #000; width:60mm; margin-top:2mm; padding-top:2mm; font-weight:900; text-transform:uppercase;">
+                Director General
+              </div>
+              <div style="font-size:9px; font-style:italic;">Digitally Signed & Authenticated</div>
+            </div>
           </div>
-        </div>
-
-        <div class="report-footer avoid-break">
-          <div>Generated via ARCON Integrated Regulatory Management System (IRMS) • System ID: DG-TERM-01</div>
-          <div>This document is confidential property of the Federal Government of Nigeria.</div>
+          <p style="margin:0;">Generated via ARCON Integrated Regulatory Management System (IRMS) • System ID: DG-TERM-01</p>
+          <p style="margin:1mm 0 0 0;">This document is confidential property of the Federal Government of Nigeria.</p>
         </div>
       `;
 
       return `
-        <div class="report-page">
-          ${topbar}
+        <div class="report-paper" id="report-root" data-type="${type}" data-date="${isoDate}">
+          ${header}
           ${content}
           ${footer}
         </div>
       `;
     }
 
-    function waitForAssets(root) {
-      const imgs = Array.from(root.querySelectorAll('img'));
-      const imgPromises = imgs.map(img => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-        return new Promise(res => {
-          img.onload = () => res();
-          img.onerror = () => res();
-        });
-      });
-
-      const fontPromise = (document.fonts && document.fonts.ready)
-        ? document.fonts.ready.catch(() => {})
-        : Promise.resolve();
-
-      const paintPromise = new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
-
-      return Promise.all([fontPromise, paintPromise, ...imgPromises]);
+    function safeFilename(str){
+      return String(str)
+        .replace(/[\\/:*?"<>|]+/g, "-")
+        .replace(/\s+/g, "_")
+        .replace(/_+/g, "_")
+        .trim();
     }
 
-    async function generatePDF(type, pushToHistory = true, customTitle = null) {
+    async function waitForReportAssets(container){
+      // wait images
+      const imgs = Array.from(container.querySelectorAll('img'));
+      await Promise.all(imgs.map(img => {
+        if(img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(res => {
+          const done = () => res();
+          img.addEventListener('load', done, { once:true });
+          img.addEventListener('error', done, { once:true });
+        });
+      }));
+
+      // wait fonts
+      if(document.fonts && document.fonts.ready){
+        try { await document.fonts.ready; } catch(e){}
+      }
+
+      // small settle (layout/paint)
+      await new Promise(r => setTimeout(r, 60));
+    }
+
+    async function generatePDF(type) {
       const toast = document.getElementById('toast-loading');
       const staging = document.getElementById('report-staging-area');
 
       toast.classList.remove('hidden');
 
-      // Inject report HTML
+      // Inject HTML
       staging.innerHTML = getReportHTML(type);
-      const page = staging.querySelector('.report-page');
+
+      const reportEl = staging.querySelector('.report-paper');
+      if(!reportEl){
+        toast.classList.add('hidden');
+        alert("Report template failed to render.");
+        return;
+      }
+
+      // Ensure assets are loaded before capture
+      await waitForReportAssets(reportEl);
+
+      const todayISO = new Date().toISOString().slice(0,10);
+      const period = String(currentReportPeriod || 'Daily').toUpperCase();
+
+      const typeLabel = type === 'executive' ? 'EXECUTIVE'
+                    : type === 'financial' ? 'FINANCIAL'
+                    : 'ENFORCEMENT';
+
+      const filename = safeFilename(`ARCON_${typeLabel}_${period}_${todayISO}.pdf`);
+
+      // Use mm units + A4 to stop crop issues
+      const opt = {
+        margin: 0,
+        filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 3,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          scrollY: 0,
+          windowWidth: reportEl.scrollWidth,
+          windowHeight: reportEl.scrollHeight
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
 
       try {
-        await waitForAssets(page);
+        await html2pdf().set(opt).from(reportEl).save();
 
-        const todayISO = new Date().toISOString().slice(0,10);
-        const reportTypeLabel =
-          type === 'executive' ? 'Executive Summary' :
-          type === 'financial' ? 'Financial Report' :
-          'Enforcement Log';
+        toast.classList.add('hidden');
 
-        const filename = `ARCON_${type.toUpperCase()}_${String(currentReportPeriod).toUpperCase()}_${todayISO}.pdf`;
+        // Add to history
+        const today = new Date().toISOString().slice(0,10);
+        const friendlyType = type === 'executive' ? 'Executive Summary' : (type === 'financial' ? 'Financial Report' : 'Enforcement Log');
 
-        const opt = {
-          margin: [10, 10, 12, 10], // mm
-          filename,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 3,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            scrollY: 0,
-            windowWidth: page.scrollWidth,
-            windowHeight: page.scrollHeight
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['css','legacy'], avoid: ['.avoid-break'] }
-        };
+        MOCK_REPORTS.unshift({
+          name: `${friendlyType} - ${currentReportPeriod}`,
+          date: today,
+          type: friendlyType,
+          key: type,
+          period: currentReportPeriod
+        });
+        renderReportHistory();
 
-        await html2pdf().set(opt).from(page).save();
-
-        if (pushToHistory) {
-          const displayName = customTitle || `${reportTypeLabel} - ${currentReportPeriod}`;
-          MOCK_REPORTS.unshift({
-            name: displayName,
-            date: todayISO,
-            type: reportTypeLabel,
-            template: type,
-            period: currentReportPeriod
-          });
-          renderReportHistory();
-        }
       } catch (err) {
         console.error(err);
-        alert("PDF generation failed. Open DevTools Console to see the error.");
-      } finally {
         toast.classList.add('hidden');
-        staging.innerHTML = '';
+        alert("Error generating PDF. Please try again.");
       }
     }
 
@@ -1289,9 +1262,9 @@
       mapInstance = L.map('map-dg').setView([9.0820, 8.6753], 6);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM' }).addTo(mapInstance);
 
-      const style = { fillColor: '#008751', fillOpacity: 0.6, radius: 6, weight: 1, color: 'white' };
-      L.circleMarker([9.07, 7.39], style).addTo(mapInstance); // Abuja
-      L.circleMarker([6.52, 3.37], style).addTo(mapInstance); // Lagos
+      const style = { fillColor: '#008751', fillOpacity: 0.6, radius: 6, weight: 2, color: 'white' };
+      L.circleMarker([9.07, 7.39], style).addTo(mapInstance);
+      L.circleMarker([6.52, 3.37], style).addTo(mapInstance);
     }
 
     function initCharts() {
