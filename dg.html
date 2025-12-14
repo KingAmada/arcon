@@ -82,523 +82,222 @@
     .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
 
-    /* ===========================
-       REPORT SYSTEM (Executive PDF)
-       =========================== */
+    /* =========================
+       REPORT TEMPLATE (A4)
+       Fixes "blank 3.5kb PDF" by keeping staging content paintable
+       ========================= */
 
-    /* Hidden staging (A4 canvas target) */
-    #report-staging-area {
+    /* Keep staging IN the viewport so html2canvas can actually paint it.
+       Invisible + non-interactive. */
+    #report-staging-area{
       position: fixed;
-      left: -99999px;
+      left: 0;
       top: 0;
-      width: 794px;            /* A4 width @ 96dpi */
-      min-height: 1123px;      /* A4 height @ 96dpi */
-      background: #fff;
-      z-index: -1;
-      overflow: hidden;
-    }
-
-    /* Page wrapper */
-    .report-page {
-      width: 794px;
-      min-height: 1123px;
-      background: #fff;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Watermark */
-    .report-watermark {
-      position: absolute;
-      inset: 0;
+      width: 210mm;
+      height: 297mm;
+      opacity: 0.001;            /* invisible but paintable */
       pointer-events: none;
-      opacity: 0.06;
-      z-index: 0;
-      background-image:
-        repeating-linear-gradient( -30deg,
-          rgba(0, 135, 81, 1) 0px,
-          rgba(0, 135, 81, 1) 0px,
-          transparent 1px,
-          transparent 140px
-        );
-    }
-    .report-watermark::after{
-      content: "ARCON • IRMS • CONFIDENTIAL";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-20deg);
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      font-size: 54px;
-      letter-spacing: 0.18em;
-      color: rgba(0, 0, 0, 1);
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    /* Fixed header/footer (repeated in multipage capture) */
-    .report-header-fixed {
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: 110px;
-      background: #fff;
-      z-index: 5;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .report-footer-fixed {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 90px;
-      background: #fff;
-      z-index: 5;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    /* Content area leaves room for fixed header/footer */
-    .report-body {
-      position: relative;
-      z-index: 2;
-      padding: 140px 54px 120px 54px;
-      font-family: Merriweather, serif;
-      color: #111827;
-    }
-
-    .report-h1 {
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      font-size: 26px;
-      letter-spacing: -0.02em;
-      margin: 0 0 8px 0;
-    }
-    .report-h2 {
-      font-family: Inter, sans-serif;
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin: 22px 0 10px 0;
-      color: #0f172a;
-    }
-    .report-h3 {
-      font-family: Inter, sans-serif;
-      font-weight: 800;
-      font-size: 13px;
-      margin: 18px 0 8px 0;
-      color: #0f172a;
-    }
-    .report-p {
-      font-size: 12px;
-      line-height: 1.75;
-      margin: 0 0 12px 0;
-      color: #111827;
-      text-align: justify;
-    }
-    .report-small {
-      font-size: 10px;
-      color: #475569;
-      line-height: 1.5;
-    }
-
-    .report-topband {
-      height: 10px;
-      background: linear-gradient(135deg, #008751 0%, #005a32 100%);
-    }
-
-    .report-headwrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 54px 14px 54px;
-      gap: 16px;
-    }
-
-    .report-brand-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 300px;
-    }
-
-    .report-logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 12px;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
+      background: transparent;
+      z-index: -9999;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .report-logo img { width: 100%; height: 100%; object-fit: cover; }
-
-    .report-brand-titles {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .report-agency {
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      font-size: 14px;
-      color: #0f172a;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin: 0;
-      line-height: 1.1;
-    }
-    .report-system {
-      font-family: Inter, sans-serif;
-      font-weight: 800;
-      font-size: 10px;
-      color: #008751;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      margin: 0;
-      line-height: 1.1;
     }
 
-    .report-meta {
-      text-align: right;
-      font-family: Inter, sans-serif;
-      font-size: 10px;
-      color: #475569;
+    .report-page{
+      width: 210mm;
+      min-height: 297mm;
+      background: #ffffff;
+      box-sizing: border-box;
+      padding: 14mm 16mm;
+      color: #111;
       line-height: 1.45;
-      min-width: 260px;
-    }
-    .report-meta strong {
-      color: #0f172a;
-      font-weight: 800;
+      font-family: "Times New Roman", Times, serif;
     }
 
-    .report-footer-wrap {
-      padding: 14px 54px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      font-family: Inter, sans-serif;
-      font-size: 10px;
-      color: #64748b;
+    .report-topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 3px double #008751;
+      margin-bottom: 14px;
     }
 
-    .report-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      font-weight: 800;
+    .report-brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+
+    .report-brand img{
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .report-title h1{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      font-size: 9px;
-      color: #0f172a;
-      white-space: nowrap;
+      color: #008751;
     }
-    .report-chip b { color: #008751; }
 
-    .report-kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin: 12px 0 8px 0;
-    }
-    .report-kpi {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px 14px;
-      background: #fff;
-      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
-    }
-    .report-kpi .label {
-      font-family: Inter, sans-serif;
-      font-weight: 800;
+    .report-title p{
+      margin: 3px 0 0 0;
       font-size: 10px;
-      color: #64748b;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
+      color: #555;
     }
-    .report-kpi .value {
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      font-size: 22px;
-      letter-spacing: -0.02em;
-      color: #0f172a;
-      margin-bottom: 4px;
-    }
-    .report-kpi .hint {
-      font-family: Inter, sans-serif;
-      font-weight: 800;
-      font-size: 10px;
-      color: #334155;
-    }
-    .kpi-green { border-color: rgba(0,135,81,0.25); background: rgba(0,135,81,0.04); }
-    .kpi-gold  { border-color: rgba(212,175,55,0.30); background: rgba(212,175,55,0.06); }
-    .kpi-red   { border-color: rgba(220,38,38,0.25); background: rgba(220,38,38,0.04); }
 
-    .report-callout {
-      border-left: 4px solid #008751;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-left-width: 4px;
-      border-radius: 14px;
-      padding: 14px 14px;
-      margin: 12px 0 14px 0;
+    .report-meta{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      margin: 12px 0 18px;
+      font-size: 10px;
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      background: #f9fafb;
     }
-    .report-callout .t {
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      font-size: 11px;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
-      color: #0f172a;
-      margin-bottom: 6px;
-    }
-    .report-callout .b {
-      font-family: Merriweather, serif;
+
+    .report-meta strong{ letter-spacing: 0.06em; }
+
+    .report-section-title{
+      background: #008751;
+      color: #fff;
+      padding: 8px 12px;
       font-size: 12px;
-      color: #0f172a;
-      line-height: 1.7;
+      margin: 18px 0 10px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+      font-weight: 900;
     }
 
-    .report-table {
+    .report-section-title.red{ background:#b91c1c; }
+    .report-section-title.gray{
+      background:#f3f4f6;
+      color:#222;
+      border-left: 4px solid #008751;
+      border-radius: 6px;
+    }
+    .report-section-title.gray.red{
+      border-left-color:#b91c1c;
+    }
+
+    .kpi-grid{
+      display:flex;
+      gap: 12px;
+      margin: 10px 0 14px;
+    }
+    .kpi-card{
+      flex: 1;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px 12px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .kpi-label{
+      font-size: 9px;
+      color: #666;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+    .kpi-value{
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: 900;
+    }
+    .kpi-note{
+      margin-top: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      color: #166534;
+    }
+
+    .report-table{
       width: 100%;
       border-collapse: collapse;
-      font-size: 11px;
-      margin: 10px 0 14px 0;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .report-table th {
-      background: #0b3b25;
-      color: #fff;
-      font-family: Inter, sans-serif;
-      font-weight: 900;
+      margin: 10px 0 14px;
       font-size: 10px;
-      letter-spacing: 0.12em;
+    }
+    .report-table th{
+      background-color: #008751;
+      color: white;
+      font-weight: 900;
       text-transform: uppercase;
-      padding: 10px 10px;
+      padding: 8px 8px;
+      border: 1px solid #00643C;
       text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
+      letter-spacing: 0.08em;
+      font-size: 9px;
     }
-    .report-table td {
-      padding: 9px 10px;
-      border-bottom: 1px solid #eef2f7;
-      color: #0f172a;
+    .report-table td{
+      padding: 7px 8px;
+      border: 1px solid #e5e7eb;
+      color: #333;
+      vertical-align: top;
     }
-    .report-table tr:nth-child(even) td {
-      background: #f8fafc;
-    }
+    .report-table tr:nth-child(even){ background-color:#f9fafb; }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 8px;
+    .report-badge{
+      display:inline-block;
+      padding: 2px 8px;
       border-radius: 999px;
-      font-family: Inter, sans-serif;
       font-weight: 900;
       font-size: 9px;
-      letter-spacing: 0.10em;
       text-transform: uppercase;
+      letter-spacing: 0.06em;
       border: 1px solid transparent;
       white-space: nowrap;
     }
-    .badge-success { background: #dcfce7; border-color: #86efac; color: #166534; }
-    .badge-warning { background: #fef9c3; border-color: #fde047; color: #854d0e; }
-    .badge-danger  { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
-    .badge-neutral { background: #e2e8f0; border-color: #cbd5e1; color: #0f172a; }
+    .badge-success{ background:#dcfce7; color:#166534; border-color:#86efac; }
+    .badge-danger{ background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+    .badge-warning{ background:#fef9c3; color:#854d0e; border-color:#fde047; }
 
-    .report-barwrap {
-      display: grid;
-      grid-template-columns: 1.2fr 2fr;
-      gap: 14px;
-      align-items: start;
-      margin: 8px 0 12px 0;
-    }
-    .report-barchart {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 12px;
-      background: #fff;
-    }
-    .bar-row {
-      display: grid;
-      grid-template-columns: 90px 1fr 70px;
-      gap: 10px;
-      align-items: center;
-      margin: 10px 0;
-      font-family: Inter, sans-serif;
-    }
-    .bar-row .nm {
-      font-weight: 900;
-      font-size: 10px;
-      color: #0f172a;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .bar-row .rail {
-      height: 10px;
-      background: #e2e8f0;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid #cbd5e1;
-    }
-    .bar-row .fill {
-      height: 100%;
-      background: linear-gradient(135deg, #008751 0%, #005a32 100%);
-      border-radius: 999px;
-    }
-    .bar-row .val {
-      text-align: right;
-      font-weight: 900;
-      font-size: 10px;
-      color: #0f172a;
-    }
-
-    .report-signature {
-      margin-top: 14px;
-      display: flex;
-      justify-content: flex-end;
-    }
-    .sig-box {
-      width: 280px;
-      text-align: center;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 12px 12px;
-      background: #fff;
-    }
-    .sig-name {
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      font-size: 12px;
-      color: #0f172a;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-top: 6px;
-    }
-    .sig-title {
-      font-family: Inter, sans-serif;
-      font-weight: 800;
-      font-size: 10px;
-      color: #64748b;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-    .sig-line {
-      height: 1px;
-      background: #0f172a;
-      margin: 6px 0 0 0;
-      opacity: 0.55;
-    }
-    .sig-note {
-      font-family: Inter, sans-serif;
-      font-weight: 800;
-      font-size: 9px;
-      color: #64748b;
-      margin-top: 6px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .cover {
-      padding: 170px 54px 120px 54px;
-      position: relative;
-      z-index: 2;
-    }
-    .cover-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(0,135,81,0.08);
-      border: 1px solid rgba(0,135,81,0.22);
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-size: 10px;
-      color: #0f172a;
-    }
-    .cover-title {
-      font-family: Inter, sans-serif;
-      font-weight: 950;
-      font-size: 40px;
-      letter-spacing: -0.03em;
-      margin: 18px 0 10px 0;
-      color: #0f172a;
-      line-height: 1.05;
-    }
-    .cover-sub {
-      font-family: Merriweather, serif;
-      font-size: 14px;
-      color: #334155;
-      line-height: 1.7;
-      max-width: 560px;
-      margin: 0 0 16px 0;
-    }
-    .cover-meta {
+    .report-footer{
       margin-top: 18px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      max-width: 560px;
+      border-top: 1px solid #d1d5db;
+      padding-top: 10px;
+      font-size: 9px;
+      text-align: center;
+      color: #666;
     }
-    .cover-meta .item {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 12px 12px;
-      background: #fff;
+
+    .signature-wrap{
+      margin-top: 18px;
+      display:flex;
+      justify-content:flex-end;
     }
-    .cover-meta .k {
-      font-family: Inter, sans-serif;
-      font-weight: 900;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #64748b;
+    .signature-box{
+      width: 240px;
+      text-align:center;
+    }
+    .signature-name{
+      font-family: cursive;
+      font-size: 18px;
+      color:#008751;
       margin-bottom: 6px;
     }
-    .cover-meta .v {
-      font-family: Inter, sans-serif;
+    .signature-line{
+      border-top: 1px solid #111;
+      padding-top: 6px;
       font-weight: 900;
-      font-size: 14px;
-      color: #0f172a;
-    }
-    .cover-footer-note {
-      position: absolute;
-      left: 54px;
-      right: 54px;
-      bottom: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      font-family: Inter, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       font-size: 10px;
-      color: #64748b;
-      z-index: 2;
+    }
+    .signature-note{
+      font-size: 9px;
+      font-style: italic;
+      margin-top: 2px;
     }
 
-    .page-break { page-break-before: always; break-before: page; }
-
-    /* Improve html2canvas capture consistency */
-    #report-staging-area, .report-page, .report-header-fixed, .report-footer-fixed {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
+    .page-break{ page-break-before: always; break-before: page; }
+    .avoid-break{ page-break-inside: avoid; break-inside: avoid; }
   </style>
 </head>
 
@@ -611,8 +310,8 @@
     <aside class="hidden md:flex w-72 bg-green-gradient text-white border-r border-white/10 flex-col flex-shrink-0 z-20 relative shadow-xl">
       <div class="h-24 flex items-center px-6 border-b border-white/10">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg transform rotate-3 transition hover:rotate-0 overflow-hidden">
-            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-12 h-12 object-cover" alt="ARCON Logo">
+          <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg transform rotate-3 transition hover:rotate-0">
+            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-9 h-9 object-contain">
           </div>
           <div>
             <h1 class="font-extrabold text-white text-xl tracking-tight leading-none">ARCON</h1>
@@ -694,9 +393,7 @@
       <header class="h-16 md:h-24 bg-white/80 backdrop-blur-md border-b border-gray-200/60 flex items-center justify-between px-4 md:px-8 sticky top-0 md:relative z-10">
         <div>
           <h2 class="font-black text-gray-800 text-xl md:text-2xl flex items-center gap-3 tracking-tight">
-            <span class="md:hidden text-arconGreen">
-              <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-8 h-8 object-contain" alt="ARCON Logo">
-            </span>
+            <span class="md:hidden text-arconGreen"><img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="w-8 h-8 object-contain"></span>
             <span id="page-title">Executive Dashboard</span>
           </h2>
           <p class="hidden md:block text-sm text-gray-500 font-medium mt-1">Real-time regulatory oversight & revenue metrics</p>
@@ -862,7 +559,7 @@
           <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-20 md:relative">
             <div>
               <h2 class="text-xl font-bold text-gray-800">Reports Center</h2>
-              <p class="text-sm text-gray-500">Generate and export official executive-grade documents.</p>
+              <p class="text-sm text-gray-500">Generate and export official regulatory documents.</p>
             </div>
             <div class="flex gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
               <button onclick="setReportPeriod(this, 'Daily')" class="report-period-btn active px-4 py-2 bg-white text-arconGreen font-bold rounded-lg shadow-sm text-xs transition-all">Daily</button>
@@ -871,83 +568,38 @@
             </div>
           </div>
 
-          <!-- Report Types Grid (ALL SAMPLES) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            <!-- Executive Summary -->
-            <div class="bg-green-gradient text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10"
-                 onclick="generatePDF('executive')">
+            <div class="bg-green-gradient text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border border-white/10" onclick="generatePDF('executive')">
               <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
               <div class="relative z-10">
-                <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl mb-4 border border-white/20">
-                  <i class="ph ph-presentation-chart"></i>
-                </div>
+                <div class="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl mb-4 border border-white/20"><i class="ph ph-presentation-chart"></i></div>
                 <h3 class="text-lg font-bold">Executive Summary</h3>
-                <p class="text-xs text-green-100 mt-1 mb-6 opacity-90">Cover page + KPIs + recommendations + performance matrix + signature page.</p>
+                <p class="text-xs text-green-100 mt-1 mb-6 opacity-80">High-level overview of all KPIs including revenue, compliance, and agency metrics.</p>
                 <button class="w-full py-3 bg-white text-arconGreen rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
                   <i class="ph ph-download-simple text-lg"></i> Download PDF
                 </button>
               </div>
             </div>
 
-            <!-- Financial -->
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all"
-                 onclick="generatePDF('financial')">
-              <div class="w-12 h-12 bg-green-50 text-arconGreen rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-currency-ngn"></i></div>
+            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all" onclick="generatePDF('financial')">
+              <div class="w-12 h-12 bg-green-50 text-arconGreen rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-file-text"></i></div>
               <h3 class="text-lg font-bold text-gray-800">Financial Report</h3>
-              <p class="text-xs text-gray-400 mt-1 mb-6">Revenue streams, zonal contributions, transaction summary, and projections.</p>
+              <p class="text-xs text-gray-400 mt-1 mb-6">Detailed revenue breakdown, collections, and future projections.</p>
               <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
                 <i class="ph ph-download-simple text-lg"></i> Download PDF
               </button>
             </div>
 
-            <!-- Enforcement -->
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-red-500 hover:shadow-md transition-all"
-                 onclick="generatePDF('enforcement')">
+            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-red-500 hover:shadow-md transition-all" onclick="generatePDF('enforcement')">
               <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-warning-octagon"></i></div>
               <h3 class="text-lg font-bold text-gray-800">Enforcement Log</h3>
-              <p class="text-xs text-gray-400 mt-1 mb-6">Violations, investigations, sanctions, status, and compliance summary.</p>
+              <p class="text-xs text-gray-400 mt-1 mb-6">List of violations, pending actions, and resolved compliance cases.</p>
               <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
                 <i class="ph ph-download-simple text-lg"></i> Download PDF
               </button>
             </div>
-
-            <!-- Agency Registry Summary -->
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
-                 onclick="generatePDF('agency')">
-              <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-buildings"></i></div>
-              <h3 class="text-lg font-bold text-gray-800">Agency Registry Summary</h3>
-              <p class="text-xs text-gray-400 mt-1 mb-6">Top agencies, compliance ranking, and notable campaigns overview.</p>
-              <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
-                <i class="ph ph-download-simple text-lg"></i> Download PDF
-              </button>
-            </div>
-
-            <!-- Zonal Performance -->
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-arconGreen hover:shadow-md transition-all"
-                 onclick="generatePDF('zonal')">
-              <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-map-trifold"></i></div>
-              <h3 class="text-lg font-bold text-gray-800">Zonal Performance</h3>
-              <p class="text-xs text-gray-400 mt-1 mb-6">Zone-by-zone collections, compliance delta, and intervention priorities.</p>
-              <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
-                <i class="ph ph-download-simple text-lg"></i> Download PDF
-              </button>
-            </div>
-
-            <!-- Compliance Brief -->
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-yellow-500 hover:shadow-md transition-all"
-                 onclick="generatePDF('compliance')">
-              <div class="w-12 h-12 bg-yellow-50 text-yellow-700 rounded-xl flex items-center justify-center text-2xl mb-4"><i class="ph ph-shield-check"></i></div>
-              <h3 class="text-lg font-bold text-gray-800">Compliance Brief</h3>
-              <p class="text-xs text-gray-400 mt-1 mb-6">Compliance rate, categories of breaches, and corrective actions plan.</p>
-              <button class="w-full py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-bold text-gray-600 flex items-center justify-center gap-2 transition-colors">
-                <i class="ph ph-download-simple text-lg"></i> Download PDF
-              </button>
-            </div>
-
           </div>
 
-          <!-- Recent Reports Table -->
           <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h3 class="font-bold text-gray-800 text-sm md:text-base">Recent Activity</h3>
@@ -992,11 +644,11 @@
       <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       <div>
         <p class="font-bold text-sm">Generating PDF...</p>
-        <p class="text-xs text-gray-400">Compiling layout, branding, and pagination.</p>
+        <p class="text-xs text-gray-400">Compiling data and layouts.</p>
       </div>
     </div>
 
-    <!-- REPORT STAGING AREA (Hidden) -->
+    <!-- REPORT STAGING AREA (Hidden but paintable) -->
     <div id="report-staging-area"></div>
 
     <!-- AGENCY DETAIL MODAL -->
@@ -1007,7 +659,9 @@
             <h3 class="font-bold text-xl text-gray-900" id="modal-agency-name">--</h3>
             <p class="text-xs text-gray-500 font-mono" id="modal-agency-rc">RC: --</p>
           </div>
-          <button onclick="document.getElementById('agency-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300"><i class="ph ph-x"></i></button>
+          <button onclick="document.getElementById('agency-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300">
+            <i class="ph ph-x"></i>
+          </button>
         </div>
         <div class="p-6 overflow-y-auto">
           <div class="flex gap-4 mb-6">
@@ -1029,25 +683,45 @@
   </div>
 
   <script>
-    /* ===========================
-       DATA (Sample / Demo)
-       =========================== */
-    const BRAND = {
-      agencyName: "Advertising Regulatory Council of Nigeria",
-      shortName: "ARCON",
-      systemName: "Integrated Regulatory Management System (IRMS)",
-      address: "Plot 12, Augustus Aikhomu Way, Utako District, Abuja",
-      website: "www.arcon.gov.ng",
-      logoUrl: "https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg"
-    };
-
+    // --- Data ---
     const NIGERIA_DATA = [
-      { state: "Abuja FCT", lgas: ["Abaji", "Abuja Municipal", "Bwari", "Gwagwalada", "Kuje", "Kwali"] },
-      { state: "Lagos", lgas: ["Agege", "Ajeromi-Ifelodun", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"] },
-      { state: "Rivers", lgas: ["Abua/Odual", "Ahoada East", "Ahoada West", "Akuku-Toru", "Andoni", "Asari-Toru", "Bonny", "Degema", "Eleme", "Emohua", "Etche", "Gokana", "Ikwerre", "Khana", "Obio/Akpor", "Ogba/Egbema/Ndoni", "Ogu/Bolo", "Okrika", "Omuma", "Opobo/Nkoro", "Oyigbo", "Port Harcourt", "Tai"] },
-      { state: "Kano", lgas: ["Ajingi", "Albasu", "Bagwai", "Bebeji", "Bichi", "Bunkure", "Dala", "Dambatta", "Dawakin Kudu", "Dawakin Tofa", "Doguwa", "Fagge", "Gabasawa", "Garko", "Garun Mallam", "Gaya", "Gezawa", "Gwale", "Gwarzo", "Kabo", "Kano Municipal", "Karaye", "Kibiya", "Kiru", "Kumbotso", "Kunchi", "Kura", "Madobi", "Makoda", "Minjibir", "Nasarawa", "Rano", "Rimin Gado", "Rogo", "Shanono", "Sumaila", "Takai", "Tarauni", "Tofa", "Tsanyawa", "Tudun Wada", "Ungogo", "Warawa", "Wudil"] },
+      { state: "Abia", lgas: ["Aba North", "Aba South", "Arochukwu", "Bende", "Ikwuano", "Isiala Ngwa North", "Isiala Ngwa South", "Isuikwuato", "Obi Ngwa", "Ohafia", "Osisioma", "Ugwunagbo", "Ukwa East", "Ukwa West", "Umuahia North", "Umuahia South", "Umu Nneochi"] },
+      { state: "Adamawa", lgas: ["Demsa", "Fufure", "Ganye", "Gayuk", "Gombi", "Grie", "Hong", "Jada", "Lamurde", "Madagali", "Maiha", "Mayo Belwa", "Michika", "Mubi North", "Mubi South", "Numan", "Shelleng", "Song", "Toungo", "Yola North", "Yola South"] },
+      { state: "Akwa Ibom", lgas: ["Abak", "Eastern Obolo", "Eket", "Esit Eket", "Essien Udim", "Etim Ekpo", "Etinan", "Ibeno", "Ibesikpo Asutan", "Ibiono-Ibom", "Ika", "Ikono", "Ikot Abasi", "Ikot Ekpene", "Ini", "Itu", "Mbo", "Mkpat-Enin", "Nsit-Atai", "Nsit-Ibom", "Nsit-Ubium", "Obot Akara", "Okobo", "Onna", "Oron", "Oruk Anam", "Udung-Uko", "Ukanafun", "Uruan", "Urue-Offong/Oruko", "Uyo"] },
+      { state: "Anambra", lgas: ["Aguata", "Anambra East", "Anambra West", "Anaocha", "Awka North", "Awka South", "Ayamelum", "Dunukofia", "Ekwusigo", "Idemili North", "Idemili South", "Ihiala", "Njikoka", "Nnewi North", "Nnewi South", "Ogbaru", "Onitsha North", "Onitsha South", "Orumba North", "Orumba South", "Oyi"] },
+      { state: "Bauchi", lgas: ["Alkaleri", "Bauchi", "Bogoro", "Damban", "Darazo", "Dass", "Gamawa", "Ganjuwa", "Giade", "Itas/Gadau", "Jama'are", "Katagum", "Kirfi", "Misau", "Ningi", "Shira", "Tafawa Balewa", "Toro", "Warji", "Zaki"] },
+      { state: "Bayelsa", lgas: ["Brass", "Ekeremor", "Kolokuma/Opokuma", "Nembe", "Ogbia", "Sagbama", "Southern Ijaw", "Yenagoa"] },
+      { state: "Benue", lgas: ["Ado", "Agatu", "Apa", "Buruku", "Gboko", "Guma", "Gwer East", "Gwer West", "Katsina-Ala", "Konshisha", "Kwande", "Logo", "Makurdi", "Obi", "Ogbadibo", "Ohimini", "Oju", "Okpokwu", "Otukpo", "Tarka", "Ukum", "Ushongo", "Vandeikya"] },
+      { state: "Borno", lgas: ["Abadam", "Askira/Uba", "Bama", "Bayo", "Biu", "Chibok", "Damboa", "Dikwa", "Gubio", "Guzamala", "Gwoza", "Hawul", "Jere", "Kaga", "Kala/Balge", "Konduga", "Kukawa", "Kwaya Kusar", "Mafa", "Magumeri", "Maiduguri", "Marte", "Mobbar", "Monguno", "Ngala", "Nganzai", "Shani"] },
+      { state: "Cross River", lgas: ["Abi", "Akamkpa", "Akpabuyo", "Bakassi", "Bekwarra", "Biase", "Boki", "Calabar Municipal", "Calabar South", "Etung", "Ikom", "Obanliku", "Obubra", "Obudu", "Odukpani", "Ogoja", "Yakuur", "Yala"] },
+      { state: "Delta", lgas: ["Aniocha North", "Aniocha South", "Bomadi", "Burutu", "Ethiope East", "Ethiope West", "Ika North East", "Ika South", "Isoko North", "Isoko South", "Ndokwa East", "Ndokwa West", "Okpe", "Oshimili North", "Oshimili South", "Patani", "Sapele", "Udu", "Ughelli North", "Ughelli South", "Ukwuani", "Uvwie", "Warri North", "Warri South", "Warri South West"] },
+      { state: "Ebonyi", lgas: ["Abakaliki", "Afikpo North", "Afikpo South", "Ebonyi", "Ezza North", "Ezza South", "Ikwo", "Ishielu", "Ivo", "Izzi", "Ohaozara", "Ohaukwu", "Onicha"] },
+      { state: "Edo", lgas: ["Akoko-Edo", "Egor", "Esan Central", "Esan North-East", "Esan South-East", "Esan West", "Etsako Central", "Etsako East", "Etsako West", "Igueben", "Ikpoba Okha", "Oredo", "Orhionmwon", "Ovia North-East", "Ovia South-West", "Owan East", "Owan West", "Uhunmwonde"] },
+      { state: "Ekiti", lgas: ["Ado Ekiti", "Efon", "Ekiti East", "Ekiti South-West", "Ekiti West", "Emure", "Gbonyin", "Ido Osi", "Ijero", "Ikere", "Ikole", "Ilejemeje", "Irepodun/Ifelodun", "Ise/Orun", "Moba", "Oye"] },
       { state: "Enugu", lgas: ["Aninri", "Awgu", "Enugu East", "Enugu North", "Enugu South", "Ezeagu", "Igbo Etiti", "Igbo Eze North", "Igbo Eze South", "Isi Uzo", "Nkanu East", "Nkanu West", "Nsukka", "Oji River", "Udenu", "Udi", "Uzo Uwani"] },
+      { state: "Abuja FCT", lgas: ["Abaji", "Abuja Municipal", "Bwari", "Gwagwalada", "Kuje", "Kwali"] },
+      { state: "Gombe", lgas: ["Akko", "Balanga", "Billiri", "Dukku", "Funakaye", "Gombe", "Kaltungo", "Kwami", "Nafada", "Shongom", "Yamaltu/Deba"] },
+      { state: "Imo", lgas: ["Aboh Mbaise", "Ahiazu Mbaise", "Ehime Mbano", "Ezinihitte", "Ideato North", "Ideato South", "Ihitte/Uboma", "Ikeduru", "Isiala Mbano", "Isu", "Mbaitoli", "Ngor Okpala", "Njaba", "Nkwerre", "Nwangele", "Obowo", "Oguta", "Ohaji/Egbema", "Okigwe", "Orlu", "Orsu", "Oru East", "Oru West", "Owerri Municipal", "Owerri North", "Owerri West", "Unuimo"] },
+      { state: "Jigawa", lgas: ["Auyo", "Babura", "Biriniwa", "Birnin Kudu", "Buji", "Dutse", "Gagarawa", "Garki", "Gumel", "Guri", "Gwaram", "Gwiwa", "Hadejia", "Jahun", "Kafin Hausa", "Kaugama", "Kazaure", "Kiri Kasama", "Kiyawa", "Maigatari", "Malam Madori", "Miga", "Ringim", "Roni", "Sule Tankarkar", "Taura", "Yankwashi"] },
+      { state: "Kaduna", lgas: ["Birnin Gwari", "Chikun", "Giwa", "Igabi", "Ikara", "Jaba", "Jema'a", "Kachia", "Kaduna North", "Kaduna South", "Kagarko", "Kajuru", "Kaura", "Kauru", "Kubau", "Kudan", "Lere", "Makarfi", "Sabon Gari", "Sanga", "Soba", "Zangon Kataf", "Zaria"] },
+      { state: "Kano", lgas: ["Ajingi", "Albasu", "Bagwai", "Bebeji", "Bichi", "Bunkure", "Dala", "Dambatta", "Dawakin Kudu", "Dawakin Tofa", "Doguwa", "Fagge", "Gabasawa", "Garko", "Garun Mallam", "Gaya", "Gezawa", "Gwale", "Gwarzo", "Kabo", "Kano Municipal", "Karaye", "Kibiya", "Kiru", "Kumbotso", "Kunchi", "Kura", "Madobi", "Makoda", "Minjibir", "Nasarawa", "Rano", "Rimin Gado", "Rogo", "Shanono", "Sumaila", "Takai", "Tarauni", "Tofa", "Tsanyawa", "Tudun Wada", "Ungogo", "Warawa", "Wudil"] },
+      { state: "Katsina", lgas: ["Bakori", "Batagarawa", "Batsari", "Baure", "Bindawa", "Charanchi", "Dandume", "Danja", "Dan Musa", "Daura", "Dutsi", "Dutsin Ma", "Faskari", "Funtua", "Ingawa", "Jibia", "Kafur", "Kaita", "Kankara", "Kankia", "Katsina", "Kurfi", "Kusada", "Mai'Adua", "Malumfashi", "Mani", "Mashi", "Matazu", "Musawa", "Rimi", "Sabuwa", "Safana", "Sandamu", "Zango"] },
+      { state: "Kebbi", lgas: ["Aleiro", "Arewa Dandi", "Argungu", "Augie", "Bagudo", "Birnin Kebbi", "Bunza", "Dandi", "Fakai", "Gwandu", "Jega", "Kalgo", "Koko/Besse", "Maiyama", "Ngaski", "Sakaba", "Shanga", "Suru", "Wasagu/Danko", "Yauri", "Zuru"] },
+      { state: "Kogi", lgas: ["Adavi", "Ajaokuta", "Ankpa", "Bassa", "Dekina", "Ibaji", "Idah", "Igalamela Odolu", "Ijumu", "Kabba/Bunu", "Kogi", "Lokoja", "Mopa Muro", "Ofu", "Ogori/Magongo", "Okehi", "Okene", "Olamaboro", "Omala", "Yagba East", "Yagba West"] },
+      { state: "Kwara", lgas: ["Asa", "Baruten", "Edu", "Ekiti", "Ifelodun", "Ilorin East", "Ilorin South", "Ilorin West", "Irepodun", "Isin", "Kaiama", "Moro", "Offa", "Oke Ero", "Oyun", "Pategi"] },
+      { state: "Lagos", lgas: ["Agege", "Ajeromi-Ifelodun", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"] },
+      { state: "Nasarawa", lgas: ["Akwanga", "Awe", "Doma", "Karu", "Keana", "Keffi", "Kokona", "Lafia", "Nasarawa", "Nasarawa Egon", "Obi", "Toto", "Wamba"] },
+      { state: "Niger", lgas: ["Agaie", "Agwara", "Bida", "Borgu", "Bosso", "Chanchaga", "Edati", "Gbako", "Gurara", "Katcha", "Kontagora", "Lapai", "Lavun", "Magama", "Mariga", "Mashegu", "Mokwa", "Moya", "Paikoro", "Rafi", "Rijau", "Shiroro", "Suleja", "Tafa", "Wushishi"] },
+      { state: "Ogun", lgas: ["Abeokuta North", "Abeokuta South", "Ado-Odo/Ota", "Egbado North", "Egbado South", "Ewekoro", "Ifo", "Ijebu East", "Ijebu North", "Ijebu North East", "Ijebu Ode", "Ikenne", "Imeko Afon", "Ipokia", "Obafemi Owode", "Odeda", "Odogbolu", "Ogun Waterside", "Remo North", "Shagamu"] },
+      { state: "Ondo", lgas: ["Akoko North-East", "Akoko North-West", "Akoko South-East", "Akoko South-West", "Akure North", "Akure South", "Ese Odo", "Idanre", "Ifedore", "Ilaje", "Ile Oluji/Okeigbo", "Irele", "Odigbo", "Okitipupa", "Ondo East", "Ondo West", "Ose", "Owo"] },
+      { state: "Osun", lgas: ["Atakunmosa East", "Atakunmosa West", "Aiyedaade", "Aiyedire", "Boluwaduro", "Boripe", "Ede North", "Ede South", "Egbedore", "Ejigbo", "Ife Central", "Ife East", "Ife North", "Ife South", "Ifedayo", "Ifelodun", "Ila", "Ilesa East", "Ilesa West", "Irepodun", "Irewole", "Isokan", "Iwo", "Obokun", "Odo Otin", "Ola Oluwa", "Olorunda", "Oriade", "Orolu", "Osogbo"] },
       { state: "Oyo", lgas: ["Afijio", "Akinyele", "Atiba", "Atisbo", "Egbeda", "Ibadan North", "Ibadan North-East", "Ibadan North-West", "Ibadan South-East", "Ibadan South-West", "Ibarapa Central", "Ibarapa East", "Ibarapa North", "Ido", "Irepo", "Iseyin", "Itesiwaju", "Iwajowa", "Kajola", "Lagelu", "Ogbomosho North", "Ogbomosho South", "Ogo Oluwa", "Olorunsogo", "Oluyole", "Ona Ara", "Orelope", "Ori Ire", "Oyo East", "Oyo West", "Saki East", "Saki West", "Surulere"] },
+      { state: "Plateau", lgas: ["Barkin Ladi", "Bassa", "Bokkos", "Jos East", "Jos North", "Jos South", "Kanam", "Kanke", "Langtang North", "Langtang South", "Mangu", "Mikang", "Pankshin", "Qua'an Pan", "Riyom", "Shendam", "Wase"] },
+      { state: "Rivers", lgas: ["Abua/Odual", "Ahoada East", "Ahoada West", "Akuku-Toru", "Andoni", "Asari-Toru", "Bonny", "Degema", "Eleme", "Emohua", "Etche", "Gokana", "Ikwerre", "Khana", "Obio/Akpor", "Ogba/Egbema/Ndoni", "Ogu/Bolo", "Okrika", "Omuma", "Opobo/Nkoro", "Oyigbo", "Port Harcourt", "Tai"] },
+      { state: "Sokoto", lgas: ["Binji", "Bodinga", "Dange Shuni", "Gada", "Goronyo", "Gudu", "Gwadabawa", "Illela", "Isa", "Kebbe", "Kware", "Rabah", "Sabon Birni", "Shagari", "Silame", "Sokoto North", "Sokoto South", "Tambuwal", "Tangaza", "Tureta", "Wamako", "Wurno", "Yabo"] },
+      { state: "Taraba", lgas: ["Ardo Kola", "Bali", "Donga", "Gashaka", "Gassol", "Ibi", "Jalingo", "Karim Lamido", "Kumi", "Lau", "Sardauna", "Takum", "Ussa", "Wukari", "Yorro", "Zing"] },
+      { state: "Yobe", lgas: ["Bade", "Bursari", "Damaturu", "Fika", "Fune", "Geidam", "Gujba", "Gulani", "Jakusko", "Karasuwa", "Machina", "Nangere", "Nguru", "Potiskum", "Tarmuwa", "Yunusari", "Yusufari"] },
+      { state: "Zamfara", lgas: ["Anka", "Bakura", "Birnin Magaji/Kiyaw", "Bukkuyum", "Bungudu", "Gummi", "Gusau", "Kaura Namoda", "Maradun", "Maru", "Shinkafi", "Talata Mafara", "Tsafe", "Zurmi"] }
     ];
 
     const AGENCIES = [
@@ -1063,74 +737,11 @@
 
     let mapInstance = null;
     let revChart = null;
+
+    // Report period (shared)
     let currentReportPeriod = 'Daily';
 
-    // Cached logo as DataURL for perfect PDF rendering
-    let _logoDataUrl = null;
-
-    // Report history now stores enough info to regenerate the exact report on click
-    const REPORT_HISTORY = [
-      { key: "executive", name: "Executive Summary - Q3", date: "2025-10-01", type: "Executive Summary", period: "Monthly" },
-      { key: "financial", name: "Financial Audit Oct", date: "2025-10-05", type: "Financial Report", period: "Monthly" }
-    ];
-
-    /* ===========================
-       UTILITIES
-       =========================== */
-    function pad2(n){ return String(n).padStart(2, "0"); }
-
-    function isoToday(){
-      const d = new Date();
-      return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-    }
-
-    function fmtDateLong(d = new Date()){
-      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-
-    function fmtNGN(n){
-      try {
-        return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(n);
-      } catch {
-        return `₦${Math.round(n).toLocaleString()}`;
-      }
-    }
-
-    function randomRef(){
-      return `ARCON-${Math.floor(100000 + Math.random()*900000)}`;
-    }
-
-    function safeText(str){
-      return String(str).replace(/[<>&"]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[s]));
-    }
-
-    async function ensureLogoDataUrl(){
-      if(_logoDataUrl) return _logoDataUrl;
-      try{
-        const res = await fetch(BRAND.logoUrl, { mode: "cors", cache: "force-cache" });
-        const blob = await res.blob();
-        _logoDataUrl = await new Promise((resolve) => {
-          const r = new FileReader();
-          r.onload = () => resolve(r.result);
-          r.readAsDataURL(blob);
-        });
-        return _logoDataUrl;
-      } catch(e){
-        console.warn("Logo fetch failed, using URL fallback:", e);
-        _logoDataUrl = BRAND.logoUrl;
-        return _logoDataUrl;
-      }
-    }
-
-    function toast(on){
-      const t = document.getElementById('toast-loading');
-      if(on) t.classList.remove('hidden');
-      else t.classList.add('hidden');
-    }
-
-    /* ===========================
-       CORE INIT
-       =========================== */
+    // --- Core Logic ---
     function init() {
       populateStates();
       setView('overview');
@@ -1143,12 +754,14 @@
       ['overview', 'agencies', 'reports', 'map'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
       document.getElementById('view-'+viewId).classList.remove('hidden');
 
+      // Update Nav States
       document.querySelectorAll('.desktop-nav-btn, .mobile-nav-btn').forEach(el => {
         el.classList.remove('text-arconGreen', 'bg-white', 'shadow-lg');
         if(el.classList.contains('desktop-nav-btn')) el.classList.add('text-white/80', 'hover:bg-white/10');
         else el.classList.add('text-gray-400');
       });
 
+      // Highlight Active
       const dBtn = document.querySelector(`.desktop-nav-btn[onclick*="${viewId}"]`);
       if(dBtn) {
         dBtn.classList.remove('text-white/80', 'hover:bg-white/10');
@@ -1161,18 +774,19 @@
         mBtn.classList.add('text-arconGreen');
       }
 
-      document.getElementById('page-title').innerText = viewId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      document.getElementById('page-title').innerText =
+        viewId.charAt(0).toUpperCase() + viewId.slice(1);
+
       if(viewId === 'map') setTimeout(initMap, 200);
     }
 
-    /* ===========================
-       FILTERS
-       =========================== */
+    // --- Filters ---
     function populateStates() {
       const sel = document.getElementById('filter-state');
-      NIGERIA_DATA.sort((a,b) => a.state.localeCompare(b.state)).forEach(s => {
+      NIGERIA_DATA.slice().sort((a,b) => a.state.localeCompare(b.state)).forEach(s => {
         let opt = document.createElement('option');
-        opt.value = s.state; opt.innerText = s.state;
+        opt.value = s.state;
+        opt.innerText = s.state;
         sel.appendChild(opt);
       });
     }
@@ -1186,7 +800,8 @@
       if(stateData) {
         stateData.lgas.slice().sort().forEach(l => {
           let opt = document.createElement('option');
-          opt.value = l; opt.innerText = l;
+          opt.value = l;
+          opt.innerText = l;
           lgaSel.appendChild(opt);
         });
       }
@@ -1212,11 +827,10 @@
       alert(`Dashboard updated for: ${locText}`);
     }
 
-    /* ===========================
-       AGENCIES MODULE
-       =========================== */
+    // --- Agencies Module ---
     function renderAgencies() {
-      const search = document.getElementById('agency-search')?.value?.toLowerCase?.() || "";
+      const searchEl = document.getElementById('agency-search');
+      const search = (searchEl ? searchEl.value : '').toLowerCase();
       const tbody = document.getElementById('agencies-table-body');
       tbody.innerHTML = '';
 
@@ -1224,10 +838,12 @@
         .filter(a => a.name.toLowerCase().includes(search) || a.rc.toLowerCase().includes(search))
         .forEach(agency => {
           const row = `
-            <tr class="hover:bg-slate-50 border-b border-gray-50 transition cursor-pointer" onclick="showAgencyModal('${safeText(agency.name)}')">
-              <td class="px-6 py-4 font-bold text-gray-800">${safeText(agency.name)}</td>
-              <td class="px-6 py-4 font-mono text-gray-500 text-xs">${safeText(agency.rc)}</td>
-              <td class="px-6 py-4 text-center"><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-bold">${agency.ads} Active</span></td>
+            <tr class="hover:bg-slate-50 border-b border-gray-50 transition cursor-pointer" onclick="showAgencyModal('${agency.name.replace(/'/g,"\\'")}')">
+              <td class="px-6 py-4 font-bold text-gray-800">${agency.name}</td>
+              <td class="px-6 py-4 font-mono text-gray-500 text-xs">${agency.rc}</td>
+              <td class="px-6 py-4 text-center">
+                <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-xs font-bold">${agency.ads} Active</span>
+              </td>
               <td class="px-6 py-4 text-center">
                 <div class="w-full bg-gray-100 rounded-full h-2 w-24 mx-auto">
                   <div class="bg-green-500 h-2 rounded-full" style="width: ${agency.score}%"></div>
@@ -1255,17 +871,47 @@
       const list = document.getElementById('modal-campaign-list');
       list.innerHTML = agency.campaigns.map(c => `
         <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-arconGreen"><i class="ph ph-megaphone-simple"></i></div>
-          <div><p class="text-sm font-bold text-gray-800">${safeText(c)}</p><p class="text-[10px] text-green-600 font-bold">● Running</p></div>
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-arconGreen">
+            <i class="ph ph-megaphone-simple"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-gray-800">${c}</p>
+            <p class="text-[10px] text-green-600 font-bold">● Running</p>
+          </div>
         </li>
       `).join('');
 
       document.getElementById('agency-modal').classList.remove('hidden');
     }
 
-    /* ===========================
-       REPORTS MODULE
-       =========================== */
+    // =========================
+    // REPORTS MODULE (FIXED: NO BLANK PDFs)
+    // =========================
+
+    const ARCON_LOGO_DATA_URI = (() => {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#008751"/>
+              <stop offset="1" stop-color="#005a32"/>
+            </linearGradient>
+          </defs>
+          <rect x="10" y="10" width="108" height="108" rx="22" fill="url(#g)"/>
+          <circle cx="64" cy="54" r="22" fill="#D4AF37" opacity="0.95"/>
+          <path d="M40 86c8-8 17-12 24-12s16 4 24 12" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+          <text x="64" y="60" text-anchor="middle" font-family="Inter, Arial" font-weight="900" font-size="18" fill="#0b2d1d">ARCON</text>
+          <text x="64" y="104" text-anchor="middle" font-family="Inter, Arial" font-weight="800" font-size="10" fill="#ffffff" opacity="0.9">IRMS</text>
+        </svg>
+      `.trim();
+      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    })();
+
+    const MOCK_REPORTS = [
+      { name: "Executive Summary - Q3", date: "2025-10-01", type: "Executive Summary", template: "executive", period: "Yearly" },
+      { name: "Financial Audit Oct", date: "2025-10-05", type: "Financial Report", template: "financial", period: "Monthly" }
+    ];
+
     function setReportPeriod(btn, period) {
       document.querySelectorAll('.report-period-btn').forEach(b => {
         b.classList.remove('bg-white', 'text-arconGreen', 'shadow-sm');
@@ -1276,36 +922,22 @@
       currentReportPeriod = period;
     }
 
-    function reportTypeLabel(key){
-      return ({
-        executive: "Executive Summary",
-        financial: "Financial Report",
-        enforcement: "Enforcement Log",
-        agency: "Agency Registry Summary",
-        zonal: "Zonal Performance",
-        compliance: "Compliance Brief"
-      }[key] || "Executive Report");
-    }
-
     function renderReportHistory() {
       const tbody = document.getElementById('report-history-body');
       tbody.innerHTML = '';
-      REPORT_HISTORY.forEach((r, idx) => {
+
+      MOCK_REPORTS.forEach((r, idx) => {
         const row = `
-          <tr class="hover:bg-slate-50 transition">
+          <tr class="hover:bg-slate-50 border-b border-gray-50 transition">
             <td class="px-6 py-4 font-bold text-gray-800 flex items-center gap-2">
-              <i class="ph ph-file-pdf text-red-500 text-lg"></i> ${safeText(r.name)}
+              <i class="ph ph-file-pdf text-red-500 text-lg"></i> ${r.name}
             </td>
-            <td class="px-6 py-4 text-gray-500 text-xs">${safeText(r.date)}</td>
+            <td class="px-6 py-4 text-gray-500 text-xs">${r.date}</td>
             <td class="px-6 py-4">
-              <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${safeText(r.type)}</span>
-              <span class="ml-2 bg-green-50 text-arconGreen px-2 py-1 rounded text-xs font-bold">${safeText(r.period)}</span>
+              <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${r.type}</span>
             </td>
             <td class="px-6 py-4 text-right">
-              <button class="text-arconGreen font-bold text-xs hover:underline"
-                      onclick="downloadFromHistory(event, ${idx})">
-                Download
-              </button>
+              <button onclick="downloadReportFromHistory(${idx})" class="text-arconGreen font-bold text-xs hover:underline">Download</button>
             </td>
           </tr>
         `;
@@ -1313,694 +945,359 @@
       });
     }
 
-    function downloadFromHistory(ev, idx){
-      ev?.stopPropagation?.();
-      const item = REPORT_HISTORY[idx];
-      if(!item) return;
-      // regenerate (always downloads a beautiful executive pdf)
-      generatePDF(item.key, { period: item.period, forceName: item.name, forceDate: item.date });
-    }
+    async function downloadReportFromHistory(idx) {
+      const r = MOCK_REPORTS[idx];
+      if(!r) return;
 
-    function buildReportHeader(meta){
-      return `
-        <div class="report-topband"></div>
-        <div class="report-header-fixed">
-          <div class="report-headwrap">
-            <div class="report-brand-left">
-              <div class="report-logo">
-                <img src="${meta.logo}" alt="ARCON Logo">
-              </div>
-              <div class="report-brand-titles">
-                <p class="report-agency">Federal Republic of Nigeria</p>
-                <p class="report-system">${safeText(BRAND.shortName)} • ${safeText(BRAND.systemName)}</p>
-              </div>
-            </div>
-
-            <div class="report-meta">
-              <div><strong>Report:</strong> ${safeText(meta.reportType)}</div>
-              <div><strong>Period:</strong> ${safeText(meta.period)}</div>
-              <div><strong>Date:</strong> ${safeText(meta.dateLong)}</div>
-              <div><strong>Ref:</strong> ${safeText(meta.ref)}</div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildReportFooter(meta){
-      return `
-        <div class="report-footer-fixed">
-          <div class="report-footer-wrap">
-            <div class="report-small">
-              <div><b>${safeText(BRAND.shortName)}</b> • ${safeText(BRAND.address)} • ${safeText(BRAND.website)}</div>
-              <div class="report-small">This document is confidential and intended for authorized executive use only.</div>
-            </div>
-            <div class="report-chip"><b>DG</b> Terminal • IRMS • <span id="pdfPageCounter">Pagination</span></div>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildCoverPage(meta){
-      return `
-        <div class="report-page">
-          <div class="report-watermark"></div>
-          ${buildReportHeader(meta)}
-          ${buildReportFooter(meta)}
-
-          <div class="cover">
-            <div class="cover-badge">
-              <span style="width:10px;height:10px;border-radius:999px;background:#008751;display:inline-block;"></span>
-              EXECUTIVE REPORT • ${safeText(meta.reportType.toUpperCase())}
-            </div>
-
-            <div class="cover-title">${safeText(meta.coverTitle)}</div>
-            <div class="cover-sub">
-              Official executive brief generated via the <b>${safeText(BRAND.systemName)}</b>.
-              This report consolidates revenue, compliance, enforcement, and registry intelligence for strategic action.
-            </div>
-
-            <div class="cover-meta">
-              <div class="item"><div class="k">Reporting Period</div><div class="v">${safeText(meta.period)}</div></div>
-              <div class="item"><div class="k">Reference No.</div><div class="v">${safeText(meta.ref)}</div></div>
-              <div class="item"><div class="k">Prepared For</div><div class="v">Director General</div></div>
-              <div class="item"><div class="k">Generated</div><div class="v">${safeText(meta.dateLong)}</div></div>
-            </div>
-
-            <div class="cover-footer-note">
-              <div>Classification: <b>CONFIDENTIAL</b></div>
-              <div>System: <b>${safeText(BRAND.shortName)} IRMS</b> • Document Hash: <b>${safeText(meta.hash)}</b></div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildSignatureBlock(meta){
-      return `
-        <div class="report-signature">
-          <div class="sig-box">
-            <div style="font-family: cursive; font-size: 26px; color: #008751; line-height: 1; margin-bottom: 6px;">
-              Dr. Olalekan Fadolapo
-            </div>
-            <div class="sig-line"></div>
-            <div class="sig-name">Dr. Olalekan Fadolapo</div>
-            <div class="sig-title">Director General</div>
-            <div class="sig-note">Digitally Signed & Authenticated</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildExecutiveBody(meta){
-      return `
-        <div class="report-page">
-          <div class="report-watermark"></div>
-          ${buildReportHeader(meta)}
-          ${buildReportFooter(meta)}
-
-          <div class="report-body">
-            <div class="report-h1">Executive Summary</div>
-            <div class="report-small">
-              This executive summary provides a consolidated view of core KPIs and priority actions for the reporting period.
-            </div>
-
-            <div class="report-kpi-grid">
-              <div class="report-kpi kpi-green">
-                <div class="label">Total Revenue</div>
-                <div class="value">₦45.2M</div>
-                <div class="hint">▲ +12% vs benchmark</div>
-              </div>
-              <div class="report-kpi kpi-gold">
-                <div class="label">Compliance Rate</div>
-                <div class="value">68%</div>
-                <div class="hint">Focus states: Rivers, Delta</div>
-              </div>
-              <div class="report-kpi kpi-red">
-                <div class="label">Active Enforcements</div>
-                <div class="value">85</div>
-                <div class="hint">Top class: illegal siting</div>
-              </div>
-            </div>
-
-            <div class="report-callout">
-              <div class="t">Executive Insight</div>
-              <div class="b">
-                Revenue performance remains strong, with the Lagos zone contributing the highest collections via digital vetting and licensing.
-                However, compliance deterioration in select South-South corridors indicates urgent need for coordinated zonal enforcement
-                and streamlined reporting from partner signage agencies.
-              </div>
-            </div>
-
-            <div class="report-h2">Strategic Recommendations</div>
-            <div class="report-p">
-              1) Deploy a targeted enforcement sprint to Port Harcourt and Asaba with weekly outcome reporting.
-              2) Integrate state signage billing and permit verification (LASAA/KASUPDA equivalents) into IRMS for unified collections.
-              3) Refresh vetting fee structure for emerging digital ad formats while strengthening creative pre-screening workflows.
-            </div>
-
-            <div class="report-h2">Performance Matrix</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>KPI Category</th>
-                  <th>Target</th>
-                  <th>Actual</th>
-                  <th>Variance</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>License Revenue</td>
-                  <td>₦40.0M</td>
-                  <td>₦45.2M</td>
-                  <td>+13%</td>
-                  <td><span class="badge badge-success">Exceeded</span></td>
-                </tr>
-                <tr>
-                  <td>Agency Registration</td>
-                  <td>1,200</td>
-                  <td>1,240</td>
-                  <td>+3.3%</td>
-                  <td><span class="badge badge-success">On Track</span></td>
-                </tr>
-                <tr>
-                  <td>Ad Vetting Volume</td>
-                  <td>500</td>
-                  <td>485</td>
-                  <td>-3%</td>
-                  <td><span class="badge badge-warning">Near Target</span></td>
-                </tr>
-                <tr>
-                  <td>Litigation Cases</td>
-                  <td>&lt; 5</td>
-                  <td>2</td>
-                  <td>-60%</td>
-                  <td><span class="badge badge-success">Optimal</span></td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="report-h2">Priority Actions</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Action</th>
-                  <th>Owner</th>
-                  <th>Due</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>South-South compliance intervention (PHC/Asaba)</td>
-                  <td>Zonal Director</td>
-                  <td>14 days</td>
-                  <td><span class="badge badge-warning">In Progress</span></td>
-                </tr>
-                <tr>
-                  <td>Unified billing integration with state signage agencies</td>
-                  <td>IRMS Program Office</td>
-                  <td>30 days</td>
-                  <td><span class="badge badge-warning">Planned</span></td>
-                </tr>
-                <tr>
-                  <td>Digital media vetting pipeline enhancement</td>
-                  <td>Compliance Unit</td>
-                  <td>21 days</td>
-                  <td><span class="badge badge-neutral">Queued</span></td>
-                </tr>
-              </tbody>
-            </table>
-
-            ${buildSignatureBlock(meta)}
-          </div>
-        </div>
-      `;
-    }
-
-    function buildFinancialBody(meta){
-      const total = 45200000;
-      return `
-        <div class="report-page page-break">
-          <div class="report-watermark"></div>
-          ${buildReportHeader(meta)}
-          ${buildReportFooter(meta)}
-
-          <div class="report-body">
-            <div class="report-h1">Financial Report</div>
-            <div class="report-small">Detailed breakdown of all revenue streams processed through IRMS for the reporting period.</div>
-
-            <div class="report-h2">Revenue Streams</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Revenue Stream</th>
-                  <th style="text-align:center;">Tx Count</th>
-                  <th style="text-align:right;">Gross (NGN)</th>
-                  <th style="text-align:right;">Net (NGN)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Vetting Fees (Digital)</td><td style="text-align:center;">320</td><td style="text-align:right;">${fmtNGN(18500000)}</td><td style="text-align:right;">${fmtNGN(18500000)}</td></tr>
-                <tr><td>Vetting Fees (Traditional)</td><td style="text-align:center;">130</td><td style="text-align:right;">${fmtNGN(6500000)}</td><td style="text-align:right;">${fmtNGN(6500000)}</td></tr>
-                <tr><td>Practitioner Licenses</td><td style="text-align:center;">120</td><td style="text-align:right;">${fmtNGN(12000000)}</td><td style="text-align:right;">${fmtNGN(12000000)}</td></tr>
-                <tr><td>Fines & Penalties</td><td style="text-align:center;">45</td><td style="text-align:right;">${fmtNGN(5200000)}</td><td style="text-align:right;">${fmtNGN(5200000)}</td></tr>
-                <tr><td>Corporate Registration</td><td style="text-align:center;">30</td><td style="text-align:right;">${fmtNGN(3000000)}</td><td style="text-align:right;">${fmtNGN(3000000)}</td></tr>
-                <tr style="font-weight: 900;">
-                  <td>TOTAL REVENUE</td><td style="text-align:center;">645</td><td style="text-align:right;">${fmtNGN(total)}</td><td style="text-align:right;">${fmtNGN(total)}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="report-h2">Zonal Contribution</div>
-            <div class="report-barwrap">
-              <div class="report-barchart">
-                <div class="report-h3" style="margin-top:0;">Collections by Zone</div>
-                <div class="bar-row">
-                  <div class="nm">Lagos</div>
-                  <div class="rail"><div class="fill" style="width:63%"></div></div>
-                  <div class="val">63%</div>
-                </div>
-                <div class="bar-row">
-                  <div class="nm">Abuja</div>
-                  <div class="rail"><div class="fill" style="width:22%; opacity:0.85;"></div></div>
-                  <div class="val">22%</div>
-                </div>
-                <div class="bar-row">
-                  <div class="nm">Kano</div>
-                  <div class="rail"><div class="fill" style="width:9%; opacity:0.65;"></div></div>
-                  <div class="val">9%</div>
-                </div>
-                <div class="bar-row">
-                  <div class="nm">PHC</div>
-                  <div class="rail"><div class="fill" style="width:6%; opacity:0.55;"></div></div>
-                  <div class="val">6%</div>
-                </div>
-              </div>
-
-              <div>
-                <div class="report-callout" style="margin-top:0;">
-                  <div class="t">Financial Interpretation</div>
-                  <div class="b">
-                    Lagos remains the primary revenue driver via digital vetting throughput. Abuja is stable, while Kano and PHC show mild contraction,
-                    which correlates with reduced campaign volume and increased compliance friction.
-                  </div>
-                </div>
-
-                <table class="report-table">
-                  <thead>
-                    <tr>
-                      <th>Region</th>
-                      <th>Revenue</th>
-                      <th>Growth (MoM)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>Lagos Zone</td><td>${fmtNGN(28500000)}</td><td><span class="badge badge-success">+5.2%</span></td></tr>
-                    <tr><td>Abuja HQ</td><td>${fmtNGN(10200000)}</td><td><span class="badge badge-success">+1.8%</span></td></tr>
-                    <tr><td>Kano Zone</td><td>${fmtNGN(4100000)}</td><td><span class="badge badge-warning">-0.5%</span></td></tr>
-                    <tr><td>Port Harcourt</td><td>${fmtNGN(2400000)}</td><td><span class="badge badge-danger">-2.1%</span></td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="report-h2">Forward Projection (Sample)</div>
-            <div class="report-p">
-              Projection assumes improved compliance-driven conversion of pending vetting and a 6–10% lift in digital media volume.
-              With unified billing integration, collections are expected to increase by an estimated ₦3.5M–₦6.0M in the next cycle.
-            </div>
-
-            ${buildSignatureBlock(meta)}
-          </div>
-        </div>
-      `;
-    }
-
-    function buildEnforcementBody(meta){
-      return `
-        <div class="report-page page-break">
-          <div class="report-watermark"></div>
-          ${buildReportHeader(meta)}
-          ${buildReportFooter(meta)}
-
-          <div class="report-body">
-            <div class="report-h1">Enforcement Log</div>
-            <div class="report-small">Record of regulatory breaches, investigative actions, notices, removals, and sanctions.</div>
-
-            <div class="report-h2">Incident Register</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Entity / Agency</th>
-                  <th>Violation Type</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>2025-10-12</td><td>Globus Marketing</td><td>Illegal Siting (No Permit)</td><td>Ikeja, Lagos</td><td><span class="badge badge-danger">Sanctioned</span></td></tr>
-                <tr><td>2025-10-11</td><td>Prime Media Ltd</td><td>Unapproved Creative</td><td>Wuse II, Abuja</td><td><span class="badge badge-warning">Under Review</span></td></tr>
-                <tr><td>2025-10-09</td><td>City Wall Ads</td><td>Expired License</td><td>GRA, Port Harcourt</td><td><span class="badge badge-warning">Removal Notice</span></td></tr>
-                <tr><td>2025-10-08</td><td>NextGen Promo</td><td>Indecent Exposure</td><td>Kano Municipal</td><td><span class="badge badge-danger">Litigation</span></td></tr>
-                <tr><td>2025-10-05</td><td>Alpha Outdoor</td><td>Non-payment of Fees</td><td>Lekki, Lagos</td><td><span class="badge badge-danger">Sealed</span></td></tr>
-                <tr><td>2025-10-02</td><td>Zenith Boards</td><td>Structural Defect</td><td>Enugu North</td><td><span class="badge badge-success">Resolved</span></td></tr>
-              </tbody>
-            </table>
-
-            <div class="report-h2">Compliance Summary</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th>Count</th>
-                  <th>Interpretation</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Total Violations Reported</td><td>142</td><td>Driven by illegal siting and expired licenses</td></tr>
-                <tr><td>Compliance Notices Served</td><td>98</td><td>Notice-to-removal conversion target: 60%</td></tr>
-                <tr><td>Direct Enforcement (Removals)</td><td>22</td><td>Requires cross-agency support in hotspots</td></tr>
-                <tr><td>Pending Legal Actions</td><td>4</td><td>High priority: public decency + structural risk</td></tr>
-              </tbody>
-            </table>
-
-            <div class="report-callout">
-              <div class="t">Immediate Action</div>
-              <div class="b">
-                Increase field verification frequency for high-traffic corridors and enforce expiry auto-flagging through IRMS
-                to reduce manual gaps. Recommend joint operations with state signage agencies for faster removals and higher fine recovery.
-              </div>
-            </div>
-
-            ${buildSignatureBlock(meta)}
-          </div>
-        </div>
-      `;
-    }
-
-    function buildAgencyBody(meta){
-      const top = AGENCIES.slice().sort((a,b)=>b.score-a.score).slice(0,5);
-      return `
-        <div class="report-page page-break">
-          <div class="report-watermark"></div>
-          ${buildReportHeader(meta)}
-          ${buildReportFooter(meta)}
-
-          <div class="report-body">
-            <div class="report-h1">Agency Registry Summary</div>
-            <div class="report-small">Snapshot of registry performance, top compliance agencies, and high-activity campaigns.</div>
-
-            <div class="report-h2">Top Compliance Agencies</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Agency</th>
-                  <th>RC</th>
-                  <th>APCON ID</th>
-                  <th style="text-align:center;">Active Ads</th>
-                  <th style="text-align:center;">Compliance</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${top.map(a => `
-                  <tr>
-                    <td>${safeText(a.name)}</td>
-                    <td>${safeText(a.rc)}</td>
-                    <td>${safeText(a.id)}</td>
-                    <td style="text-align:center;">${a.ads}</td>
-                    <td style="text-align:center;"><span class="badge badge-success">${a.score}%</span></td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-
-            <div class="report-h2">Notable Campaign Activity</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Agency</th>
-                  <th>Campaigns (Sample)</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${AGENCIES.slice(0,6).map(a => `
-                  <tr>
-                    <td>${safeText(a.name)}</td>
-                    <td>${safeText(a.campaigns.join(", "))}</td>
-                    <td><span class="badge badge-success">Running</span></td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-
-            <div class="report-callout">
-              <div class="t">Registry Insight</div>
-              <div class="b">
-                High-performing agencies show consistent creative pre-clearance and timely renewal behavior.
-                Recommend incentivizing early renewals via IRMS alerts and enforcing automatic ad suspension for expiry violations.
-              </div>
-            </div>
-
-            ${buildSignatureBlock(meta)}
-          </div>
-        </div>
-      `;
-    }
-
-    function buildZonalBody(meta){
-      return `
-        <div class="report-page page-break">
-          <div class="report-watermark"></div>
-          ${buildReportHeader(meta)}
-          ${buildReportFooter(meta)}
-
-          <div class="report-body">
-            <div class="report-h1">Zonal Performance</div>
-            <div class="report-small">Zone-by-zone revenue and compliance signal, highlighting hotspots and intervention priorities.</div>
-
-            <div class="report-h2">Zone Scorecard</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Zone</th>
-                  <th>Revenue</th>
-                  <th>Compliance</th>
-                  <th>Enforcement Cases</th>
-                  <th>Priority</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Lagos</td><td>${fmtNGN(28500000)}</td><td><span class="badge badge-success">74%</span></td><td>31</td><td><span class="badge badge-warning">Medium</span></td></tr>
-                <tr><td>Abuja</td><td>${fmtNGN(10200000)}</td><td><span class="badge badge-success">71%</span></td><td>18</td><td><span class="badge badge-neutral">Low</span></td></tr>
-                <tr><td>Kano</td><td>${fmtNGN(4100000)}</td><td><span class="badge badge-warning">62%</span></td><td>16</td><td><span class="badge badge-warning">Medium</span></td></tr>
-                <tr><td>Port Harcourt</td><td>${fmtNGN(2400000)}</td><td><span class="badge badge-danger">58%</span></td><td>20</td><td><span class="badge badge-danger">High</span></td></tr>
-              </tbody>
-            </table>
-
-            <div class="report-h2">Intervention Plan (Sample)</div>
-            <div class="report-p">
-              PHC corridor requires a 2-week compliance sweep focusing on expired licensing, illegal siting, and fee recovery.
-              Kano requires creative pre-screening tightening, while Lagos requires sustained throughput protection and dispute resolution.
-            </div>
-
-            ${buildSignatureBlock(meta)}
-          </div>
-        </div>
-      `;
-    }
-
-    function buildComplianceBody(meta){
-      return `
-        <div class="report-page page-break">
-          <div class="report-watermark"></div>
-          ${buildReportHeader(meta)}
-          ${buildReportFooter(meta)}
-
-          <div class="report-body">
-            <div class="report-h1">Compliance Brief</div>
-            <div class="report-small">Compliance rate summary, breach categories, corrective actions, and risk notes.</div>
-
-            <div class="report-h2">Compliance Snapshot</div>
-            <div class="report-kpi-grid">
-              <div class="report-kpi kpi-gold">
-                <div class="label">Overall Compliance</div>
-                <div class="value">68%</div>
-                <div class="hint">Goal: ≥ 75%</div>
-              </div>
-              <div class="report-kpi kpi-red">
-                <div class="label">High-Risk Breaches</div>
-                <div class="value">22</div>
-                <div class="hint">Structural + public decency</div>
-              </div>
-              <div class="report-kpi kpi-green">
-                <div class="label">Resolved Cases</div>
-                <div class="value">57</div>
-                <div class="hint">Improving closures</div>
-              </div>
-            </div>
-
-            <div class="report-h2">Top Breach Categories</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Count</th>
-                  <th>Trend</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Illegal Siting</td><td>54</td><td><span class="badge badge-danger">Rising</span></td><td>Joint operations + permit verification</td></tr>
-                <tr><td>Expired License</td><td>39</td><td><span class="badge badge-warning">Stable</span></td><td>Auto-flag + suspension workflow</td></tr>
-                <tr><td>Unapproved Creative</td><td>27</td><td><span class="badge badge-warning">Stable</span></td><td>Pre-clearance enforcement</td></tr>
-                <tr><td>Non-payment</td><td>22</td><td><span class="badge badge-danger">Rising</span></td><td>Collections enforcement + sealing</td></tr>
-              </tbody>
-            </table>
-
-            <div class="report-callout">
-              <div class="t">Risk Note</div>
-              <div class="b">
-                If illegal siting remains unchecked, it erodes fee recovery, increases public safety exposure, and weakens deterrence.
-                Recommend a “fast-track enforcement lane” with daily notice issuance and weekly removal targets.
-              </div>
-            </div>
-
-            ${buildSignatureBlock(meta)}
-          </div>
-        </div>
-      `;
-    }
-
-    function buildReportHTML(key, meta){
-      // Cover + body pages (multi-page)
-      const coverTitle = reportTypeLabel(key);
-      const metaFull = {
-        ...meta,
-        coverTitle,
-      };
-
-      let body = "";
-      if(key === "executive") body = buildExecutiveBody(metaFull);
-      else if(key === "financial") body = buildFinancialBody(metaFull);
-      else if(key === "enforcement") body = buildEnforcementBody(metaFull);
-      else if(key === "agency") body = buildAgencyBody(metaFull);
-      else if(key === "zonal") body = buildZonalBody(metaFull);
-      else if(key === "compliance") body = buildComplianceBody(metaFull);
-      else body = buildExecutiveBody(metaFull);
-
-      return `
-        <div>
-          ${buildCoverPage(metaFull)}
-          ${body}
-        </div>
-      `;
-    }
-
-    async function generatePDF(key, overrides = {}) {
-      const staging = document.getElementById('report-staging-area');
-      toast(true);
-
-      const dateObj = overrides.forceDate ? new Date(overrides.forceDate + "T12:00:00") : new Date();
-      const dateLong = fmtDateLong(dateObj);
-      const ref = randomRef();
-      const period = overrides.period || currentReportPeriod;
-      const reportType = reportTypeLabel(key);
-
-      const logo = await ensureLogoDataUrl();
-      const hash = Math.floor(100000000 + Math.random()*900000000).toString(16).toUpperCase();
-
-      const meta = { logo, dateLong, ref, period, reportType, hash };
-
-      // Inject HTML (executive multi-page)
-      staging.innerHTML = buildReportHTML(key, meta);
-
-      // Filename
-      const fileDate = overrides.forceDate || isoToday();
-      const baseName = overrides.forceName
-        ? overrides.forceName.replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'_')
-        : `${reportTypeLabel(key)}_${period}`.replace(/\s+/g,'_');
-      const filename = `${BRAND.shortName}_${baseName}_${fileDate}.pdf`;
-
-      // html2pdf options tuned for crisp executive look
-      const opt = {
-        margin: 0,
-        filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2.5,
-          useCORS: true,
-          allowTaint: false,
-          scrollY: 0,
-          windowWidth: 794
-        },
-        jsPDF: { unit: 'px', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-      };
+      const prev = currentReportPeriod;
+      currentReportPeriod = r.period || currentReportPeriod;
 
       try {
-        // Add page numbers + save
-        await html2pdf()
-          .set(opt)
-          .from(staging)
-          .toPdf()
-          .get('pdf')
-          .then((pdf) => {
-            const pageCount = pdf.internal.getNumberOfPages();
-            for(let i=1; i<=pageCount; i++){
-              pdf.setPage(i);
-              pdf.setFontSize(9);
-              pdf.setTextColor(120);
-              const w = pdf.internal.pageSize.getWidth();
-              const h = pdf.internal.pageSize.getHeight();
-              pdf.text(`Page ${i} of ${pageCount}`, w - 70, h - 18);
-              pdf.text(`${BRAND.shortName} • IRMS`, 54, h - 18);
-            }
-          })
-          .save();
-
-        // Add to history (top)
-        const item = {
-          key,
-          name: `${reportTypeLabel(key)} - ${period}`,
-          date: fileDate,
-          type: reportTypeLabel(key),
-          period
-        };
-        REPORT_HISTORY.unshift(item);
-        renderReportHistory();
-      } catch (err) {
-        console.error(err);
-        alert("Error generating PDF. Please try again.");
+        await generatePDF(r.template, false, r.name);
       } finally {
-        toast(false);
+        currentReportPeriod = prev;
       }
     }
 
-    /* ===========================
-       MAP + CHARTS
-       =========================== */
+    function getReportHTML(type) {
+      const now = new Date();
+      const date = now.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'2-digit' });
+      const ref = 'ARCON-' + Math.floor(Math.random() * 900000 + 100000);
+
+      const reportTypeLabel =
+        type === 'executive' ? 'Executive Summary' :
+        type === 'financial' ? 'Financial Report' :
+        'Enforcement Log';
+
+      const topbar = `
+        <div class="report-topbar avoid-break">
+          <div class="report-brand">
+            <img src="${ARCON_LOGO_DATA_URI}" alt="ARCON Logo" />
+            <div class="report-title">
+              <h1>Advertising Regulatory Council of Nigeria</h1>
+              <p>Integrated Regulatory Management System (IRMS) • Confidential Executive Report</p>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px; font-weight:900; letter-spacing:0.12em; text-transform:uppercase; color:#111;">
+              Federal Republic of Nigeria
+            </div>
+            <div style="font-size:9px; color:#555; margin-top:4px;">
+              Plot 12, Utako District, Abuja • www.arcon.gov.ng
+            </div>
+          </div>
+        </div>
+
+        <div class="report-meta avoid-break">
+          <div><strong>REPORT:</strong> ${reportTypeLabel.toUpperCase()}</div>
+          <div><strong>PERIOD:</strong> ${String(currentReportPeriod).toUpperCase()}</div>
+          <div><strong>DATE:</strong> ${date}</div>
+          <div><strong>REF:</strong> ${ref}</div>
+        </div>
+      `;
+
+      let content = '';
+
+      if (type === 'executive') {
+        content = `
+          <div class="report-section-title">1.0 EXECUTIVE SUMMARY</div>
+
+          <div class="kpi-grid avoid-break">
+            <div class="kpi-card">
+              <div class="kpi-label">Total Revenue</div>
+              <div class="kpi-value" style="color:#008751;">₦45.2M</div>
+              <div class="kpi-note">▲ 12% vs Target</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Compliance Rate</div>
+              <div class="kpi-value" style="color:#D4AF37;">68%</div>
+              <div class="kpi-note" style="color:#854d0e;">Requires Attention</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Active Enforcements</div>
+              <div class="kpi-value" style="color:#dc2626;">85</div>
+              <div class="kpi-note" style="color:#991b1b;">Ongoing Cases</div>
+            </div>
+          </div>
+
+          <div class="avoid-break">
+            <div style="font-size:11px; font-weight:900; margin: 6px 0 6px; color:#222;">1.1 STRATEGIC OVERVIEW</div>
+            <p style="font-size:11px; color:#333; margin:0; text-align:justify;">
+              The period under review indicates strong revenue performance driven by digital vetting fees and improved practitioner onboarding.
+              Compliance rates in select regions remain below internal thresholds, requiring targeted zonal interventions and tighter integration with state signage authorities.
+            </p>
+
+            <div style="font-size:11px; font-weight:900; margin: 10px 0 6px; color:#222;">1.2 KEY RECOMMENDATIONS</div>
+            <ul style="font-size:11px; color:#333; margin:0; padding-left:16px;">
+              <li>Deploy special enforcement task force for illegal outdoor placements in high-traffic corridors.</li>
+              <li>Integrate billing & permit validation with LASAA, KASUPDA and other state signage agencies.</li>
+              <li>Expand digital vetting pipeline for online creators and emerging ad formats.</li>
+            </ul>
+          </div>
+
+          <div class="report-section-title gray">2.0 PERFORMANCE METRICS</div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>KPI Category</th>
+                <th>Target</th>
+                <th>Actual</th>
+                <th>Variance</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>License Revenue</td><td>₦40.0M</td><td>₦45.2M</td><td>+13%</td><td><span class="report-badge badge-success">Exceeded</span></td></tr>
+              <tr><td>Agency Registration</td><td>1,200</td><td>1,240</td><td>+3.3%</td><td><span class="report-badge badge-success">On Track</span></td></tr>
+              <tr><td>Ad Vetting Volume</td><td>500</td><td>485</td><td>-3%</td><td><span class="report-badge badge-warning">Near Target</span></td></tr>
+              <tr><td>Litigation Cases</td><td>&lt; 5</td><td>2</td><td>-60%</td><td><span class="report-badge badge-success">Optimal</span></td></tr>
+            </tbody>
+          </table>
+
+          <div class="avoid-break">
+            <div style="font-size:11px; font-weight:900; margin: 6px 0 6px; color:#222;">2.1 NEXT 30 DAYS FOCUS</div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Initiative</th>
+                  <th>Owner</th>
+                  <th>Deliverable</th>
+                  <th>Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Unified Billing Pilot</td><td>IRMS Team</td><td>LASAA integration sandbox + API</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
+                <tr><td>Highway Outdoor Sweep</td><td>Enforcement</td><td>Removal notices + compliance follow-up</td><td><span class="report-badge badge-danger">High</span></td></tr>
+                <tr><td>Digital Vetting Scale-up</td><td>Vetting Unit</td><td>Creator portal + fast-lane review</td><td><span class="report-badge badge-warning">Medium</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      if (type === 'financial') {
+        content = `
+          <div class="report-section-title">1.0 FINANCIAL OVERVIEW</div>
+          <p style="font-size:11px; margin:0 0 10px; color:#333;">
+            Detailed breakdown of revenue streams processed through the Integrated Regulatory Management System (IRMS).
+          </p>
+
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Revenue Stream</th>
+                <th style="text-align:center;">Tx Count</th>
+                <th style="text-align:right;">Gross (NGN)</th>
+                <th style="text-align:right;">Net (NGN)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Vetting Fees (Digital)</td><td style="text-align:center;">320</td><td style="text-align:right;">18,500,000</td><td style="text-align:right;">18,500,000</td></tr>
+              <tr><td>Vetting Fees (Traditional)</td><td style="text-align:center;">130</td><td style="text-align:right;">6,500,000</td><td style="text-align:right;">6,500,000</td></tr>
+              <tr><td>Practitioner Licenses</td><td style="text-align:center;">120</td><td style="text-align:right;">12,000,000</td><td style="text-align:right;">12,000,000</td></tr>
+              <tr><td>Fines & Penalties</td><td style="text-align:center;">45</td><td style="text-align:right;">5,200,000</td><td style="text-align:right;">5,200,000</td></tr>
+              <tr><td>Corporate Registration</td><td style="text-align:center;">30</td><td style="text-align:right;">3,000,000</td><td style="text-align:right;">3,000,000</td></tr>
+              <tr style="font-weight:900; background:#f0fdf4;">
+                <td>TOTAL</td><td style="text-align:center;">645</td><td style="text-align:right;">45,200,000</td><td style="text-align:right;">45,200,000</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="report-section-title gray">2.0 ZONAL CONTRIBUTION</div>
+
+          <div class="avoid-break" style="border:1px solid #eee; border-radius:10px; padding:12px; margin-bottom:10px;">
+            <div style="font-size:10px; font-weight:900; letter-spacing:0.10em; text-transform:uppercase; color:#333; margin-bottom:8px;">
+              Revenue Share Snapshot
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-end; height:120px;">
+              <div style="flex:1; text-align:center;">
+                <div style="height:90px; background:#008751; border-radius:8px;"></div>
+                <div style="font-size:9px; margin-top:5px; font-weight:900;">LAGOS (63%)</div>
+              </div>
+              <div style="flex:1; text-align:center;">
+                <div style="height:45px; background:#008751; opacity:0.75; border-radius:8px;"></div>
+                <div style="font-size:9px; margin-top:5px; font-weight:900;">ABUJA (22%)</div>
+              </div>
+              <div style="flex:1; text-align:center;">
+                <div style="height:25px; background:#008751; opacity:0.55; border-radius:8px;"></div>
+                <div style="font-size:9px; margin-top:5px; font-weight:900;">KANO (9%)</div>
+              </div>
+              <div style="flex:1; text-align:center;">
+                <div style="height:18px; background:#008751; opacity:0.35; border-radius:8px;"></div>
+                <div style="font-size:9px; margin-top:5px; font-weight:900;">PHC (6%)</div>
+              </div>
+            </div>
+          </div>
+
+          <table class="report-table">
+            <thead>
+              <tr><th>Region</th><th>Revenue</th><th>Growth (MoM)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Lagos Zone</td><td>₦28,500,000</td><td><span class="report-badge badge-success">+5.2%</span></td></tr>
+              <tr><td>Abuja HQ</td><td>₦10,200,000</td><td><span class="report-badge badge-success">+1.8%</span></td></tr>
+              <tr><td>Kano Zone</td><td>₦4,100,000</td><td><span class="report-badge badge-warning">-0.5%</span></td></tr>
+              <tr><td>Port Harcourt</td><td>₦2,400,000</td><td><span class="report-badge badge-danger">-2.1%</span></td></tr>
+            </tbody>
+          </table>
+        `;
+      }
+
+      if (type === 'enforcement') {
+        content = `
+          <div class="report-section-title red">1.0 ENFORCEMENT ACTIONS LOG</div>
+          <p style="font-size:11px; margin:0 0 10px; color:#333;">
+            Record of regulatory breaches, investigative actions, and sanctions imposed.
+          </p>
+
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Entity / Agency</th>
+                <th>Violation Type</th>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2025-10-12</td><td>Globus Marketing</td><td>Illegal Siting (No Permit)</td><td>Ikeja, Lagos</td><td><span class="report-badge badge-danger">Sanctioned</span></td></tr>
+              <tr><td>2025-10-11</td><td>Prime Media Ltd</td><td>Unapproved Creative</td><td>Wuse II, Abuja</td><td><span class="report-badge badge-warning">Under Review</span></td></tr>
+              <tr><td>2025-10-09</td><td>City Wall Ads</td><td>Expired License</td><td>GRA, Port Harcourt</td><td><span class="report-badge badge-warning">Removal Notice</span></td></tr>
+              <tr><td>2025-10-08</td><td>NextGen Promo</td><td>Indecent Exposure</td><td>Kano Municipal</td><td><span class="report-badge badge-danger">Litigation</span></td></tr>
+              <tr><td>2025-10-05</td><td>Alpha Outdoor</td><td>Non-payment of Fees</td><td>Lekki, Lagos</td><td><span class="report-badge badge-danger">Sealed</span></td></tr>
+              <tr><td>2025-10-02</td><td>Zenith Boards</td><td>Structural Defect</td><td>Enugu North</td><td><span class="report-badge badge-success">Resolved</span></td></tr>
+            </tbody>
+          </table>
+
+          <div class="report-section-title gray red">2.0 COMPLIANCE SUMMARY</div>
+          <ul style="font-size:11px; line-height:1.55; padding-left:16px; margin:0;">
+            <li><strong>Total Violations Reported:</strong> 142</li>
+            <li><strong>Compliance Notices Served:</strong> 98</li>
+            <li><strong>Direct Enforcement (Removals):</strong> 22</li>
+            <li><strong>Pending Legal Actions:</strong> 4</li>
+          </ul>
+        `;
+      }
+
+      const footer = `
+        <div class="signature-wrap avoid-break">
+          <div class="signature-box">
+            <div class="signature-name">Dr. Olalekan Fadolapo</div>
+            <div class="signature-line">Director General</div>
+            <div class="signature-note">Digitally Signed & Authenticated</div>
+          </div>
+        </div>
+
+        <div class="report-footer avoid-break">
+          <div>Generated via ARCON Integrated Regulatory Management System (IRMS) • System ID: DG-TERM-01</div>
+          <div>This document is confidential property of the Federal Government of Nigeria.</div>
+        </div>
+      `;
+
+      return `
+        <div class="report-page">
+          ${topbar}
+          ${content}
+          ${footer}
+        </div>
+      `;
+    }
+
+    function waitForAssets(root) {
+      const imgs = Array.from(root.querySelectorAll('img'));
+      const imgPromises = imgs.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(res => {
+          img.onload = () => res();
+          img.onerror = () => res();
+        });
+      });
+
+      const fontPromise = (document.fonts && document.fonts.ready)
+        ? document.fonts.ready.catch(() => {})
+        : Promise.resolve();
+
+      const paintPromise = new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+
+      return Promise.all([fontPromise, paintPromise, ...imgPromises]);
+    }
+
+    async function generatePDF(type, pushToHistory = true, customTitle = null) {
+      const toast = document.getElementById('toast-loading');
+      const staging = document.getElementById('report-staging-area');
+
+      toast.classList.remove('hidden');
+
+      // Inject report HTML
+      staging.innerHTML = getReportHTML(type);
+      const page = staging.querySelector('.report-page');
+
+      try {
+        await waitForAssets(page);
+
+        const todayISO = new Date().toISOString().slice(0,10);
+        const reportTypeLabel =
+          type === 'executive' ? 'Executive Summary' :
+          type === 'financial' ? 'Financial Report' :
+          'Enforcement Log';
+
+        const filename = `ARCON_${type.toUpperCase()}_${String(currentReportPeriod).toUpperCase()}_${todayISO}.pdf`;
+
+        const opt = {
+          margin: [10, 10, 12, 10], // mm
+          filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 3,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            scrollY: 0,
+            windowWidth: page.scrollWidth,
+            windowHeight: page.scrollHeight
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css','legacy'], avoid: ['.avoid-break'] }
+        };
+
+        await html2pdf().set(opt).from(page).save();
+
+        if (pushToHistory) {
+          const displayName = customTitle || `${reportTypeLabel} - ${currentReportPeriod}`;
+          MOCK_REPORTS.unshift({
+            name: displayName,
+            date: todayISO,
+            type: reportTypeLabel,
+            template: type,
+            period: currentReportPeriod
+          });
+          renderReportHistory();
+        }
+      } catch (err) {
+        console.error(err);
+        alert("PDF generation failed. Open DevTools Console to see the error.");
+      } finally {
+        toast.classList.add('hidden');
+        staging.innerHTML = '';
+      }
+    }
+
+    // --- Visuals ---
     function initMap() {
       if(mapInstance) { mapInstance.invalidateSize(); return; }
       mapInstance = L.map('map-dg').setView([9.0820, 8.6753], 6);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM' }).addTo(mapInstance);
 
-      const style = { fillColor: '#008751', fillOpacity: 0.65, radius: 7, weight: 2, color: 'white' };
-      L.circleMarker([9.07, 7.39], style).addTo(mapInstance).bindTooltip("Abuja HQ • Compliant");
-      L.circleMarker([6.52, 3.37], style).addTo(mapInstance).bindTooltip("Lagos • High Activity");
+      const style = { fillColor: '#008751', fillOpacity: 0.6, radius: 6, weight: 1, color: 'white' };
+      L.circleMarker([9.07, 7.39], style).addTo(mapInstance); // Abuja
+      L.circleMarker([6.52, 3.37], style).addTo(mapInstance); // Lagos
     }
 
     function initCharts() {
-      const canvas = document.getElementById('revChart');
-      if(!canvas) return;
-      const ctx = canvas.getContext('2d');
-
+      const ctx = document.getElementById('revChart').getContext('2d');
       const grad = ctx.createLinearGradient(0,0,0,300);
-      grad.addColorStop(0, 'rgba(0, 135, 81, 0.18)');
+      grad.addColorStop(0, 'rgba(0, 135, 81, 0.15)');
       grad.addColorStop(1, 'rgba(0, 135, 81, 0)');
 
       revChart = new Chart(ctx, {
@@ -2013,9 +1310,7 @@
             borderColor: '#008751',
             backgroundColor: grad,
             fill: true,
-            tension: 0.4,
-            pointRadius: 3,
-            pointHoverRadius: 4
+            tension: 0.4
           }]
         },
         options: {
