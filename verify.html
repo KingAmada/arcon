@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>ARCON | Public Verification</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- QR (Scan) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            arconGreen: "#008751",
+            arconGreenDark: "#00643C",
+            arconYellow: "#F5A800",
+            arconYellowDark: "#D48F00",
+            ink: "#0B1220",
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Merriweather', 'serif'],
+            mono: ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Merriweather:wght@400;700;900&family=Fira+Code:wght@400;600&display=swap');
+    body { font-family: Inter, system-ui, sans-serif; background:#f8fafc; -webkit-font-smoothing: antialiased; }
+
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+    .toast {
+      background: white; border-left: 4px solid #008751;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      padding: 12px 16px; border-radius: 10px; margin-top: 10px;
+      display: flex; align-items: center; gap: 12px;
+      max-width: 340px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Top Bar -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-md shadow-sm overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
+            <img src="https://raw.githubusercontent.com/KingAmada/arcon/refs/heads/main/arcon.jpg" class="h-full w-full object-cover" alt="ARCON Logo">
+          </div>
+          <div class="leading-tight">
+            <h1 class="font-serif font-black text-arconGreenDark text-lg">ARCON</h1>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-extrabold">Public Verification</p>
+          </div>
+        </div>
+
+        <button onclick="window.location.href='advertiser.html'" class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-ink text-white font-black hover:bg-black">
+          <i class="ph ph-buildings"></i> Advertiser Portal
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: Tabs -->
+      <div class="lg:col-span-2 space-y-5">
+
+        <!-- Headline -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-arconYellow/20 text-ink text-[11px] font-extrabold uppercase tracking-widest">
+                <span class="w-2 h-2 rounded-full bg-arconGreen"></span> Live Verification
+              </div>
+              <h2 class="text-2xl md:text-3xl font-serif font-black text-gray-900 mt-2">Verify an Advertisement</h2>
+              <p class="text-sm text-gray-600 mt-1">
+                Choose a method: <b>QR Scan</b>, <b>License ID</b>, or <b>Photo Match</b> (≥ 70% similarity).
+              </p>
+            </div>
+            <button onclick="openReportModal()" class="px-4 py-2 rounded-xl bg-red-50 border border-red-200 text-red-700 font-black hover:bg-red-100 flex items-center gap-2">
+              <i class="ph ph-flag"></i> Report Illegal Ad
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+          <div class="grid grid-cols-3 text-center text-xs font-black uppercase tracking-widest">
+            <button id="tab-qr" onclick="switchTab('qr')" class="py-4 bg-white text-arconGreen border-b-2 border-arconGreen">QR Scan</button>
+            <button id="tab-id" onclick="switchTab('id')" class="py-4 bg-gray-50 text-gray-500 border-b">License ID</button>
+            <button id="tab-photo" onclick="switchTab('photo')" class="py-4 bg-gray-50 text-gray-500 border-b">Photo Match</button>
+          </div>
+
+          <!-- QR Tab -->
+          <div id="pane-qr" class="p-5 md:p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="text-[10px] font-black uppercase tracking-widest text-gray-500">QR Scanner</div>
+              <span id="scanner-status" class="text-[10px] font-black px-2 py-1 rounded-full bg-gray-100 text-gray-700">Ready</span>
+            </div>
+
+            <div id="reader" class="w-full rounded-xl overflow-hidden border bg-gray-50 min-h-[240px] flex items-center justify-center">
+              <div class="text-center text-gray-400 text-xs font-semibold p-4">
+                <i class="ph ph-camera text-2xl mb-1"></i>
+                <p>Tap “Start” and allow camera permission.</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <button onclick="startScanner()" class="py-3 rounded-xl bg-arconGreen text-white font-black hover:bg-arconGreenDark flex items-center justify-center gap-2">
+                <i class="ph ph-play"></i> Start
+              </button>
+              <button onclick="stopScanner()" class="py-3 rounded-xl border font-black text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2">
+                <i class="ph ph-stop"></i> Stop
+              </button>
+            </div>
+
+            <div class="text-xs text-gray-500">
+              Note: Photo Match assets have no QR. Use the Photo Match tab.
+            </div>
+          </div>
+
+          <!-- ID Tab -->
+          <div id="pane-id" class="hidden p-5 md:p-6 space-y-4">
+            <div class="text-[10px] font-black uppercase tracking-widest text-gray-500">Manual License ID</div>
+            <div class="flex gap-2">
+              <input id="license-input" class="flex-grow p-3 border rounded-xl text-center font-mono font-black uppercase outline-none focus:ring-2 focus:ring-arconGreen"
+                placeholder="APP-2025-1234" />
+              <button onclick="verifyById()" class="px-5 rounded-xl bg-ink text-white font-black hover:bg-black">Check</button>
+            </div>
+            <p class="text-xs text-gray-500">If license is valid, you’ll see the details immediately.</p>
+          </div>
+
+          <!-- Photo Tab -->
+          <div id="pane-photo" class="hidden p-5 md:p-6 space-y-5">
+            <div class="bg-arconYellow/10 border border-arconYellow/30 rounded-2xl p-4">
+              <div class="font-black text-ink flex items-center gap-2">
+                <i class="ph ph-camera"></i> Photo Match (Premium Assets)
+              </div>
+              <p class="text-sm text-gray-700 mt-1">
+                Snap or upload the ad photo. We’ll match it to approved ads using image fingerprint similarity.
+              </p>
+              <p class="text-xs text-gray-500 mt-2">
+                Pass threshold: <b>70%</b> and above (handles lighting & camera differences).
+              </p>
+            </div>
+
+            <!-- Camera Capture -->
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <div class="flex items-center justify-between">
+                <div class="text-[10px] font-black uppercase tracking-widest text-gray-500">Camera Capture</div>
+                <span id="cam-status" class="text-[10px] font-black px-2 py-1 rounded-full bg-gray-100 text-gray-700">Idle</span>
+              </div>
+
+              <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="rounded-xl overflow-hidden border bg-gray-50">
+                  <video id="cam" playsinline autoplay class="w-full h-56 object-cover hidden"></video>
+                  <div id="cam-placeholder" class="h-56 flex items-center justify-center text-gray-400 text-sm font-semibold">
+                    Camera preview will appear here.
+                  </div>
+                </div>
+                <div class="rounded-xl overflow-hidden border bg-gray-50">
+                  <canvas id="shot" class="w-full h-56 object-cover hidden"></canvas>
+                  <div id="shot-placeholder" class="h-56 flex items-center justify-center text-gray-400 text-sm font-semibold">
+                    Captured image will appear here.
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                <button onclick="startCamera()" class="py-3 rounded-xl bg-arconGreen text-white font-black hover:bg-arconGreenDark flex items-center justify-center gap-2">
+                  <i class="ph ph-video-camera"></i> Start Camera
+                </button>
+                <button onclick="takePhoto()" class="py-3 rounded-xl bg-ink text-white font-black hover:bg-black flex items-center justify-center gap-2">
+                  <i class="ph ph-camera"></i> Snap
+                </button>
+                <button onclick="stopCamera()" class="py-3 rounded-xl border font-black text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2 md:col-span-1 col-span-2">
+                  <i class="ph ph-x"></i> Stop Camera
+                </button>
+              </div>
+            </div>
+
+            <!-- Upload -->
+            <div class="border border-gray-200 rounded-2xl p-4">
+              <div class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Upload Photo</div>
+              <input id="photo-file" type="file" accept="image/*" class="w-full p-3 border rounded-xl bg-white" />
+              <button onclick="matchUploadedPhoto()" class="mt-3 w-full py-3 rounded-xl bg-arconYellow text-ink font-black hover:bg-arconYellowDark flex items-center justify-center gap-2">
+                <i class="ph ph-magnifying-glass"></i> Match Photo
+              </button>
+              <p class="text-xs text-gray-500 mt-2">Best results: stand directly in front of the ad, avoid extreme tilt.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <button onclick="matchCanvasShot()" class="py-3 rounded-xl bg-arconGreen text-white font-black hover:bg-arconGreenDark flex items-center justify-center gap-2">
+                <i class="ph ph-shield-check"></i> Match Captured Photo
+              </button>
+              <button onclick="clearPhoto()" class="py-3 rounded-xl border font-black text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2">
+                <i class="ph ph-broom"></i> Clear
+              </button>
+            </div>
+
+            <div id="photo-progress" class="hidden text-sm"></div>
+          </div>
+
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="hidden bg-white border border-gray-200 rounded-2xl p-6"></div>
+      </div>
+
+      <!-- Right: Registry / Guidance -->
+      <div class="space-y-5">
+        <div class="bg-white border border-gray-200 rounded-2xl p-6">
+          <div class="text-xs font-black uppercase tracking-widest text-gray-500">Guidance</div>
+          <h3 class="text-lg font-black text-gray-900 mt-1">How Verifiers Catch Illegal Ads</h3>
+          <ul class="mt-3 space-y-2 text-sm text-gray-700">
+            <li class="flex gap-2"><i class="ph ph-check-circle text-arconGreen mt-0.5"></i> QR scan checks the registry instantly.</li>
+            <li class="flex gap-2"><i class="ph ph-check-circle text-arconGreen mt-0.5"></i> Photo Match finds ads even when no QR is printed.</li>
+            <li class="flex gap-2"><i class="ph ph-check-circle text-arconGreen mt-0.5"></i> If no match: report it → enforcement escalates.</li>
+          </ul>
+          <div class="mt-4 p-4 rounded-xl bg-red-50 border border-red-200">
+            <div class="font-black text-red-800 flex items-center gap-2"><i class="ph ph-warning"></i> No match?</div>
+            <div class="text-sm text-red-700 mt-1">We show a “not in database” alert + a report form.</div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-6">
+          <div class="text-xs font-black uppercase tracking-widest text-gray-500">Registry</div>
+          <h3 class="text-lg font-black text-gray-900 mt-1">Assets In This Demo Browser</h3>
+          <p class="text-sm text-gray-600 mt-2">
+            This verify page reads the same localStorage registry used by <b>advertiser.html</b>.
+          </p>
+          <div class="mt-4">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-black text-gray-900">Total</div>
+              <div class="text-sm font-black text-ink" id="reg-total">0</div>
+            </div>
+            <div class="flex items-center justify-between mt-2">
+              <div class="text-sm font-black text-gray-900">Photo Match Assets</div>
+              <div class="text-sm font-black text-ink" id="reg-photo">0</div>
+            </div>
+            <div class="flex items-center justify-between mt-2">
+              <div class="text-sm font-black text-gray-900">QR Assets</div>
+              <div class="text-sm font-black text-ink" id="reg-qr">0</div>
+            </div>
+          </div>
+
+          <button onclick="refreshRegistry()" class="mt-5 w-full py-3 rounded-xl bg-ink text-white font-black hover:bg-black">
+            Refresh Registry
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- REPORT MODAL -->
+  <div id="report-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden">
+      <div class="bg-red-50 border-b border-red-100 p-4 flex items-center justify-between">
+        <div class="font-black text-red-700 flex items-center gap-2"><i class="ph ph-flag"></i> Report Illegal / Unverified Ad</div>
+        <button onclick="closeReportModal()" class="text-gray-500 hover:text-gray-900"><i class="ph ph-x text-xl"></i></button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="text-sm text-gray-700">
+          If the ad is not in the database, submit a report. Response SLA: <b>within 24 hours</b>.
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input id="rep-state" class="p-3 border rounded-xl" placeholder="State (e.g. Lagos)" />
+          <input id="rep-lga" class="p-3 border rounded-xl" placeholder="LGA / Area" />
+        </div>
+        <input id="rep-location" class="p-3 border rounded-xl w-full" placeholder="Exact location / Landmark" />
+        <textarea id="rep-notes" class="p-3 border rounded-xl w-full min-h-[110px]" placeholder="Describe the ad (brand, message, size, where placed, etc.)"></textarea>
+
+        <input id="rep-photo" type="file" accept="image/*" class="p-3 border rounded-xl w-full bg-white" />
+
+        <div class="flex gap-3">
+          <button onclick="submitReport()" class="flex-1 py-3 rounded-xl bg-red-600 text-white font-black hover:bg-red-700">Submit Report</button>
+          <button onclick="closeReportModal()" class="flex-1 py-3 rounded-xl border font-black text-gray-800 hover:bg-gray-50">Cancel</button>
+        </div>
+
+        <div id="rep-status" class="hidden text-sm"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------
+    // Shared Storage
+    // -----------------------
+    const STORAGE_KEY = "arcon_assets_demo_v4"; // must match advertiser.html
+    const REPORT_KEY  = "arcon_reports_demo_v1";
+
+    // -----------------------
+    // Helpers
+    // -----------------------
+    const getEl = (id) => document.getElementById(id);
+    const safeUpper = (s)=> String(s||'').trim().toUpperCase();
+    const escapeHtml = (str) => String(str || '')
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
+
+    function showToast(msg){
+      const container = getEl('toast-container');
+      const t = document.createElement('div');
+      t.className = "toast";
+      t.innerHTML = `
+        <div class="text-arconGreen text-xl"><i class="ph ph-bell-ringing"></i></div>
+        <div>
+          <div class="text-[10px] font-black uppercase text-gray-400">Activity</div>
+          <div class="text-xs font-bold text-gray-800">${escapeHtml(msg)}</div>
+        </div>
+      `;
+      container.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all .5s';
+        setTimeout(() => t.remove(), 500);
+      }, 3500);
+    }
+
+    const proof = [
+      "Enforcement officer verified an ad in Abuja",
+      "A billboard was verified using Photo Match",
+      "A QR verification just completed in Lagos",
+      "A suspicious ad was reported and queued",
+      "Photo Match flagged a near-duplicate ad",
+      "Compliance confirmed: certificate valid",
+    ];
+    setInterval(() => showToast(proof[Math.floor(Math.random()*proof.length)]), 9000);
+
+    function loadRegistry(){
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+      catch { return []; }
+    }
+
+    function refreshRegistry(){
+      const reg = loadRegistry();
+      const total = reg.length;
+      const photo = reg.filter(a => a.verificationMethod === 'PHOTO').length;
+      const qr = reg.filter(a => a.verificationMethod !== 'PHOTO').length;
+      getEl('reg-total').innerText = total;
+      getEl('reg-photo').innerText = photo;
+      getEl('reg-qr').innerText = qr;
+      showToast("Registry refreshed.");
+    }
+
+    // -----------------------
+    // Tabs
+    // -----------------------
+    function switchTab(tab){
+      const tabs = ['qr','id','photo'];
+      tabs.forEach(t => {
+        getEl('pane-'+t).classList.add('hidden');
+        getEl('tab-'+t).className = "py-4 bg-gray-50 text-gray-500 border-b text-center text-xs font-black uppercase tracking-widest";
+      });
+      getEl('pane-'+tab).classList.remove('hidden');
+      getEl('tab-'+tab).className = "py-4 bg-white text-arconGreen border-b-2 border-arconGreen text-center text-xs font-black uppercase tracking-widest";
+
+      // stop QR scanner if leaving
+      if(tab !== 'qr') stopScanner();
+      // stop camera if leaving photo
+      if(tab !== 'photo') stopCamera();
+    }
+
+    // -----------------------
+    // QR Scanner
+    // -----------------------
+    let qrScanner = null;
+
+    function makeVerifyPayload(id){ return `ARCON-VERIFY:${id}`; }
+
+    function extractIdFromPayload(payload){
+      const text = String(payload || '').trim();
+      const m = text.match(/APP-\d{4}-\d{3,6}/i);
+      if(m) return safeUpper(m[0]);
+      const m2 = text.match(/ARCON-VERIFY:\s*([A-Z0-9-]+)/i);
+      if(m2) return safeUpper(m2[1]);
+      return safeUpper(text);
+    }
+
+    async function startScanner() {
+      if (!window.Html5Qrcode) {
+        getEl('scanner-status').innerText = "Lib Error";
+        return alert("Scanner library failed to load. Check internet connection.");
+      }
+
+      getEl('scanner-status').innerText = "Starting...";
+
+      if (qrScanner) await stopScanner();
+
+      const readerDiv = getEl('reader');
+      readerDiv.innerHTML = "";
+
+      try {
+        qrScanner = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1.0 };
+
+        await qrScanner.start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            const id = extractIdFromPayload(decodedText);
+            getEl('scanner-status').innerText = "Scanned";
+            stopScanner().then(() => verifyId(id, true));
+          },
+          () => {}
+        );
+
+        getEl('scanner-status').innerText = "Running";
+      } catch (err) {
+        console.error(err);
+        getEl('scanner-status').innerText = "Failed";
+        stopScanner();
+        alert("Camera failed. Ensure HTTPS and camera permissions are allowed.");
+      }
+    }
+
+    async function stopScanner() {
+      try {
+        if (qrScanner) {
+          await qrScanner.stop().catch(() => {});
+          await qrScanner.clear().catch(() => {});
+          qrScanner = null;
+        }
+      } catch (e) {}
+
+      const reader = getEl('reader');
+      reader.innerHTML = `
+        <div class="text-center text-gray-400 text-xs font-semibold p-4">
+          <i class="ph ph-camera text-2xl mb-1"></i>
+          <p>Tap “Start” and allow camera permission.</p>
+        </div>
+      `;
+      getEl('scanner-status').innerText = "Stopped";
+    }
+
+    // -----------------------
+    // ID Verification
+    // -----------------------
+    function verifyById(){
+      const id = safeUpper(getEl('license-input').value);
+      verifyId(id, false);
+    }
+
+    function verifyId(id, fromScanner){
+      const reg = loadRegistry();
+      const found = reg.find(a => safeUpper(a.id) === id);
+
+      if(found){
+        renderResult(found, { method: fromScanner ? "QR Scan" : "License ID", score: 100 });
+      } else {
+        renderNotFound(`This license ID (${escapeHtml(id)}) is not in the database.`);
+      }
+    }
+
+    // -----------------------
+    // Photo Match Algorithm (dHash + similarity)
+    // -----------------------
+    function hammingDistance(a, b){
+      let d = 0;
+      const n = Math.min(a.length, b.length);
+      for(let i=0;i<n;i++) if(a[i] !== b[i]) d++;
+      // if length differs (shouldn't), penalize
+      d += Math.abs(a.length - b.length);
+      return d;
+    }
+
+    function similarityPct(dhashA, dhashB){
+      const dist = hammingDistance(dhashA, dhashB);
+      const bits = Math.max(dhashA.length, dhashB.length, 64);
+      const sim = 1 - (dist / bits);
+      return Math.max(0, Math.min(1, sim)) * 100;
+    }
+
+    async function computeDHashFromImageElement(imgEl){
+      const w = 9, h = 8;
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(imgEl, 0, 0, w, h);
+      const { data } = ctx.getImageData(0, 0, w, h);
+
+      const gray = new Array(w*h);
+      for(let i=0;i<w*h;i++){
+        const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
+        gray[i] = (0.299*r + 0.587*g + 0.114*b);
+      }
+
+      let bits = "";
+      for(let y=0;y<h;y++){
+        for(let x=0;x<w-1;x++){
+          const left = gray[y*w + x];
+          const right = gray[y*w + x + 1];
+          bits += (left < right) ? "1" : "0";
+        }
+      }
+      return bits;
+    }
+
+    async function dhashFromDataUrl(dataUrl){
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = dataUrl;
+      await new Promise((res, rej) => {
+        img.onload = res;
+        img.onerror = () => rej(new Error("Image load failed."));
+      });
+      return computeDHashFromImageElement(img);
+    }
+
+    async function matchAgainstRegistry(queryDhash){
+      const reg = loadRegistry();
+
+      // only compare against PHOTO assets that have hashes
+      const photoAssets = reg.filter(a => a.verificationMethod === 'PHOTO' && Array.isArray(a.mediaHashes) && a.mediaHashes.length);
+
+      let best = null; // { asset, score, matchedName }
+      for(const asset of photoAssets){
+        for(const h of asset.mediaHashes){
+          const score = similarityPct(queryDhash, h.dhash);
+          if(!best || score > best.score){
+            best = { asset, score, matchedName: h.name };
+          }
+        }
+      }
+      return best;
+    }
+
+    // -----------------------
+    // Photo Capture
+    // -----------------------
+    let camStream = null;
+
+    async function startCamera(){
+      try{
+        const video = getEl('cam');
+        const placeholder = getEl('cam-placeholder');
+        const status = getEl('cam-status');
+
+        camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+
+        video.srcObject = camStream;
+        video.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        status.innerText = "Live";
+      }catch(err){
+        console.error(err);
+        getEl('cam-status').innerText = "Blocked";
+        alert("Camera blocked. Use HTTPS and allow permissions.");
+      }
+    }
+
+    function stopCamera(){
+      if(camStream){
+        camStream.getTracks().forEach(t => t.stop());
+        camStream = null;
+      }
+      const video = getEl('cam');
+      const placeholder = getEl('cam-placeholder');
+      video.classList.add('hidden');
+      placeholder.classList.remove('hidden');
+      getEl('cam-status').innerText = "Idle";
+    }
+
+    function takePhoto(){
+      const video = getEl('cam');
+      if(video.classList.contains('hidden')) return alert("Start camera first.");
+      const canvas = getEl('shot');
+      const shotPlaceholder = getEl('shot-placeholder');
+
+      const w = video.videoWidth || 960;
+      const h = video.videoHeight || 540;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, w, h);
+
+      canvas.classList.remove('hidden');
+      shotPlaceholder.classList.add('hidden');
+
+      showToast("Photo captured.");
+    }
+
+    function clearPhoto(){
+      const canvas = getEl('shot');
+      const shotPlaceholder = getEl('shot-placeholder');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+      canvas.classList.add('hidden');
+      shotPlaceholder.classList.remove('hidden');
+      getEl('photo-progress').classList.add('hidden');
+      showToast("Cleared.");
+    }
+
+    async function matchCanvasShot(){
+      const canvas = getEl('shot');
+      if(canvas.classList.contains('hidden')) return alert("Capture a photo first (Snap).");
+
+      const progress = getEl('photo-progress');
+      progress.classList.remove('hidden');
+      progress.innerHTML = `<div class="p-4 rounded-xl bg-gray-50 border text-gray-800 font-black">Matching captured photo…</div>`;
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+      try{
+        const dh = await dhashFromDataUrl(dataUrl);
+        const best = await matchAgainstRegistry(dh);
+
+        if(best && best.score >= 70){
+          renderResult(best.asset, { method: "Photo Match", score: best.score, matchedName: best.matchedName });
+        } else {
+          renderNotFound(`No match found (best similarity: ${best ? best.score.toFixed(1) : "0.0"}%).`);
+          openNotFoundReportHint();
+        }
+      }catch(err){
+        console.error(err);
+        progress.innerHTML = `<div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 font-black">Photo match failed. Try a clearer photo.</div>`;
+      }
+    }
+
+    async function matchUploadedPhoto(){
+      const file = getEl('photo-file').files?.[0];
+      if(!file) return alert("Choose an image to upload.");
+
+      const progress = getEl('photo-progress');
+      progress.classList.remove('hidden');
+      progress.innerHTML = `<div class="p-4 rounded-xl bg-gray-50 border text-gray-800 font-black">Matching uploaded photo…</div>`;
+
+      const dataUrl = await new Promise((resolve) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => resolve(null);
+        r.readAsDataURL(file);
+      });
+      if(!dataUrl) return alert("Could not read the file.");
+
+      try{
+        const dh = await dhashFromDataUrl(dataUrl);
+        const best = await matchAgainstRegistry(dh);
+
+        if(best && best.score >= 70){
+          renderResult(best.asset, { method: "Photo Match", score: best.score, matchedName: best.matchedName });
+        } else {
+          renderNotFound(`No match found (best similarity: ${best ? best.score.toFixed(1) : "0.0"}%).`);
+          openNotFoundReportHint();
+        }
+      }catch(err){
+        console.error(err);
+        progress.innerHTML = `<div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 font-black">Photo match failed. Try a clearer photo.</div>`;
+      }
+    }
+
+    async function matchUploadedPhotoAutoIfAny(file){
+      // (not used) - keep logic explicit
+    }
+
+    function openNotFoundReportHint(){
+      // exactly what you asked: show a modal-like message and push report option
+      showToast("This ad isn't in our database. Please report it.");
+      // pre-open report modal for speed
+      openReportModal();
+    }
+
+    // -----------------------
+    // Result rendering
+    // -----------------------
+    function renderResult(asset, meta){
+      getEl('result').classList.remove('hidden');
+
+      const vMethod = asset.verificationMethod === 'PHOTO' ? 'PHOTO MATCH (PREMIUM)' : 'QR CODE (STANDARD)';
+      const score = (meta?.score ?? 100);
+
+      const badge =
+        score >= 90 ? `bg-green-100 text-green-700` :
+        score >= 70 ? `bg-arconYellow/25 text-ink` :
+        `bg-red-100 text-red-700`;
+
+      getEl('result').innerHTML = `
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="text-xs font-black uppercase tracking-widest text-gray-500">Verification Result</div>
+            <h3 class="text-xl font-black text-gray-900 mt-1">✅ Approved Advertisement</h3>
+            <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full ${badge} text-xs font-black uppercase tracking-widest">
+              ${escapeHtml(meta.method)} • ${score.toFixed(1)}% match
+            </div>
+            ${meta?.matchedName ? `<div class="text-xs text-gray-500 mt-2"><b>Matched artwork:</b> ${escapeHtml(meta.matchedName)}</div>` : ``}
+          </div>
+
+          <div class="text-right">
+            <div class="text-xs font-black uppercase tracking-widest text-gray-500">License ID</div>
+            <div class="font-mono text-lg font-black text-ink">${escapeHtml(asset.id)}</div>
+          </div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="rounded-2xl border border-gray-200 p-4 bg-gray-50">
+            <div class="text-[10px] font-black uppercase tracking-widest text-gray-500">Sponsor</div>
+            <div class="font-black text-gray-900 mt-1">${escapeHtml(asset.sponsor || '—')}</div>
+            <div class="text-xs text-gray-600 mt-2"><b>Purpose:</b> ${escapeHtml(asset.purpose || '—')}</div>
+            <div class="text-xs text-gray-600 mt-1"><b>Type:</b> ${escapeHtml(asset.adType || '—')}</div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200 p-4 bg-gray-50">
+            <div class="text-[10px] font-black uppercase tracking-widest text-gray-500">Compliance</div>
+            <div class="text-sm font-black text-gray-900 mt-1">${escapeHtml(vMethod)}</div>
+            <div class="text-xs text-gray-600 mt-2"><b>State:</b> ${escapeHtml(asset.state || '—')}</div>
+            <div class="text-xs text-gray-600 mt-1"><b>LGA:</b> ${escapeHtml(asset.lga || '—')}</div>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-2xl border border-gray-200 p-4">
+          <div class="text-[10px] font-black uppercase tracking-widest text-gray-500">Dates</div>
+          <div class="text-sm text-gray-800 mt-2"><b>Issued:</b> ${escapeHtml(asset.createdAt || '—')}</div>
+          <div class="text-sm text-gray-800 mt-1"><b>Expiry:</b> ${escapeHtml(asset.expiry || '—')}</div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <button onclick="copyId('${escapeHtml(asset.id)}')" class="py-3 rounded-xl bg-ink text-white font-black hover:bg-black flex items-center justify-center gap-2">
+            <i class="ph ph-copy"></i> Copy License ID
+          </button>
+          <button onclick="openReportModal()" class="py-3 rounded-xl border font-black text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2">
+            <i class="ph ph-flag"></i> Report Another Ad
+          </button>
+        </div>
+      `;
+
+      getEl('photo-progress').classList.add('hidden');
+      showToast("Verification successful.");
+    }
+
+    function renderNotFound(message){
+      getEl('result').classList.remove('hidden');
+      getEl('result').innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="text-red-600 text-2xl"><i class="ph ph-x-circle-fill"></i></div>
+          <div>
+            <div class="text-xs font-black uppercase tracking-widest text-gray-500">Verification Result</div>
+            <h3 class="text-xl font-black text-gray-900 mt-1">❌ Not Found / Not Approved</h3>
+            <p class="text-sm text-gray-700 mt-2">${escapeHtml(message)}</p>
+
+            <div class="mt-4 p-4 rounded-2xl bg-red-50 border border-red-200">
+              <div class="font-black text-red-800">This ad isn’t in our database.</div>
+              <div class="text-sm text-red-700 mt-1">
+                Kindly report it and we will respond within <b>24 hours</b> with necessary action.
+              </div>
+              <button onclick="openReportModal()" class="mt-3 w-full py-3 rounded-xl bg-red-600 text-white font-black hover:bg-red-700">
+                Report This Ad
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      getEl('photo-progress').classList.add('hidden');
+    }
+
+    function copyId(id){
+      navigator.clipboard.writeText(id);
+      showToast("License ID copied.");
+    }
+
+    // -----------------------
+    // Report Flow
+    // -----------------------
+    function openReportModal(){
+      getEl('rep-status').classList.add('hidden');
+      getEl('report-modal').classList.remove('hidden');
+      getEl('report-modal').classList.add('flex');
+    }
+    function closeReportModal(){
+      getEl('report-modal').classList.add('hidden');
+      getEl('report-modal').classList.remove('flex');
+    }
+
+    async function submitReport(){
+      const state = (getEl('rep-state').value || '').trim();
+      const lga = (getEl('rep-lga').value || '').trim();
+      const loc = (getEl('rep-location').value || '').trim();
+      const notes = (getEl('rep-notes').value || '').trim();
+
+      if(!state || !loc || !notes){
+        return showReportStatus("Please fill State, Exact Location, and Description.", true);
+      }
+
+      const file = getEl('rep-photo').files?.[0];
+      let photoDataUrl = "";
+      if(file){
+        photoDataUrl = await new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result || "");
+          r.onerror = () => resolve("");
+          r.readAsDataURL(file);
+        });
+      }
+
+      const ticket = `REP-${new Date().getFullYear()}-${Math.floor(Math.random()*900000)+100000}`;
+      const payload = {
+        ticket,
+        createdAt: new Date().toISOString(),
+        state, lga, location: loc, notes,
+        photoDataUrl
+      };
+
+      let reports = [];
+      try{ reports = JSON.parse(localStorage.getItem(REPORT_KEY) || "[]"); }catch{ reports = []; }
+      reports.unshift(payload);
+      localStorage.setItem(REPORT_KEY, JSON.stringify(reports));
+
+      showReportStatus(`Report submitted. Ticket: ${ticket}. We will respond within 24 hours.`, false);
+      showToast("Report submitted.");
+
+      setTimeout(() => closeReportModal(), 1400);
+    }
+
+    function showReportStatus(msg, isError){
+      const box = getEl('rep-status');
+      box.classList.remove('hidden');
+      box.className = "text-sm mt-2 p-3 rounded-xl border " + (isError ? "bg-red-50 border-red-200 text-red-700 font-black" : "bg-green-50 border-green-200 text-green-700 font-black");
+      box.innerText = msg;
+    }
+
+    // -----------------------
+    // Init
+    // -----------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshRegistry();
+
+      // optional query: ?verify=APP-2025-001
+      const params = new URLSearchParams(location.search);
+      const v = params.get('verify');
+      if(v){
+        switchTab('id');
+        getEl('license-input').value = safeUpper(v);
+        verifyById();
+      }
+    });
+  </script>
+</body>
+</html>
